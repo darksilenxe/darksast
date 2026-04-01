@@ -1,0 +1,13 @@
+id: "SQL-TEMPLATE-LITERAL-QUERY"
+severity: "HIGH"
+framework: "Node.js"
+description: "Detects SQL helper calls that pass template literals directly, which can interpolate untrusted input."
+query: |
+  (call_expression
+    function: (member_expression
+      property: (property_identifier) @method (#match? @method "^(query|execute|raw)$")
+    )
+    arguments: (arguments
+      (template_string) @sql_template
+    )
+  ) @sql_template_sink

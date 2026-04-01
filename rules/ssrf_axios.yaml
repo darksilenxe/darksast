@@ -1,0 +1,11 @@
+id: "SSRF-AXIOS"
+severity: "HIGH"
+framework: "JavaScript"
+description: "Detects axios network requests that should be reviewed for SSRF when the request target is user-controlled."
+query: |
+  (call_expression
+    function: (member_expression
+      object: (identifier) @obj (#eq? @obj "axios")
+      property: (property_identifier) @method (#match? @method "^(get|post|put|patch|delete|request)$")
+    ) @ssrf_sink
+  )

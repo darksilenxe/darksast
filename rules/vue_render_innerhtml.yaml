@@ -1,0 +1,18 @@
+id: "VUE-RENDER-INNERHTML"
+severity: "HIGH"
+framework: "Vue"
+description: "Detects Vue render-function patterns using innerHTML, which can introduce XSS when content is attacker-controlled."
+query: |
+  (call_expression
+    function: (identifier) @render_fn
+    (#eq? @render_fn "h")
+    arguments: (arguments
+      (_)
+      (object
+        (pair
+          key: (property_identifier) @key
+          (#eq? @key "innerHTML")
+        ) @vue_sink
+      )
+    )
+  )

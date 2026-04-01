@@ -1,0 +1,10 @@
+id: "OPEN-REDIRECT-LOCATION-ASSIGN"
+severity: "MEDIUM"
+framework: "JavaScript"
+description: "Detects direct location assignments that can produce client-side open redirects."
+query: |
+  (assignment_expression
+    left: (member_expression
+      property: (property_identifier) @prop (#match? @prop "^(href|location)$")
+    ) @redirect_sink
+  ) @finding

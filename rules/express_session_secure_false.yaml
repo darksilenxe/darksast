@@ -1,0 +1,21 @@
+id: "EXPRESS-SESSION-SECURE-FALSE"
+severity: "MEDIUM"
+framework: "Node.js"
+description: "Detects cookie/session configs with secure:false inside Express session middleware."
+query: |
+  (call_expression
+    function: (identifier) @fn (#eq? @fn "session")
+    arguments: (arguments
+      (object
+        (pair
+          key: (property_identifier) @cookie_key (#eq? @cookie_key "cookie")
+          value: (object
+            (pair
+              key: (property_identifier) @key (#eq? @key "secure")
+              value: (false) @disabled
+            )
+          )
+        )
+      )
+    )
+  ) @session_secure_false

@@ -1,0 +1,11 @@
+id: "UNSAFE-YAML-LOAD"
+severity: "HIGH"
+framework: "Node.js"
+description: "Detects yaml.load() usage that can be unsafe with untrusted YAML input."
+query: |
+  (call_expression
+    function: (member_expression
+      object: (identifier) @obj (#match? @obj "^(yaml|jsyaml)$")
+      property: (property_identifier) @method (#eq? @method "load")
+    ) @yaml_sink
+  )

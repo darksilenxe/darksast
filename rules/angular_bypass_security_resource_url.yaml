@@ -1,0 +1,10 @@
+id: "ANGULAR-BYPASS-SECURITY-RESOURCE-URL"
+severity: "HIGH"
+framework: "Angular"
+description: "Detects Angular bypassSecurityTrustResourceUrl usage, which can disable resource URL sanitization."
+query: |
+  (call_expression
+    function: (member_expression
+      property: (property_identifier) @method (#eq? @method "bypassSecurityTrustResourceUrl")
+    ) @angular_sink
+  )

@@ -1,0 +1,11 @@
+id: "TEMPLATE-INJECTION-COMPILE"
+severity: "HIGH"
+framework: "Node.js"
+description: "Detects template compilation and rendering APIs that become dangerous when template content is attacker-controlled."
+query: |
+  (call_expression
+    function: (member_expression
+      object: (identifier) @obj (#match? @obj "^(Handlebars|ejs|pug)$")
+      property: (property_identifier) @method (#match? @method "^(compile|render)$")
+    ) @template_sink
+  )

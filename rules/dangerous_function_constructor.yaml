@@ -1,0 +1,8 @@
+id: "JS-FUNCTION-CONSTRUCTOR"
+severity: "HIGH"
+description: "Detects use of new Function(...), which creates executable code from strings and is equivalent to eval risk."
+query: |
+  (new_expression
+    constructor: (identifier) @ctor
+    (#eq? @ctor "Function")
+  )

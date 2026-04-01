@@ -1,0 +1,11 @@
+{
+  "name": "javascript-security-scanner",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "scan": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/scan_entry.ps1 -TargetKey repo",
+    "scan:tests": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/scan_entry.ps1 -TargetKey tests",
+    "scan:sample-site": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/scan_entry.ps1 -TargetKey sample-site",
+    "scan:sample-vue": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/scan_entry.ps1 -TargetKey sample-vue"
+  }
+}

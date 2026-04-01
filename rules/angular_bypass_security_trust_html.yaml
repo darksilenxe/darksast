@@ -1,0 +1,11 @@
+id: "ANGULAR-BYPASS-SECURITY-TRUST-HTML"
+severity: "HIGH"
+framework: "Angular"
+description: "Detects Angular DomSanitizer bypassSecurityTrustHtml usage, which can bypass built-in sanitization when fed untrusted HTML."
+query: |
+  (call_expression
+    function: (member_expression
+      property: (property_identifier) @method
+      (#eq? @method "bypassSecurityTrustHtml")
+    ) @angular_sink
+  )

@@ -1,0 +1,19 @@
+id: "COOKIE-SECURE-FALSE"
+severity: "MEDIUM"
+framework: "Express"
+description: "Detects res.cookie() options with secure:false, which allows cookies over non-TLS channels."
+query: |
+  (call_expression
+    function: (member_expression
+      property: (property_identifier) @method (#eq? @method "cookie")
+    )
+    arguments: (arguments
+      (_) (_)
+      (object
+        (pair
+          key: (property_identifier) @key (#eq? @key "secure")
+          value: (false) @insecure
+        )
+      )
+    )
+  ) @cookie_config

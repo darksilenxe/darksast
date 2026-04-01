@@ -1,0 +1,10 @@
+id: "PATH-TRAVERSAL-SEND-FILE"
+severity: "HIGH"
+framework: "Node.js"
+description: "Detects sendFile() usage that can expose arbitrary files if the path is attacker-controlled."
+query: |
+  (call_expression
+    function: (member_expression
+      property: (property_identifier) @method (#eq? @method "sendFile")
+    ) @path_sink
+  ) @finding

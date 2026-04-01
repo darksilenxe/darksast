@@ -1,0 +1,10 @@
+id: "NEXTJS-DANGEROUSLY-ALLOW-SVG"
+severity: "MEDIUM"
+framework: "Next.js"
+description: "Detects Next.js image config dangerouslyAllowSVG: true, which can increase XSS and content-security risk if untrusted SVG is served."
+query: |
+  (pair
+    key: (property_identifier) @key
+    (#eq? @key "dangerouslyAllowSVG")
+    value: (true) @enabled
+  )

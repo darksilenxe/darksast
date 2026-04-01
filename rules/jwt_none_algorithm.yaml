@@ -1,0 +1,11 @@
+id: "JWT-ALG-NONE"
+severity: "CRITICAL"
+framework: "Node.js"
+description: "Detects JWT verification options that allow the 'none' algorithm."
+query: |
+  (pair
+    key: (property_identifier) @key (#eq? @key "algorithms")
+    value: (array
+      (string) @alg (#match? @alg "none")
+    )
+  ) @jwt_config

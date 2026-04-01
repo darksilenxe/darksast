@@ -1,0 +1,483 @@
+{
+  "timestamp": "2026-04-01T09:40:05-06:00",
+  "target_directory": "./tests",
+  "total_findings": 68,
+  "findings": [
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 56,
+      "rule_id": "ANGULAR-BYPASS-SECURITY-RESOURCE-URL",
+      "severity": "HIGH",
+      "framework": "Angular"
+    },
+    {
+      "file": "tests\\framework_rule_coverage.js",
+      "line": 17,
+      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-HTML",
+      "severity": "HIGH",
+      "framework": "Angular"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 55,
+      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-URL",
+      "severity": "HIGH",
+      "framework": "Angular"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 21,
+      "rule_id": "NODE-CHILD-PROCESS-EXEC",
+      "severity": "CRITICAL",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 100,
+      "rule_id": "COOKIE-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 14,
+      "rule_id": "JS-EVAL-EXEC",
+      "severity": "HIGH",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 52,
+      "rule_id": "CORS-WILDCARD-CREDENTIALS",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 17,
+      "rule_id": "JS-FUNCTION-CONSTRUCTOR",
+      "severity": "HIGH",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 24,
+      "rule_id": "DOM-XSS-DOCUMENT-WRITE",
+      "severity": "HIGH",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 27,
+      "rule_id": "DOM-XSS-INNERHTML-ASSIGN",
+      "severity": "HIGH",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 6,
+      "rule_id": "EXPRESS-SESSION-HTTPONLY-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\sample-site\\app.js",
+      "line": 13,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 6,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 91,
+      "rule_id": "EXPRESS-SESSION-HTTPONLY-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\sample-vue\\main.js",
+      "line": 4,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\framework_rule_coverage.js",
+      "line": 4,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\sample-site\\app.js",
+      "line": 13,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\framework_rule_coverage.js",
+      "line": 4,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 6,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 91,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\sample-vue\\main.js",
+      "line": 4,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\sample-site\\app.js",
+      "line": 13,
+      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 91,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 6,
+      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 91,
+      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 22,
+      "rule_id": "HARDCODED-SECRET",
+      "severity": "HIGH",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 24,
+      "rule_id": "HARDCODED-SECRET",
+      "severity": "HIGH",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 40,
+      "rule_id": "INSECURE-CRYPTO-HASH",
+      "severity": "MEDIUM",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 41,
+      "rule_id": "INSECURE-RANDOM-TOKEN",
+      "severity": "MEDIUM",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 42,
+      "rule_id": "INSECURE-RANDOM-TOKEN",
+      "severity": "MEDIUM",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 43,
+      "rule_id": "INSECURE-RANDOM-TOKEN",
+      "severity": "MEDIUM",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 45,
+      "rule_id": "INSECURE-RANDOM-TOKEN",
+      "severity": "MEDIUM",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 38,
+      "rule_id": "JWT-DECODE-ONLY",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 39,
+      "rule_id": "JWT-ALG-NONE",
+      "severity": "CRITICAL",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 98,
+      "rule_id": "JWT-VERIFY-IGNORE-EXPIRATION",
+      "severity": "MEDIUM",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\framework_rule_coverage.js",
+      "line": 27,
+      "rule_id": "NEXTJS-DANGEROUSLY-ALLOW-SVG",
+      "severity": "MEDIUM",
+      "framework": "Next.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 62,
+      "rule_id": "NEXTJS-REMOTE-PATTERN-WILDCARD",
+      "severity": "MEDIUM",
+      "framework": "Next.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 48,
+      "rule_id": "NOSQL-OPERATOR-INJECTION",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 48,
+      "rule_id": "NOSQL-OPERATOR-INJECTION",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 37,
+      "rule_id": "OPEN-REDIRECT-LOCATION-ASSIGN",
+      "severity": "MEDIUM",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 36,
+      "rule_id": "OPEN-REDIRECT-RESPONSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 99,
+      "rule_id": "OPEN-REDIRECT-WINDOW-OPEN",
+      "severity": "MEDIUM",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 34,
+      "rule_id": "PATH-TRAVERSAL-FS-READ",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 35,
+      "rule_id": "PATH-TRAVERSAL-SEND-FILE",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 108,
+      "rule_id": "REACT-UNSAFE-URL-PROP",
+      "severity": "MEDIUM",
+      "framework": "React"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 53,
+      "rule_id": "SHELL-WRAPPER-EXEC",
+      "severity": "CRITICAL",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 54,
+      "rule_id": "SHELL-WRAPPER-EXEC",
+      "severity": "CRITICAL",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 47,
+      "rule_id": "SQL-RAW-QUERY",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 101,
+      "rule_id": "SQL-RAW-QUERY",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 101,
+      "rule_id": "SQL-TEMPLATE-LITERAL-QUERY",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 31,
+      "rule_id": "SSRF-AXIOS",
+      "severity": "HIGH",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 30,
+      "rule_id": "SSRF-FETCH",
+      "severity": "HIGH",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\rule_coverage.js",
+      "line": 30,
+      "rule_id": "JS-STRING-TIMER-EXEC",
+      "severity": "MEDIUM",
+      "framework": "JavaScript"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 32,
+      "rule_id": "SSRF-HTTP-REQUEST",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 33,
+      "rule_id": "SSRF-HTTP-REQUEST",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 49,
+      "rule_id": "TEMPLATE-INJECTION-COMPILE",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\sample-vue\\main.js",
+      "line": 11,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React"
+    },
+    {
+      "file": "tests\\test.js",
+      "line": 16,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 75,
+      "rule_id": "TLS-REJECT-UNAUTHORIZED-FALSE",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 102,
+      "rule_id": "UNSAFE-DESERIALIZATION-CALL",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 103,
+      "rule_id": "UNSAFE-DESERIALIZATION-CALL",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\sample-site\\app.js",
+      "line": 21,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 51,
+      "rule_id": "UNSAFE-VM-EXECUTION",
+      "severity": "CRITICAL",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\framework_rule_coverage.js",
+      "line": 21,
+      "rule_id": "VUE-RENDER-INNERHTML",
+      "severity": "HIGH",
+      "framework": "Vue"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 50,
+      "rule_id": "UNSAFE-YAML-LOAD",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\test.js",
+      "line": 9,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React"
+    },
+    {
+      "file": "tests\\advanced_rule_coverage.js",
+      "line": 23,
+      "rule_id": "WEAK-SECRET-FALLBACK",
+      "severity": "HIGH",
+      "framework": "Node.js"
+    },
+    {
+      "file": "tests\\sample-site\\app.js",
+      "line": 7,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React"
+    }
+  ]
+}

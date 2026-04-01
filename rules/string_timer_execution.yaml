@@ -1,0 +1,10 @@
+id: "JS-STRING-TIMER-EXEC"
+severity: "MEDIUM"
+description: "Detects setTimeout/setInterval with string code, which behaves like eval and can lead to script injection."
+query: |
+  (call_expression
+    function: (identifier) @fn (#match? @fn "^(setTimeout|setInterval)$")
+    arguments: (arguments
+      (string) @string_code
+    )
+  )

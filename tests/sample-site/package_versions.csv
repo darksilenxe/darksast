@@ -1,0 +1,7 @@
+project_path,scope,package,version
+tests\sample-site,devDependencies,eslint,9.12.0
+tests\sample-site,dependencies,lodash,4.17.21
+tests\sample-site,dependencies,next,15.3.0
+tests\sample-site,dependencies,react,19.1.0
+tests\sample-site,dependencies,react-dom,19.1.1
+tests\sample-site,devDependencies,vite,5.4.0

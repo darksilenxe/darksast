@@ -1,0 +1,16 @@
+id: "EXPRESS-SESSION-RESAVE-TRUE"
+severity: "LOW"
+framework: "Express"
+description: "Detects session configurations with resave:true in express-session middleware."
+query: |
+  (call_expression
+    function: (identifier) @fn (#eq? @fn "session")
+    arguments: (arguments
+      (object
+        (pair
+          key: (property_identifier) @key (#eq? @key "resave")
+          value: (true) @enabled
+        )
+      )
+    )
+  ) @session_resave

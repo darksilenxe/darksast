@@ -1,0 +1,9 @@
+category,metric,value
+inventory,total_projects,0
+inventory,total_packages,0
+inventory,dependencies,0
+inventory,dev_dependencies,0
+frameworks,count,0
+frameworks,names,
+vulnerability,react2shell_potential_count,0
+vulnerability,react2shell_potential_entries,

@@ -1,0 +1,9 @@
+id: "SSRF-FETCH"
+severity: "HIGH"
+framework: "JavaScript"
+description: "Detects fetch() calls that may become SSRF sinks when URLs are attacker-controlled."
+query: |
+  (call_expression
+    function: (identifier) @fn
+    (#eq? @fn "fetch")
+  ) @ssrf_sink

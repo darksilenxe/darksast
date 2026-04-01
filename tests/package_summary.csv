@@ -1,0 +1,13 @@
+category,metric,value
+inventory,total_projects,2
+inventory,total_packages,11
+inventory,dependencies,7
+inventory,dev_dependencies,4
+frameworks,count,4
+frameworks,names,Next.js;Nuxt;React;Vue
+vulnerability,react2shell_potential_count,3
+vulnerability,react2shell_potential_entries,next@15.3.0 (tests\sample-site);react-dom@19.1.1 (tests\sample-site);react@19.1.0 (tests\sample-site)
+frameworks,package_count_nextjs,1
+frameworks,package_count_nuxt,1
+frameworks,package_count_react,2
+frameworks,package_count_vue,1

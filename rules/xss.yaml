@@ -1,0 +1,9 @@
+# rules/xss.yaml
+id: "XSS-01"
+severity: "HIGH"
+framework: "React"
+description: "Identifies potentially unsafe use of dangerouslySetInnerHTML."
+query: |
+  (jsx_attribute 
+    (property_identifier) @attr_name 
+    (#eq? @attr_name "dangerouslySetInnerHTML"))

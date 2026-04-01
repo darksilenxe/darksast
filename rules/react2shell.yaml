@@ -1,0 +1,9 @@
+# rules/react2shell.yaml
+id: "REACT2SHELL-01"
+severity: "CRITICAL"
+framework: "React"
+description: "Flags the 'use server' directive which exposes functions to the vulnerable React Flight protocol."
+query: |
+  (expression_statement 
+    (string) @directive 
+    (#match? @directive "use server"))

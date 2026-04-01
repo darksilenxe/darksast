@@ -1,0 +1,9 @@
+id: "NEXTJS-REMOTE-PATTERN-WILDCARD"
+severity: "MEDIUM"
+framework: "Next.js"
+description: "Detects Next.js remote image hostname wildcards that can overly broaden trusted image origins."
+query: |
+  (pair
+    key: (property_identifier) @key (#eq? @key "hostname")
+    value: (string) @value (#match? @value "^[\"']\\*[\"']$")
+  ) @next_config

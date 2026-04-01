@@ -1,0 +1,20 @@
+id: "JWT-VERIFY-IGNORE-EXPIRATION"
+severity: "MEDIUM"
+framework: "Node.js"
+description: "Detects jwt.verify() calls configured with ignoreExpiration: true, which can accept expired tokens."
+query: |
+  (call_expression
+    function: (member_expression
+      object: (identifier) @obj (#eq? @obj "jwt")
+      property: (property_identifier) @method (#eq? @method "verify")
+    )
+    arguments: (arguments
+      (_) (_)
+      (object
+        (pair
+          key: (property_identifier) @key (#eq? @key "ignoreExpiration")
+          value: (true) @value
+        )
+      )
+    )
+  ) @jwt_exp_bypass

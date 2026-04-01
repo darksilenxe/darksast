@@ -1,0 +1,14 @@
+id: "INSECURE-CRYPTO-HASH"
+severity: "MEDIUM"
+framework: "Node.js"
+description: "Detects weak hashing algorithms such as MD5 and SHA1."
+query: |
+  (call_expression
+    function: (member_expression
+      object: (identifier) @obj (#eq? @obj "crypto")
+      property: (property_identifier) @method (#eq? @method "createHash")
+    )
+    arguments: (arguments
+      (string) @alg (#match? @alg "(md5|sha1)")
+    )
+  ) @weak_hash

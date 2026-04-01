@@ -1,0 +1,11 @@
+id: "JWT-DECODE-ONLY"
+severity: "HIGH"
+framework: "Node.js"
+description: "Detects jwt.decode() usage, which parses tokens without signature verification."
+query: |
+  (call_expression
+    function: (member_expression
+      object: (identifier) @obj (#eq? @obj "jwt")
+      property: (property_identifier) @method (#eq? @method "decode")
+    ) @jwt_sink
+  )

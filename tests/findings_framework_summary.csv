@@ -1,0 +1,15 @@
+framework,severity,count
+Angular,HIGH,3
+Express,LOW,5
+Express,MEDIUM,6
+JavaScript,CRITICAL,1
+JavaScript,HIGH,8
+JavaScript,MEDIUM,7
+Next.js,MEDIUM,2
+Node.js,CRITICAL,4
+Node.js,HIGH,17
+Node.js,MEDIUM,8
+React,HIGH,2
+React,LOW,3
+React,MEDIUM,1
+Vue,HIGH,1

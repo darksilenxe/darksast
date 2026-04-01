@@ -1,0 +1,193 @@
+id: "INSECURE-RANDOM-TOKEN"
+severity: "MEDIUM"
+framework: "JavaScript"
+description: "Detects Math.random() usage in code paths that may generate tokens or security-sensitive values."
+query: |
+  [
+    ((variable_declarator
+      name: (identifier) @name
+      value: (call_expression
+        function: (member_expression
+          object: (identifier) @obj
+          property: (property_identifier) @method
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random"))
+    ((variable_declarator
+      name: (identifier) @name
+      value: (call_expression
+        function: (member_expression
+          object: (call_expression
+            function: (member_expression
+              object: (identifier) @obj
+              property: (property_identifier) @method
+            )
+          )
+          property: (property_identifier) @formatter
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random"))
+    ((variable_declarator
+      name: (identifier) @name
+      value: (call_expression
+        function: (member_expression
+          object: (call_expression
+            function: (member_expression
+              object: (call_expression
+                function: (member_expression
+                  object: (identifier) @obj
+                  property: (property_identifier) @method
+                )
+              )
+              property: (property_identifier) @formatter
+            )
+          )
+          property: (property_identifier) @post
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random")
+      (#eq? @formatter "toString")
+      (#match? @post "^(slice|substring|substr)$"))
+    ((variable_declarator
+      name: (identifier) @name
+      value: (binary_expression
+        right: (call_expression
+          function: (member_expression
+            object: (call_expression
+              function: (member_expression
+                object: (identifier) @obj
+                property: (property_identifier) @method
+              )
+            )
+            property: (property_identifier) @formatter
+          )
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random")
+      (#eq? @formatter "toString"))
+    ((variable_declarator
+      name: (identifier) @name
+      value: (binary_expression
+        left: (call_expression
+          function: (member_expression
+            object: (call_expression
+              function: (member_expression
+                object: (identifier) @obj
+                property: (property_identifier) @method
+              )
+            )
+            property: (property_identifier) @formatter
+          )
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random")
+      (#eq? @formatter "toString"))
+    ((assignment_expression
+      left: (identifier) @name
+      right: (call_expression
+        function: (member_expression
+          object: (identifier) @obj
+          property: (property_identifier) @method
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random"))
+    ((assignment_expression
+      left: (identifier) @name
+      right: (call_expression
+        function: (member_expression
+          object: (call_expression
+            function: (member_expression
+              object: (identifier) @obj
+              property: (property_identifier) @method
+            )
+          )
+          property: (property_identifier) @formatter
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random"))
+    ((assignment_expression
+      left: (identifier) @name
+      right: (call_expression
+        function: (member_expression
+          object: (call_expression
+            function: (member_expression
+              object: (call_expression
+                function: (member_expression
+                  object: (identifier) @obj
+                  property: (property_identifier) @method
+                )
+              )
+              property: (property_identifier) @formatter
+            )
+          )
+          property: (property_identifier) @post
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random")
+      (#eq? @formatter "toString")
+      (#match? @post "^(slice|substring|substr)$"))
+    ((assignment_expression
+      left: (identifier) @name
+      right: (binary_expression
+        right: (call_expression
+          function: (member_expression
+            object: (call_expression
+              function: (member_expression
+                object: (identifier) @obj
+                property: (property_identifier) @method
+              )
+            )
+            property: (property_identifier) @formatter
+          )
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random")
+      (#eq? @formatter "toString"))
+    ((assignment_expression
+      left: (identifier) @name
+      right: (binary_expression
+        left: (call_expression
+          function: (member_expression
+            object: (call_expression
+              function: (member_expression
+                object: (identifier) @obj
+                property: (property_identifier) @method
+              )
+            )
+            property: (property_identifier) @formatter
+          )
+        )
+      )
+    ) @finding
+      (#match? @name "(?i)(token|secret|session(id)?|nonce|csrf|auth|api[_-]?key)")
+      (#eq? @obj "Math")
+      (#eq? @method "random")
+      (#eq? @formatter "toString"))
+  ]

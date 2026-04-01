@@ -1,0 +1,16 @@
+id: "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE"
+severity: "MEDIUM"
+framework: "Express"
+description: "Detects session configurations with saveUninitialized:true in express-session middleware."
+query: |
+  (call_expression
+    function: (identifier) @fn (#eq? @fn "session")
+    arguments: (arguments
+      (object
+        (pair
+          key: (property_identifier) @key (#eq? @key "saveUninitialized")
+          value: (true) @enabled
+        )
+      )
+    )
+  ) @session_save_uninit

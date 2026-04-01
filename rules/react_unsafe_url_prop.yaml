@@ -1,0 +1,8 @@
+id: "REACT-UNSAFE-URL-PROP"
+severity: "MEDIUM"
+framework: "React"
+description: "Detects URL-bearing JSX props such as href, src, and action that should be reviewed when attacker-controlled."
+query: |
+  (jsx_attribute
+    (property_identifier) @prop (#match? @prop "^(href|src|action|formAction)$")
+  ) @url_prop

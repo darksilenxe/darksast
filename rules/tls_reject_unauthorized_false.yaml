@@ -1,0 +1,9 @@
+id: "TLS-REJECT-UNAUTHORIZED-FALSE"
+severity: "HIGH"
+framework: "Node.js"
+description: "Detects TLS options that disable certificate validation by setting rejectUnauthorized to false."
+query: |
+  (pair
+    key: (property_identifier) @key (#eq? @key "rejectUnauthorized")
+    value: (false) @disabled
+  ) @tls_bypass

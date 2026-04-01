@@ -1,0 +1,7 @@
+JavaScript Framework and Package Inventory
+========================================
+
+Detected frameworks: none
+
+| Project Path | Scope | Package | Version |
+|---|---|---|---|

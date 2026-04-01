@@ -1,0 +1,8 @@
+id: "NOSQL-OPERATOR-INJECTION"
+severity: "HIGH"
+framework: "Node.js"
+description: "Detects dangerous NoSQL operators such as $where, $regex, and comparison operators that often appear in injection payloads."
+query: |
+  (pair
+    key: (string) @key (#match? @key "\\$(where|regex|ne|gt|gte|lt|lte)")
+  ) @nosql_operator

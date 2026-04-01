@@ -1,0 +1,11 @@
+id: "OPEN-REDIRECT-WINDOW-OPEN"
+severity: "MEDIUM"
+framework: "JavaScript"
+description: "Detects window.open() usage, which can enable open redirect or phishing flows when URL input is untrusted."
+query: |
+  (call_expression
+    function: (member_expression
+      object: (identifier) @obj (#eq? @obj "window")
+      property: (property_identifier) @method (#eq? @method "open")
+    )
+  ) @finding

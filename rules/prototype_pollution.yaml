@@ -1,0 +1,10 @@
+# rules/prototype_pollution.yaml
+id: "PROTOTYPE-POLLUTION-SINK"
+severity: "Medium"
+description: "Flags nested dynamic property assignments (e.g., obj[a][b] = c). If the keys are derived from user input or external server events, this can lead to Prototype Pollution."
+query: |
+  (assignment_expression
+    left: (subscript_expression
+      object: (subscript_expression)
+    ) @potential_pollution_sink
+  )

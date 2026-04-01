@@ -1,0 +1,14 @@
+id: "SHELL-WRAPPER-EXEC"
+severity: "CRITICAL"
+framework: "Node.js"
+description: "Detects shell execution through wrappers such as execa, shelljs.exec, or zx's $ helper."
+query: |
+  (call_expression
+    function: (identifier) @fn (#match? @fn "^(execa|\$)$")
+  ) @shell_exec
+  (call_expression
+    function: (member_expression
+      object: (identifier) @obj (#eq? @obj "shelljs")
+      property: (property_identifier) @method (#eq? @method "exec")
+    ) @shell_exec
+  )

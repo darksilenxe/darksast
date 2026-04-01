@@ -1,0 +1,11 @@
+id: "UNSAFE-VM-EXECUTION"
+severity: "CRITICAL"
+framework: "Node.js"
+description: "Detects vm execution APIs that can execute attacker-controlled code."
+query: |
+  (call_expression
+    function: (member_expression
+      object: (identifier) @obj (#eq? @obj "vm")
+      property: (property_identifier) @method (#match? @method "^(runInNewContext|runInContext|runInThisContext)$")
+    ) @vm_sink
+  )
