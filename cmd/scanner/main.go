@@ -82,7 +82,7 @@ func main() {
 
 	for f := range findingsChan {
 		findings = append(findings, f)
-		fmt.Printf("[!] %-8s | %-12s | %-28s | %s:%d\n", f.Severity, f.Framework, f.RuleID, f.File, f.Line)
+		fmt.Printf("[!] %-8s | %-12s | %-28s | %s:%d:%d\n    %s\n", f.Severity, f.Framework, f.RuleID, f.File, f.Line, f.Column, f.Snippet)
 	}
 
 	err = <-scanErrChan
