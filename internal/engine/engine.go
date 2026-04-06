@@ -1,10 +1,12 @@
 package engine
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	sitter "github.com/smacker/go-tree-sitter"
@@ -15,9 +17,26 @@ import (
 type Finding struct {
 	File      string `json:"file"`
 	Line      uint32 `json:"line"`
+	Column    uint32 `json:"column"`
 	RuleID    string `json:"rule_id"`
 	Severity  string `json:"severity"`
 	Framework string `json:"framework"`
+	Snippet   string `json:"snippet"`
+}
+
+// extractSnippet returns the trimmed text of the source line at the given
+// zero-based row index, capped at 120 characters.
+func extractSnippet(sourceCode []byte, row uint32) string {
+	lines := bytes.Split(sourceCode, []byte("\n"))
+	if int(row) >= len(lines) {
+		return ""
+	}
+	line := strings.TrimSpace(string(lines[row]))
+	const maxLen = 120
+	if len(line) > maxLen {
+		return line[:maxLen] + "..."
+	}
+	return line
 }
 
 // VariableState tracks the lifecycle of a specific variable
@@ -88,17 +107,22 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, f
 				continue
 			}
 
-			line := uint32(tree.RootNode().StartPoint().Row + 1)
+			root := tree.RootNode()
+			row := root.StartPoint().Row
+			col := root.StartPoint().Column
 			if node := findingNodeForMatch(rule, filteredMatch); node != nil {
-				line = uint32(node.StartPoint().Row + 1)
+				row = node.StartPoint().Row
+				col = node.StartPoint().Column
 			}
 
 			findings <- Finding{
 				File:      path,
-				Line:      line,
+				Line:      uint32(row + 1),
+				Column:    uint32(col + 1),
 				RuleID:    rule.ID,
 				Severity:  rule.Severity,
 				Framework: normalizeFramework(rule.Framework),
+				Snippet:   extractSnippet(sourceCode, uint32(row)),
 			}
 		}
 
@@ -218,13 +242,15 @@ func (e *Engine) walkNode(node *sitter.Node, sourceCode []byte, symTable *Symbol
 
 				if state, exists := symTable.Variables[keyName]; exists {
 					if state.IsTainted && !state.IsSanitized {
-						line := uint32(node.StartPoint().Row + 1)
+						row := node.StartPoint().Row
 						findings <- Finding{
 							File:      path,
-							Line:      line,
+							Line:      uint32(row + 1),
+							Column:    uint32(node.StartPoint().Column + 1),
 							RuleID:    "proto-assignment",
 							Severity:  "HIGH",
 							Framework: "JavaScript",
+							Snippet:   extractSnippet(sourceCode, uint32(row)),
 						}
 					}
 				}

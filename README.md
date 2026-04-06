@@ -77,6 +77,40 @@ CC=gcc go run ./cmd/scanner/main.go \
 - Findings CSV: `findings.csv`
 - Findings framework summary CSV: `findings_framework_summary.csv`
 
+### Finding location fields
+
+Every finding now includes precise source location information:
+
+| Field      | Description                                                |
+|------------|------------------------------------------------------------|
+| `file`     | Path to the source file containing the vulnerability       |
+| `line`     | 1-based line number within the file                        |
+| `column`   | 1-based column (character offset) on that line             |
+| `snippet`  | Trimmed text of the source line (capped at 120 characters) |
+
+**Console output** prints `file:line:col` followed by the snippet on the next line:
+
+```
+[!] HIGH     | JavaScript   | JS-EVAL-EXEC                 | src/app.js:14:1
+    eval(userInput);
+```
+
+**JSON findings** include all four location fields per entry:
+
+```json
+{
+  "file": "src/app.js",
+  "line": 14,
+  "column": 1,
+  "rule_id": "JS-EVAL-EXEC",
+  "severity": "HIGH",
+  "framework": "JavaScript",
+  "snippet": "eval(userInput);"
+}
+```
+
+**CSV findings** (`findings.csv`) columns: `file`, `line`, `column`, `rule_id`, `severity`, `framework`, `snippet`.
+
 ## Disclaimer
 
 This project is provided for educational and defensive security purposes only. You are solely responsible for how you use this software. The author and contributors are not liable for any misuse, damages, or legal consequences resulting from use of this project.
