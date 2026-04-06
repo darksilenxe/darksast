@@ -18,6 +18,7 @@ type Finding struct {
 	RuleID    string `json:"rule_id"`
 	Severity  string `json:"severity"`
 	Framework string `json:"framework"`
+	Snippet   string `json:"snippet"`
 }
 
 // VariableState tracks the lifecycle of a specific variable
@@ -89,8 +90,10 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, f
 			}
 
 			line := uint32(tree.RootNode().StartPoint().Row + 1)
+			snippet := ""
 			if node := findingNodeForMatch(rule, filteredMatch); node != nil {
 				line = uint32(node.StartPoint().Row + 1)
+				snippet = node.Content(sourceCode)
 			}
 
 			findings <- Finding{
@@ -99,6 +102,7 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, f
 				RuleID:    rule.ID,
 				Severity:  rule.Severity,
 				Framework: normalizeFramework(rule.Framework),
+				Snippet:   snippet,
 			}
 		}
 
@@ -225,6 +229,7 @@ func (e *Engine) walkNode(node *sitter.Node, sourceCode []byte, symTable *Symbol
 							RuleID:    "proto-assignment",
 							Severity:  "HIGH",
 							Framework: "JavaScript",
+							Snippet:   node.Content(sourceCode),
 						}
 					}
 				}
