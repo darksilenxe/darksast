@@ -1,6 +1,8 @@
 id: "NEXTJS-REMOTE-PATTERN-WILDCARD"
 severity: "MEDIUM"
 framework: "Next.js"
+requires_dependency:
+  - "next"
 description: "Detects Next.js remote image hostname wildcards that can overly broaden trusted image origins."
 query: |
   (pair

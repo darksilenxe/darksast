@@ -1,6 +1,8 @@
 id: "ANGULAR-BYPASS-SECURITY-TRUST-HTML"
 severity: "HIGH"
 framework: "Angular"
+requires_dependency:
+  - "@angular/core"
 description: "Detects Angular DomSanitizer bypassSecurityTrustHtml usage, which can bypass built-in sanitization when fed untrusted HTML."
 query: |
   (call_expression

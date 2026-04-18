@@ -1,0 +1,4 @@
+framework,severity,count,confidence
+Express,LOW,1,MEDIUM
+Express,MEDIUM,1,MEDIUM
+React,LOW,1,MEDIUM

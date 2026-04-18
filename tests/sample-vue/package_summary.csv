@@ -1,0 +1,11 @@
+category,metric,value
+inventory,total_projects,1
+inventory,total_packages,5
+inventory,dependencies,3
+inventory,dev_dependencies,2
+frameworks,count,2
+frameworks,names,Nuxt;Vue
+vulnerability,react2shell_potential_count,0
+vulnerability,react2shell_potential_entries,
+frameworks,package_count_nuxt,1
+frameworks,package_count_vue,1

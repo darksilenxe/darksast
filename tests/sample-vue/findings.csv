@@ -1,0 +1,4 @@
+file,line,column,rule_id,severity,framework,snippet,confidence
+tests/sample-vue/main.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
+tests/sample-vue/main.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
+tests/sample-vue/main.js,11,17,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const state = { ...payload, active: true };",MEDIUM

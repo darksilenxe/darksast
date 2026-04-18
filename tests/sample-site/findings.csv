@@ -1,0 +1,6 @@
+file,line,column,rule_id,severity,framework,snippet,confidence
+tests/sample-site/app.js,13,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
+tests/sample-site/app.js,13,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
+tests/sample-site/app.js,13,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM
+tests/sample-site/app.js,21,18,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const merged = { ...payload, active: true };",MEDIUM
+tests/sample-site/app.js,7,12,XSS-01,HIGH,React,<div dangerouslySetInnerHTML={{ __html: html }} />,MEDIUM
