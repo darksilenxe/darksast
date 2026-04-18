@@ -68,6 +68,35 @@ CC=gcc go run ./cmd/scanner/main.go \
   -findings-csv-out ./tests/findings.csv
 ```
 
+### Scan a live website
+
+The scanner can also fetch JavaScript directly from a URL. When `-url` is set, it downloads inline `<script>` blocks and (by default) same-origin external `<script src="...">` files into `-fetch-out`, writes a `manifest.json` mapping each saved file back to its origin URL, and then runs the normal scan pipeline against that directory.
+
+```bash
+CC=gcc go run ./cmd/scanner/main.go \
+  -url https://example.com/ \
+  -fetch-out ./fetched-site \
+  -rules ./rules
+```
+
+Relevant flags:
+
+| Flag                  | Default          | Description                                                                 |
+|-----------------------|------------------|-----------------------------------------------------------------------------|
+| `-url`                | (empty)          | When set, fetch JavaScript from this URL before scanning.                   |
+| `-fetch-out`          | `./fetched-site` | Directory to write downloaded JavaScript and `manifest.json`.               |
+| `-fetch-timeout`      | `30s`            | Per-request HTTP timeout.                                                   |
+| `-fetch-user-agent`   | scanner UA       | `User-Agent` header sent on each request.                                   |
+| `-fetch-max-bytes`    | `5242880` (5 MiB)| Maximum bytes accepted per response; larger responses are skipped.          |
+| `-fetch-same-origin`  | `true`           | When `true`, skip external scripts whose host differs from the page URL.    |
+
+Notes and limitations:
+
+- Only the single page at `-url` is fetched; the scanner does not crawl additional pages.
+- JavaScript injected at runtime by other scripts (for example via `document.write` or SPA hydration) is not captured because no headless browser is used.
+- Same-origin filtering is on by default to avoid persisting third-party CDN code; pass `-fetch-same-origin=false` to include it.
+- The default User-Agent identifies the scanner so site operators can see what is hitting them.
+
 ## Outputs
 
 - Package inventory text: `package_versions.txt`
@@ -76,6 +105,7 @@ CC=gcc go run ./cmd/scanner/main.go \
 - Findings JSON: `findings_report.json`
 - Findings CSV: `findings.csv`
 - Findings framework summary CSV: `findings_framework_summary.csv`
+- Fetched JavaScript manifest (only when `-url` is set): `<fetch-out>/manifest.json`
 
 ### Finding location fields
 

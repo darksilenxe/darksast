@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	// Adjust this import path based on your actual go.mod module name
 	"javascript-security-scanner/internal/deps"
 	"javascript-security-scanner/internal/engine"
+	"javascript-security-scanner/internal/fetcher"
 	"javascript-security-scanner/internal/reporter"
 )
 
@@ -43,7 +45,40 @@ func main() {
 	gateByDependency := flag.Bool("gate-by-dependency", false, "Suppress framework-specific rules whose `requires_dependency` list does not match the scanned project's package.json (e.g. skip Angular rules when @angular/core is absent)")
 	minSeverity := flag.String("min-severity", "LOW", "Minimum finding severity to report: LOW, MEDIUM, HIGH, CRITICAL")
 	minConfidence := flag.String("min-confidence", "LOW", "Minimum finding confidence to report: LOW, MEDIUM, HIGH")
+
+	// Optional "fetch from URL" front end. When -url is empty the
+	// scanner behaves exactly as before, so existing CLI/script
+	// invocations are unaffected.
+	pageURL := flag.String("url", "", "Optional URL to download JavaScript from before scanning. When set, inline <script> blocks and same-origin external scripts are saved to -fetch-out and that directory becomes the scan target.")
+	fetchOut := flag.String("fetch-out", "./fetched-site", "Directory to write fetched JavaScript into when -url is set")
+	fetchTimeout := flag.Duration("fetch-timeout", 30*time.Second, "Per-request HTTP timeout used when fetching JavaScript")
+	fetchUserAgent := flag.String("fetch-user-agent", "", "User-Agent header used when fetching JavaScript (defaults to a clearly-identified scanner UA)")
+	fetchMaxBytes := flag.Int64("fetch-max-bytes", 5*1024*1024, "Maximum bytes accepted per HTTP response when fetching JavaScript")
+	fetchSameOrigin := flag.Bool("fetch-same-origin", true, "Only download external scripts whose host matches the page URL")
 	flag.Parse()
+
+	// If a URL was supplied, fetch JavaScript first and redirect the
+	// rest of the pipeline at the directory we just populated.
+	if strings.TrimSpace(*pageURL) != "" {
+		fmt.Printf("[*] Fetching JavaScript from %s into %s ...\n", *pageURL, *fetchOut)
+		manifest, err := fetcher.Fetch(*pageURL, *fetchOut, fetcher.Options{
+			Timeout:        *fetchTimeout,
+			UserAgent:      *fetchUserAgent,
+			MaxBytes:       *fetchMaxBytes,
+			SameOriginOnly: *fetchSameOrigin,
+		})
+		if err != nil {
+			log.Fatalf("[!] Fetch failed: %v", err)
+		}
+		fmt.Printf("[+] Fetched %d script(s) to %s (manifest: %s/manifest.json)\n",
+			manifest.SavedCount(), *fetchOut, *fetchOut)
+		for _, f := range manifest.Files {
+			if f.Error != "" {
+				log.Printf("[!] Fetch warning for %s: %s", f.LocalFile, f.Error)
+			}
+		}
+		*targetDir = *fetchOut
+	}
 
 	fmt.Printf("[*] Target Directory: %s\n", *targetDir)
 
