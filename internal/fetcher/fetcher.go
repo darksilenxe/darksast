@@ -7,7 +7,7 @@
 package fetcher
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -329,7 +329,7 @@ func deriveName(u *url.URL) string {
 		base = ""
 	}
 	if base == "" {
-		sum := sha1.Sum([]byte(u.String()))
+		sum := sha256.Sum256([]byte(u.String()))
 		base = hex.EncodeToString(sum[:8]) + ".js"
 	}
 	lower := strings.ToLower(base)
