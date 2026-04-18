@@ -1,10 +1,19 @@
 id: "NODE-CHILD-PROCESS-EXEC"
 severity: "CRITICAL"
+confidence: "MEDIUM"
 description: "Detects child_process command execution APIs that can lead to command injection when input is untrusted."
+ignore_if_literal:
+  - "cmd"
+taint:
+  sink_capture: "cmd"
+  require_tainted: false
 query: |
   (call_expression
     function: (member_expression
       object: (identifier) @obj (#eq? @obj "child_process")
       property: (property_identifier) @method (#match? @method "^(exec|execSync|spawn|spawnSync)$")
     ) @command_exec
+    arguments: (arguments
+      (_) @cmd
+    )
   )

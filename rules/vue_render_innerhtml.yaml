@@ -1,6 +1,9 @@
 id: "VUE-RENDER-INNERHTML"
 severity: "HIGH"
 framework: "Vue"
+requires_dependency:
+  - "vue"
+  - "nuxt"
 description: "Detects Vue render-function patterns using innerHTML, which can introduce XSS when content is attacker-controlled."
 query: |
   (call_expression

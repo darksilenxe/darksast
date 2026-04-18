@@ -1,8 +1,14 @@
 id: "JS-EVAL-EXEC"
 severity: "HIGH"
+confidence: "HIGH"
 description: "Detects direct use of eval(), which can execute attacker-controlled JavaScript and lead to code injection."
+ignore_if_literal:
+  - "arg"
 query: |
   (call_expression
     function: (identifier) @fn
     (#eq? @fn "eval")
-  )
+    arguments: (arguments
+      (_) @arg
+    )
+  ) @finding

@@ -1,6 +1,8 @@
 id: "ANGULAR-BYPASS-SECURITY-RESOURCE-URL"
 severity: "HIGH"
 framework: "Angular"
+requires_dependency:
+  - "@angular/core"
 description: "Detects Angular bypassSecurityTrustResourceUrl usage, which can disable resource URL sanitization."
 query: |
   (call_expression

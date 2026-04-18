@@ -1,5 +1,6 @@
 id: "OPEN-REDIRECT-RESPONSE"
 severity: "MEDIUM"
+confidence: "MEDIUM"
 framework: "Node.js"
 description: "Detects response redirect helpers that can become open redirect sinks with untrusted destinations."
 query: |

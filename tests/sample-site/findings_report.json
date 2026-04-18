@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-04-18T14:17:22Z",
+  "target_directory": "./tests/sample-site",
+  "total_findings": 5,
+  "findings": [
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 13,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 13,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 13,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 21,
+      "column": 18,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const merged = { ...payload, active: true };",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 7,
+      "column": 12,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React",
+      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: html }} /\u003e",
+      "confidence": "MEDIUM"
+    }
+  ]
+}

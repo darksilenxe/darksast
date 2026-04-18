@@ -1,5 +1,6 @@
 id: "INSECURE-CRYPTO-HASH"
 severity: "MEDIUM"
+confidence: "HIGH"
 framework: "Node.js"
 description: "Detects weak hashing algorithms such as MD5 and SHA1."
 query: |

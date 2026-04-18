@@ -55,21 +55,28 @@ func WriteFrameworkSummaryCSV(findings []engine.Finding, outputPath string) erro
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	if err := writer.Write([]string{"framework", "severity", "count"}); err != nil {
+	if err := writer.Write([]string{"framework", "severity", "count", "confidence"}); err != nil {
 		return fmt.Errorf("failed to write framework summary CSV header: %w", err)
 	}
 
-	counts := make(map[string]map[string]int)
+	counts := make(map[string]map[string]map[string]int)
 	for _, finding := range findings {
 		framework := finding.Framework
 		if framework == "" {
 			framework = "JavaScript"
 		}
+		confidence := finding.Confidence
+		if confidence == "" {
+			confidence = "MEDIUM"
+		}
 
 		if _, ok := counts[framework]; !ok {
-			counts[framework] = make(map[string]int)
+			counts[framework] = make(map[string]map[string]int)
 		}
-		counts[framework][finding.Severity]++
+		if _, ok := counts[framework][finding.Severity]; !ok {
+			counts[framework][finding.Severity] = make(map[string]int)
+		}
+		counts[framework][finding.Severity][confidence]++
 	}
 
 	frameworks := make([]string, 0, len(counts))
@@ -86,9 +93,16 @@ func WriteFrameworkSummaryCSV(findings []engine.Finding, outputPath string) erro
 		sort.Strings(severities)
 
 		for _, severity := range severities {
-			row := []string{framework, severity, fmt.Sprintf("%d", counts[framework][severity])}
-			if err := writer.Write(row); err != nil {
-				return fmt.Errorf("failed to write framework summary CSV row: %w", err)
+			confidences := make([]string, 0, len(counts[framework][severity]))
+			for confidence := range counts[framework][severity] {
+				confidences = append(confidences, confidence)
+			}
+			sort.Strings(confidences)
+			for _, confidence := range confidences {
+				row := []string{framework, severity, fmt.Sprintf("%d", counts[framework][severity][confidence]), confidence}
+				if err := writer.Write(row); err != nil {
+					return fmt.Errorf("failed to write framework summary CSV row: %w", err)
+				}
 			}
 		}
 	}
@@ -112,7 +126,7 @@ func WriteFindingsCSV(findings []engine.Finding, outputPath string) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	if err := writer.Write([]string{"file", "line", "column", "rule_id", "severity", "framework", "snippet"}); err != nil {
+	if err := writer.Write([]string{"file", "line", "column", "rule_id", "severity", "framework", "snippet", "confidence"}); err != nil {
 		return fmt.Errorf("failed to write findings CSV header: %w", err)
 	}
 
@@ -120,6 +134,11 @@ func WriteFindingsCSV(findings []engine.Finding, outputPath string) error {
 		framework := finding.Framework
 		if framework == "" {
 			framework = "JavaScript"
+		}
+
+		confidence := finding.Confidence
+		if confidence == "" {
+			confidence = "MEDIUM"
 		}
 
 		row := []string{
@@ -130,6 +149,7 @@ func WriteFindingsCSV(findings []engine.Finding, outputPath string) error {
 			finding.Severity,
 			framework,
 			finding.Snippet,
+			confidence,
 		}
 
 		if err := writer.Write(row); err != nil {

@@ -1,10 +1,20 @@
 id: "OPEN-REDIRECT-LOCATION-ASSIGN"
 severity: "MEDIUM"
+confidence: "MEDIUM"
 framework: "JavaScript"
 description: "Detects direct location assignments that can produce client-side open redirects."
+ignore_if_literal:
+  - "value"
+ignore_if_matches:
+  # Same-origin / hash-only / known-safe absolute URLs are not redirects.
+  value: "^[\"'](#.*|/[^/].*|\\./.*|\\.\\./.*)[\"']$"
+taint:
+  sink_capture: "value"
+  require_tainted: true
 query: |
   (assignment_expression
     left: (member_expression
       property: (property_identifier) @prop (#match? @prop "^(href|location)$")
     ) @redirect_sink
+    right: (_) @value
   ) @finding

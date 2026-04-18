@@ -1,0 +1,6 @@
+framework,severity,count,confidence
+Express,LOW,1,MEDIUM
+Express,MEDIUM,1,MEDIUM
+Node.js,MEDIUM,1,MEDIUM
+React,HIGH,1,MEDIUM
+React,LOW,1,MEDIUM

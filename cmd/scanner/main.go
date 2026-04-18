@@ -4,12 +4,30 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strings"
 
 	// Adjust this import path based on your actual go.mod module name
 	"javascript-security-scanner/internal/deps"
 	"javascript-security-scanner/internal/engine"
 	"javascript-security-scanner/internal/reporter"
 )
+
+// severityRank ranks severity strings so the --min-severity gate can
+// compare findings consistently. Unknown values get the lowest rank
+// so they are never filtered out by accident.
+var severityRank = map[string]int{
+	"LOW":      1,
+	"MEDIUM":   2,
+	"HIGH":     3,
+	"CRITICAL": 4,
+}
+
+// confidenceRank does the same for the --min-confidence gate.
+var confidenceRank = map[string]int{
+	"LOW":    1,
+	"MEDIUM": 2,
+	"HIGH":   3,
+}
 
 func main() {
 	targetDir := flag.String("dir", ".", "Directory to scan")
@@ -20,6 +38,11 @@ func main() {
 	findingsJSONOut := flag.String("findings-json-out", "./findings_report.json", "Output JSON file for SAST findings")
 	findingsFrameworkCSVOut := flag.String("findings-framework-csv-out", "./findings_framework_summary.csv", "Output CSV file for framework/severity finding counts")
 	findingsCSVOut := flag.String("findings-csv-out", "./findings.csv", "Output CSV file with one row per finding")
+	includeTests := flag.Bool("include-tests", false, "Include test/spec files (*.test.*, *.spec.*, __tests__, cypress, e2e, playwright) in scans")
+	includeVendored := flag.Bool("include-vendored", false, "Include vendored / build-output files (node_modules, dist, build, out, coverage, .next, vendor, *.min.js, *.d.ts) in scans")
+	gateByDependency := flag.Bool("gate-by-dependency", false, "Suppress framework-specific rules whose `requires_dependency` list does not match the scanned project's package.json (e.g. skip Angular rules when @angular/core is absent)")
+	minSeverity := flag.String("min-severity", "LOW", "Minimum finding severity to report: LOW, MEDIUM, HIGH, CRITICAL")
+	minConfidence := flag.String("min-confidence", "LOW", "Minimum finding confidence to report: LOW, MEDIUM, HIGH")
 	flag.Parse()
 
 	fmt.Printf("[*] Target Directory: %s\n", *targetDir)
@@ -71,8 +94,26 @@ func main() {
 
 	// 3. Initialize the scanning engine with the loaded rules
 	scannerEngine := engine.New(rules)
+	scannerEngine.IncludeTests = *includeTests
+	scannerEngine.IncludeVendored = *includeVendored
+	scannerEngine.EnableDependencyGating = *gateByDependency
+
+	// Wire the project's package inventory into the engine so rules
+	// can be gated by `requires_dependency`.
+	if len(packageRecords) > 0 {
+		names := make([]string, 0, len(packageRecords))
+		for _, record := range packageRecords {
+			names = append(names, record.Name)
+		}
+		scannerEngine.SetProjectDependencies(names)
+	}
+
 	findingsChan := make(chan engine.Finding, 100)
 	findings := make([]engine.Finding, 0)
+
+	// Resolve the minimum severity/confidence gates once.
+	minSevRank := severityRank[strings.ToUpper(*minSeverity)]
+	minConfRank := confidenceRank[strings.ToUpper(*minConfidence)]
 
 	// 4. Execute the scan in a goroutine and consume findings in the main flow.
 	scanErrChan := make(chan error, 1)
@@ -81,8 +122,14 @@ func main() {
 	}()
 
 	for f := range findingsChan {
+		if minSevRank > 0 && severityRank[strings.ToUpper(f.Severity)] < minSevRank {
+			continue
+		}
+		if minConfRank > 0 && confidenceRank[strings.ToUpper(f.Confidence)] < minConfRank {
+			continue
+		}
 		findings = append(findings, f)
-		fmt.Printf("[!] %-8s | %-12s | %-28s | %s:%d:%d\n    %s\n", f.Severity, f.Framework, f.RuleID, f.File, f.Line, f.Column, f.Snippet)
+		fmt.Printf("[!] %-8s | %-7s | %-12s | %-28s | %s:%d:%d\n    %s\n", f.Severity, f.Confidence, f.Framework, f.RuleID, f.File, f.Line, f.Column, f.Snippet)
 	}
 
 	err = <-scanErrChan
