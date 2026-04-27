@@ -191,7 +191,7 @@ func LoadRules(rulesDir string) ([]Rule, error) {
 			for _, semgrep := range doc.Rules {
 				converted, ok := semgrepToRule(semgrep)
 				if !ok {
-					fmt.Printf("[-] Warning: Skipping invalid Semgrep/OpenGrep rule in %s (%s, missing ID or compatible Query)\n", path, semgrepRuleLabel(semgrep.ID))
+					fmt.Printf("[-] Warning: Skipping invalid Semgrep/OpenGrep rule in %s (%s, missing ID and/or Tree-sitter-compatible query)\n", path, semgrepRuleLabel(semgrep.ID))
 					continue
 				}
 				rules = append(rules, converted)
@@ -247,6 +247,8 @@ func resolveSemgrepQuery(in semgrepRule) string {
 		if candidate == "" {
 			continue
 		}
+		// Scanner queries are JavaScript Tree-sitter queries because this
+		// engine currently scans JavaScript/TypeScript syntax only.
 		if _, err := sitter.NewQuery([]byte(candidate), javascript.GetLanguage()); err == nil {
 			return candidate
 		}
