@@ -184,7 +184,7 @@ func LoadRules(rulesDir string) ([]Rule, error) {
 				return fmt.Errorf("failed to parse YAML in %s: %w", path, err)
 			}
 			if len(doc.Rules) == 0 {
-				fmt.Printf("[-] Warning: Skipping invalid rule file %s (missing ID or Query)\n", path)
+				fmt.Printf("[-] Warning: Skipping file %s (not a valid native rule or Semgrep/OpenGrep bundle)\n", path)
 				return nil
 			}
 
@@ -234,7 +234,6 @@ func resolveSemgrepQuery(in semgrepRule) string {
 	candidates := []string{
 		strings.TrimSpace(in.Query),
 		strings.TrimSpace(in.Metadata.Query),
-		strings.TrimSpace(in.Pattern),
 	}
 
 	for _, p := range in.PatternEither {

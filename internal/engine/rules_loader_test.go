@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoadRulesSupportsSemgrepAndOpenGrepFormat(t *testing.T) {
+func TestLoadRulesSemgrepFormat(t *testing.T) {
 	dir := t.TempDir()
 	ruleFile := filepath.Join(dir, "semgrep.yaml")
 	content := `rules:
@@ -36,7 +36,7 @@ func TestLoadRulesSupportsSemgrepAndOpenGrepFormat(t *testing.T) {
 	assert.Contains(t, rules[0].Query, "(call_expression")
 }
 
-func TestLoadRulesSupportsSemgrepMetadataQueryAndFields(t *testing.T) {
+func TestLoadRulesMetadataFields(t *testing.T) {
 	dir := t.TempDir()
 	ruleFile := filepath.Join(dir, "opengrep.yaml")
 	content := `rules:
