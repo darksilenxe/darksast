@@ -2,12 +2,11 @@ framework,severity,count,confidence
 Angular,HIGH,3,MEDIUM
 Express,LOW,5,MEDIUM
 Express,MEDIUM,6,MEDIUM
-JavaScript,CRITICAL,1,MEDIUM
 JavaScript,HIGH,1,HIGH
 JavaScript,HIGH,7,MEDIUM
 JavaScript,MEDIUM,7,MEDIUM
 Next.js,MEDIUM,2,MEDIUM
-Node.js,CRITICAL,4,MEDIUM
+Node.js,CRITICAL,5,MEDIUM
 Node.js,HIGH,17,MEDIUM
 Node.js,MEDIUM,1,HIGH
 Node.js,MEDIUM,7,MEDIUM

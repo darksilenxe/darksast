@@ -1,6 +1,7 @@
 # rules/suspicious_merge.yaml
 id: "PROTOTYPE-POLLUTION-CUSTOM-MERGE"
 severity: "HIGH"
+framework: "JavaScript"
 description: "Flags dynamic object assignments inside 'for...in' loops. This is the classic signature of a vulnerable custom merge() or clone() function that lacks __proto__ sanitization."
 query: |
   (for_in_statement
