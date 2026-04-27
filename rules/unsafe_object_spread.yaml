@@ -1,6 +1,20 @@
 id: "POTENTIAL-POLLUTION-OBJECT-SPREAD"
 severity: "LOW"
 framework: "React"
-description: "Flags object spread syntax in React code. Spreading untrusted objects can introduce prototype pollution or unexpected property injection when merged into component props or state."
+description: "Flags object spread from common untrusted sources in React code."
 query: |
-  (object (spread_element) @unsafe_spread)
+  (object
+    (spread_element
+      (identifier) @source
+      (#match? @source "(?i)^(payload|input|user(input|data)?|body|query|params|request(body)?|data)$")
+    ) @unsafe_spread
+  )
+
+  (object
+    (spread_element
+      (member_expression
+        object: (identifier) @obj (#match? @obj "^(req|request|ctx)$")
+        property: (property_identifier) @prop (#match? @prop "^(body|query|params)$")
+      ) @source
+    ) @unsafe_spread
+  )
