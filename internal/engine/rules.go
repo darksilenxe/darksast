@@ -72,6 +72,34 @@ type Rule struct {
 	captureNamesInit bool
 }
 
+type semgrepMetadata struct {
+	Framework          string   `yaml:"framework"`
+	Description        string   `yaml:"description"`
+	Confidence         string   `yaml:"confidence"`
+	Query              string   `yaml:"query"`
+	RequiresDependency []string `yaml:"requires_dependency"`
+}
+
+type semgrepRule struct {
+	ID            string           `yaml:"id"`
+	Severity      string           `yaml:"severity"`
+	Message       string           `yaml:"message"`
+	Query         string           `yaml:"query"`
+	Pattern       string           `yaml:"pattern"`
+	PatternEither []semgrepPattern `yaml:"pattern-either"`
+	Patterns      []semgrepPattern `yaml:"patterns"`
+	Languages     []string         `yaml:"languages"`
+	Metadata      semgrepMetadata  `yaml:"metadata"`
+}
+
+type semgrepPattern struct {
+	Pattern string `yaml:"pattern"`
+}
+
+type semgrepDocument struct {
+	Rules []semgrepRule `yaml:"rules"`
+}
+
 func (r *Rule) compile() error {
 	if r.Query == "" {
 		return fmt.Errorf("rule %s has an empty query", r.ID)
@@ -144,15 +172,137 @@ func LoadRules(rulesDir string) ([]Rule, error) {
 				return fmt.Errorf("failed to parse YAML in %s: %w", path, err)
 			}
 
-			// Basic validation to ensure the rule isn't missing critical components
+			// Native rule format.
 			if rule.ID != "" && rule.Query != "" {
 				rules = append(rules, rule)
-			} else {
-				fmt.Printf("[-] Warning: Skipping invalid rule file %s (missing ID or Query)\n", path)
+				return nil
+			}
+
+			// Semgrep/OpenGrep bundle format.
+			var doc semgrepDocument
+			if err := yaml.Unmarshal(fileData, &doc); err != nil {
+				return fmt.Errorf("failed to parse YAML in %s: %w", path, err)
+			}
+			if len(doc.Rules) == 0 {
+				fmt.Printf("[-] Warning: Skipping file %s (not a valid native rule or Semgrep/OpenGrep bundle)\n", path)
+				return nil
+			}
+
+			for _, semgrep := range doc.Rules {
+				converted, ok := semgrepToRule(semgrep)
+				if !ok {
+					fmt.Printf("[-] Warning: Skipping invalid Semgrep/OpenGrep rule in %s (%s, missing ID and/or Tree-sitter-compatible query)\n", path, semgrepRuleLabel(semgrep.ID))
+					continue
+				}
+				rules = append(rules, converted)
 			}
 		}
 		return nil
 	})
 
 	return rules, err
+}
+
+func semgrepToRule(in semgrepRule) (Rule, bool) {
+	id := strings.TrimSpace(in.ID)
+	query := strings.TrimSpace(resolveSemgrepQuery(in))
+	if id == "" || query == "" {
+		return Rule{}, false
+	}
+
+	description := strings.TrimSpace(in.Message)
+	if description == "" {
+		description = strings.TrimSpace(in.Metadata.Description)
+	}
+	if description == "" {
+		description = fmt.Sprintf("Imported from Semgrep/OpenGrep rule %s", id)
+	}
+
+	out := Rule{
+		ID:                 id,
+		Severity:           normalizeSemgrepSeverity(in.Severity),
+		Framework:          normalizeSemgrepFramework(in.Metadata.Framework, in.Languages),
+		Description:        description,
+		Query:              query,
+		Confidence:         strings.TrimSpace(in.Metadata.Confidence),
+		RequiresDependency: in.Metadata.RequiresDependency,
+	}
+	return out, true
+}
+
+func resolveSemgrepQuery(in semgrepRule) string {
+	candidates := []string{
+		strings.TrimSpace(in.Query),
+		strings.TrimSpace(in.Metadata.Query),
+	}
+
+	for _, p := range in.PatternEither {
+		candidates = append(candidates, strings.TrimSpace(p.Pattern))
+	}
+	for _, p := range in.Patterns {
+		candidates = append(candidates, strings.TrimSpace(p.Pattern))
+	}
+
+	for _, candidate := range candidates {
+		if candidate == "" {
+			continue
+		}
+		// Scanner queries are JavaScript Tree-sitter queries because this
+		// engine currently scans JavaScript/TypeScript syntax only.
+		if _, err := sitter.NewQuery([]byte(candidate), javascript.GetLanguage()); err == nil {
+			return candidate
+		}
+	}
+	return ""
+}
+
+func semgrepRuleLabel(id string) string {
+	id = strings.TrimSpace(id)
+	if id == "" {
+		return "id=<empty>"
+	}
+	return "id=" + id
+}
+
+func normalizeSemgrepSeverity(in string) string {
+	sev := strings.ToUpper(strings.TrimSpace(in))
+	switch sev {
+	case "ERROR":
+		return "HIGH"
+	case "WARNING":
+		return "MEDIUM"
+	case "INFO":
+		return "LOW"
+	case "LOW", "MEDIUM", "HIGH", "CRITICAL":
+		return sev
+	default:
+		return "MEDIUM"
+	}
+}
+
+func normalizeSemgrepFramework(explicit string, languages []string) string {
+	if framework := strings.TrimSpace(explicit); framework != "" {
+		return framework
+	}
+
+	for _, language := range languages {
+		switch strings.ToLower(strings.TrimSpace(language)) {
+		case "javascript", "js", "typescript", "ts", "jsx", "tsx":
+			return "JavaScript"
+		case "react":
+			return "React"
+		case "angular":
+			return "Angular"
+		case "vue":
+			return "Vue"
+		case "node", "nodejs", "node.js":
+			return "Node.js"
+		case "express":
+			return "Express"
+		case "next", "nextjs", "next.js":
+			return "Next.js"
+		}
+	}
+
+	return "JavaScript"
 }

@@ -6,6 +6,7 @@ JavaScript-Security-Scanner is a lightweight Go-based static scanner for JavaScr
 
 - Scans JavaScript/TypeScript source files (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`).
 - Loads security signatures from YAML rule files in `rules/`.
+- Supports native rule files plus Semgrep/OpenGrep bundle files (`rules: [...]`) when each imported rule provides a Tree-sitter-compatible `query` (or `metadata.query`).
 - Produces findings in JSON and CSV formats.
 - Produces package inventory outputs (table text + CSV + summary CSV).
 - Supports Windows-first scripts and cross-platform shell scripts.
