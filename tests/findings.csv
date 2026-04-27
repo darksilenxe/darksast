@@ -1,69 +1,69 @@
 file,line,column,rule_id,severity,framework,snippet,confidence
 tests/advanced_rule_coverage.js,56,21,ANGULAR-BYPASS-SECURITY-RESOURCE-URL,HIGH,Angular,const resourceUrl = sanitizer.bypassSecurityTrustResourceUrl(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,55,17,ANGULAR-BYPASS-SECURITY-TRUST-URL,HIGH,Angular,const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);,MEDIUM
 tests/framework_rule_coverage.js,17,17,ANGULAR-BYPASS-SECURITY-TRUST-HTML,HIGH,Angular,const trusted = sanitizer.bypassSecurityTrustHtml(html);,MEDIUM
-tests/advanced_rule_coverage.js,100,1,COOKIE-SECURE-FALSE,MEDIUM,Express,"res.cookie('sid', token, { secure: false, httpOnly: true });",MEDIUM
-tests/advanced_rule_coverage.js,52,1,CORS-WILDCARD-CREDENTIALS,HIGH,Node.js,"cors({ origin: '*', credentials: true });",MEDIUM
+tests/advanced_rule_coverage.js,55,17,ANGULAR-BYPASS-SECURITY-TRUST-URL,HIGH,Angular,const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);,MEDIUM
 tests/rule_coverage.js,21,1,NODE-CHILD-PROCESS-EXEC,CRITICAL,JavaScript,"child_process.exec(""dir "" + userInput);",MEDIUM
-tests/advanced_rule_coverage.js,91,1,EXPRESS-SESSION-HTTPONLY-FALSE,MEDIUM,Node.js,session({,MEDIUM
+tests/advanced_rule_coverage.js,100,1,COOKIE-SECURE-FALSE,MEDIUM,Express,"res.cookie('sid', token, { secure: false, httpOnly: true });",MEDIUM
 tests/rule_coverage.js,14,1,JS-EVAL-EXEC,HIGH,JavaScript,eval(userInput);,HIGH
 tests/rule_coverage.js,17,16,JS-FUNCTION-CONSTRUCTOR,HIGH,JavaScript,"const fn = new Function(""a"", ""b"", ""return a + b;"");",MEDIUM
+tests/sample-vue/main.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
+tests/advanced_rule_coverage.js,52,1,CORS-WILDCARD-CREDENTIALS,HIGH,Node.js,"cors({ origin: '*', credentials: true });",MEDIUM
+tests/sample-vue/main.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
+tests/rule_coverage.js,24,1,DOM-XSS-DOCUMENT-WRITE,HIGH,JavaScript,document.write(userInput);,MEDIUM
+tests/rule_coverage.js,27,1,DOM-XSS-INNERHTML-ASSIGN,HIGH,JavaScript,document.body.innerHTML = userInput;,MEDIUM
+tests/sample-site/app.js,13,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
+tests/rule_coverage.js,6,1,EXPRESS-SESSION-HTTPONLY-FALSE,MEDIUM,Node.js,session({,MEDIUM
+tests/rule_coverage.js,6,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
+tests/sample-site/app.js,13,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
+tests/rule_coverage.js,6,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
+tests/rule_coverage.js,6,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM
+tests/advanced_rule_coverage.js,91,1,EXPRESS-SESSION-HTTPONLY-FALSE,MEDIUM,Node.js,session({,MEDIUM
+tests/framework_rule_coverage.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
+tests/sample-site/app.js,13,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM
+tests/framework_rule_coverage.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
 tests/advanced_rule_coverage.js,91,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
 tests/advanced_rule_coverage.js,91,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/rule_coverage.js,24,1,DOM-XSS-DOCUMENT-WRITE,HIGH,JavaScript,document.write(userInput);,MEDIUM
 tests/advanced_rule_coverage.js,91,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM
 tests/advanced_rule_coverage.js,22,7,HARDCODED-SECRET,HIGH,JavaScript,const token = 'header.payload.signature';,MEDIUM
 tests/advanced_rule_coverage.js,24,7,HARDCODED-SECRET,HIGH,JavaScript,const apiKey = 'AKIA_TEST_SECRET';,MEDIUM
-tests/rule_coverage.js,27,1,DOM-XSS-INNERHTML-ASSIGN,HIGH,JavaScript,document.body.innerHTML = userInput;,MEDIUM
 tests/advanced_rule_coverage.js,40,1,INSECURE-CRYPTO-HASH,MEDIUM,Node.js,crypto.createHash('md5');,HIGH
-tests/rule_coverage.js,6,1,EXPRESS-SESSION-HTTPONLY-FALSE,MEDIUM,Node.js,session({,MEDIUM
-tests/sample-site/app.js,13,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/rule_coverage.js,6,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/framework_rule_coverage.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/sample-vue/main.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/rule_coverage.js,6,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/sample-site/app.js,13,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/sample-vue/main.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/framework_rule_coverage.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/sample-site/app.js,13,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM
-tests/rule_coverage.js,6,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM
 tests/advanced_rule_coverage.js,41,7,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,const sessionId = Math.random().toString(36);,MEDIUM
 tests/advanced_rule_coverage.js,42,7,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,const resetToken = Math.random().toString(36).slice(2);,MEDIUM
 tests/advanced_rule_coverage.js,43,7,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,const csrfToken = 'csrf_' + Math.random().toString(36);,MEDIUM
 tests/advanced_rule_coverage.js,45,1,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,accessToken = 'bearer_' + Math.random().toString(36);,MEDIUM
+tests/sample-vue/main.js,11,17,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const state = { ...payload, active: true };",MEDIUM
 tests/advanced_rule_coverage.js,38,1,JWT-DECODE-ONLY,HIGH,Node.js,jwt.decode(token);,MEDIUM
 tests/advanced_rule_coverage.js,39,29,JWT-ALG-NONE,CRITICAL,Node.js,"jwt.verify(token, secret, { algorithms: ['none'] });",MEDIUM
 tests/advanced_rule_coverage.js,98,1,JWT-VERIFY-IGNORE-EXPIRATION,MEDIUM,Node.js,"jwt.verify(token, secret, { ignoreExpiration: true });",MEDIUM
+tests/framework_rule_coverage.js,27,5,NEXTJS-DANGEROUSLY-ALLOW-SVG,MEDIUM,Next.js,dangerouslyAllowSVG: true,MEDIUM
 tests/advanced_rule_coverage.js,62,9,NEXTJS-REMOTE-PATTERN-WILDCARD,MEDIUM,Next.js,{ hostname: '*' },MEDIUM
 tests/advanced_rule_coverage.js,48,14,NOSQL-OPERATOR-INJECTION,HIGH,Node.js,"users.find({ '$where': userInput, username: { '$regex': userInput } });",MEDIUM
 tests/advanced_rule_coverage.js,48,47,NOSQL-OPERATOR-INJECTION,HIGH,Node.js,"users.find({ '$where': userInput, username: { '$regex': userInput } });",MEDIUM
 tests/advanced_rule_coverage.js,37,1,OPEN-REDIRECT-LOCATION-ASSIGN,MEDIUM,JavaScript,window.location.href = userInput;,MEDIUM
+tests/rule_coverage.js,30,12,JS-STRING-TIMER-EXEC,MEDIUM,JavaScript,"setTimeout(""console.log('timer string')"", 1000);",MEDIUM
 tests/advanced_rule_coverage.js,36,1,OPEN-REDIRECT-RESPONSE,MEDIUM,Node.js,res.redirect(userInput);,MEDIUM
 tests/advanced_rule_coverage.js,99,1,OPEN-REDIRECT-WINDOW-OPEN,MEDIUM,JavaScript,"window.open(userInput, '_blank');",MEDIUM
-tests/framework_rule_coverage.js,27,5,NEXTJS-DANGEROUSLY-ALLOW-SVG,MEDIUM,Next.js,dangerouslyAllowSVG: true,MEDIUM
 tests/advanced_rule_coverage.js,34,1,PATH-TRAVERSAL-FS-READ,HIGH,Node.js,fs.readFileSync(req.body.path);,MEDIUM
 tests/advanced_rule_coverage.js,35,1,PATH-TRAVERSAL-SEND-FILE,HIGH,Node.js,res.sendFile(req.body.path);,MEDIUM
 tests/advanced_rule_coverage.js,108,13,REACT-UNSAFE-URL-PROP,MEDIUM,React,return <a href={userInput}>Open</a>;,MEDIUM
+tests/sample-site/app.js,21,18,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const merged = { ...payload, active: true };",MEDIUM
 tests/advanced_rule_coverage.js,53,1,SHELL-WRAPPER-EXEC,CRITICAL,Node.js,shelljs.exec(userInput);,MEDIUM
 tests/advanced_rule_coverage.js,54,1,SHELL-WRAPPER-EXEC,CRITICAL,Node.js,execa(userInput);,MEDIUM
+tests/test.js,16,19,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const profile = { ...payload, role: 'reader' };",MEDIUM
 tests/advanced_rule_coverage.js,47,1,SQL-RAW-QUERY,HIGH,Node.js,db.query('SELECT * FROM users WHERE id = ' + userInput);,MEDIUM
 tests/advanced_rule_coverage.js,101,1,SQL-RAW-QUERY,HIGH,Node.js,db.query(`SELECT * FROM users WHERE id = '${userInput}'`);,MEDIUM
 tests/advanced_rule_coverage.js,101,1,SQL-TEMPLATE-LITERAL-QUERY,HIGH,Node.js,db.query(`SELECT * FROM users WHERE id = '${userInput}'`);,MEDIUM
 tests/advanced_rule_coverage.js,31,1,SSRF-AXIOS,HIGH,JavaScript,axios.get(userInput);,MEDIUM
+tests/sample-site/app.js,7,12,XSS-01,HIGH,React,<div dangerouslySetInnerHTML={{ __html: html }} />,MEDIUM
 tests/advanced_rule_coverage.js,30,1,SSRF-FETCH,HIGH,JavaScript,fetch(userInput);,MEDIUM
 tests/advanced_rule_coverage.js,32,1,SSRF-HTTP-REQUEST,HIGH,Node.js,http.request(userInput);,MEDIUM
 tests/advanced_rule_coverage.js,33,1,SSRF-HTTP-REQUEST,HIGH,Node.js,https.get(userInput);,MEDIUM
-tests/rule_coverage.js,30,12,JS-STRING-TIMER-EXEC,MEDIUM,JavaScript,"setTimeout(""console.log('timer string')"", 1000);",MEDIUM
-tests/test.js,16,19,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const profile = { ...payload, role: 'reader' };",MEDIUM
+tests/test.js,9,18,XSS-01,HIGH,React,<div dangerouslySetInnerHTML={{ __html: rawHTMLContent }} />,MEDIUM
 tests/advanced_rule_coverage.js,49,1,TEMPLATE-INJECTION-COMPILE,HIGH,Node.js,Handlebars.compile(userInput);,MEDIUM
 tests/advanced_rule_coverage.js,75,3,TLS-REJECT-UNAUTHORIZED-FALSE,HIGH,Node.js,rejectUnauthorized: false,MEDIUM
+tests/framework_rule_coverage.js,21,26,VUE-RENDER-INNERHTML,HIGH,Vue,"const vnode = h('div', { innerHTML: html });",MEDIUM
 tests/advanced_rule_coverage.js,102,1,UNSAFE-DESERIALIZATION-CALL,HIGH,Node.js,serialize.unserialize(userInput);,MEDIUM
 tests/advanced_rule_coverage.js,103,1,UNSAFE-DESERIALIZATION-CALL,HIGH,Node.js,serialize.deserialize(userInput);,MEDIUM
-tests/sample-site/app.js,21,18,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const merged = { ...payload, active: true };",MEDIUM
 tests/advanced_rule_coverage.js,51,1,UNSAFE-VM-EXECUTION,CRITICAL,Node.js,vm.runInNewContext(userInput);,MEDIUM
-tests/sample-vue/main.js,11,17,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const state = { ...payload, active: true };",MEDIUM
 tests/advanced_rule_coverage.js,50,1,UNSAFE-YAML-LOAD,HIGH,Node.js,yaml.load(userInput);,MEDIUM
-tests/test.js,9,18,XSS-01,HIGH,React,<div dangerouslySetInnerHTML={{ __html: rawHTMLContent }} />,MEDIUM
-tests/sample-site/app.js,7,12,XSS-01,HIGH,React,<div dangerouslySetInnerHTML={{ __html: html }} />,MEDIUM
 tests/advanced_rule_coverage.js,23,7,WEAK-SECRET-FALLBACK,HIGH,Node.js,const secret = process.env.JWT_SECRET || 'changeme';,MEDIUM
-tests/framework_rule_coverage.js,21,26,VUE-RENDER-INNERHTML,HIGH,Vue,"const vnode = h('div', { innerHTML: html });",MEDIUM
