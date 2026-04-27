@@ -1,5 +1,6 @@
 id: "DOM-XSS-INNERHTML-ASSIGN"
 severity: "HIGH"
+framework: "JavaScript"
 confidence: "MEDIUM"
 description: "Detects assignments to innerHTML, which can enable DOM XSS if the assigned value is user-controlled."
 ignore_if_literal:

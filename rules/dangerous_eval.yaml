@@ -1,5 +1,6 @@
 id: "JS-EVAL-EXEC"
 severity: "HIGH"
+framework: "JavaScript"
 confidence: "HIGH"
 description: "Detects direct use of eval(), which can execute attacker-controlled JavaScript and lead to code injection."
 ignore_if_literal:

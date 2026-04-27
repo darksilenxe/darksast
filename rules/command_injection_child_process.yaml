@@ -1,6 +1,7 @@
 id: "NODE-CHILD-PROCESS-EXEC"
 severity: "CRITICAL"
 confidence: "MEDIUM"
+framework: "Node.js"
 description: "Detects child_process command execution APIs that can lead to command injection when input is untrusted."
 ignore_if_literal:
   - "cmd"

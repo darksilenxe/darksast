@@ -1,6 +1,7 @@
 # rules/insecure_object_assign.yaml
 id: "POTENTIAL-POLLUTION-OBJECT-ASSIGN"
 severity: "LOW"
+framework: "JavaScript"
 description: "Flags the use of Object.assign(). While normally safe for shallow copies, if used recursively or combined with deep-merge libraries on user input, it warrants manual review."
 query: |
   (call_expression
