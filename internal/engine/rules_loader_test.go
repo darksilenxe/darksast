@@ -49,6 +49,7 @@ func TestLoadRulesMetadataFields(t *testing.T) {
       confidence: HIGH
       requires_dependency:
         - react
+      # query is intentionally in metadata to validate OpenGrep/Semgrep bundle mapping.
       query: |
         (assignment_expression
           left: (member_expression

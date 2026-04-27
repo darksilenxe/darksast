@@ -191,7 +191,7 @@ func LoadRules(rulesDir string) ([]Rule, error) {
 			for _, semgrep := range doc.Rules {
 				converted, ok := semgrepToRule(semgrep)
 				if !ok {
-					fmt.Printf("[-] Warning: Skipping invalid Semgrep/OpenGrep rule in %s (id=%s, missing ID or compatible Query)\n", path, semgrep.ID)
+					fmt.Printf("[-] Warning: Skipping invalid Semgrep/OpenGrep rule in %s (%s, missing ID or compatible Query)\n", path, semgrepRuleLabel(semgrep.ID))
 					continue
 				}
 				rules = append(rules, converted)
@@ -215,7 +215,7 @@ func semgrepToRule(in semgrepRule) (Rule, bool) {
 		description = strings.TrimSpace(in.Metadata.Description)
 	}
 	if description == "" {
-		description = "Imported from Semgrep/OpenGrep rule"
+		description = fmt.Sprintf("Imported from Semgrep/OpenGrep rule %s", id)
 	}
 
 	out := Rule{
@@ -244,11 +244,22 @@ func resolveSemgrepQuery(in semgrepRule) string {
 	}
 
 	for _, candidate := range candidates {
-		if strings.HasPrefix(candidate, "(") {
+		if candidate == "" {
+			continue
+		}
+		if _, err := sitter.NewQuery([]byte(candidate), javascript.GetLanguage()); err == nil {
 			return candidate
 		}
 	}
 	return ""
+}
+
+func semgrepRuleLabel(id string) string {
+	id = strings.TrimSpace(id)
+	if id == "" {
+		return "id=<empty>"
+	}
+	return "id=" + id
 }
 
 func normalizeSemgrepSeverity(in string) string {
