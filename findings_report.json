@@ -1,18 +1,8 @@
 {
-  "timestamp": "2026-04-27T20:49:59Z",
-  "target_directory": "./tests",
+  "timestamp": "2026-04-27T20:50:04Z",
+  "target_directory": ".",
   "total_findings": 68,
   "findings": [
-    {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 56,
-      "column": 21,
-      "rule_id": "ANGULAR-BYPASS-SECURITY-RESOURCE-URL",
-      "severity": "HIGH",
-      "framework": "Angular",
-      "snippet": "const resourceUrl = sanitizer.bypassSecurityTrustResourceUrl(userInput);",
-      "confidence": "MEDIUM"
-    },
     {
       "file": "tests/framework_rule_coverage.js",
       "line": 17,
@@ -21,6 +11,16 @@
       "severity": "HIGH",
       "framework": "Angular",
       "snippet": "const trusted = sanitizer.bypassSecurityTrustHtml(html);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 56,
+      "column": 21,
+      "rule_id": "ANGULAR-BYPASS-SECURITY-RESOURCE-URL",
+      "severity": "HIGH",
+      "framework": "Angular",
+      "snippet": "const resourceUrl = sanitizer.bypassSecurityTrustResourceUrl(userInput);",
       "confidence": "MEDIUM"
     },
     {
@@ -64,16 +64,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/sample-vue/main.js",
-      "line": 4,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/rule_coverage.js",
       "line": 24,
       "column": 1,
@@ -84,11 +74,51 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/sample-vue/main.js",
+      "file": "tests/rule_coverage.js",
+      "line": 27,
+      "column": 1,
+      "rule_id": "DOM-XSS-INNERHTML-ASSIGN",
+      "severity": "HIGH",
+      "framework": "JavaScript",
+      "snippet": "document.body.innerHTML = userInput;",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/framework_rule_coverage.js",
+      "line": 4,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/framework_rule_coverage.js",
       "line": 4,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
       "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 6,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-HTTPONLY-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 6,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
       "framework": "Express",
       "snippet": "session({",
       "confidence": "MEDIUM"
@@ -105,21 +135,11 @@
     },
     {
       "file": "tests/rule_coverage.js",
-      "line": 27,
-      "column": 1,
-      "rule_id": "DOM-XSS-INNERHTML-ASSIGN",
-      "severity": "HIGH",
-      "framework": "JavaScript",
-      "snippet": "document.body.innerHTML = userInput;",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/rule_coverage.js",
       "line": 6,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-HTTPONLY-FALSE",
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
       "severity": "MEDIUM",
-      "framework": "Node.js",
+      "framework": "Express",
       "snippet": "session({",
       "confidence": "MEDIUM"
     },
@@ -134,8 +154,8 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/rule_coverage.js",
-      "line": 6,
+      "file": "tests/sample-vue/main.js",
+      "line": 4,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
       "severity": "LOW",
@@ -144,8 +164,8 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/rule_coverage.js",
-      "line": 6,
+      "file": "tests/sample-vue/main.js",
+      "line": 4,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
       "severity": "MEDIUM",
@@ -160,6 +180,16 @@
       "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
       "severity": "MEDIUM",
       "framework": "Node.js",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 13,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
       "snippet": "session({",
       "confidence": "MEDIUM"
     },
@@ -174,56 +204,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 4,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 4,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-site/app.js",
-      "line": 13,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/sample-site/app.js",
       "line": 13,
       "column": 1,
@@ -240,6 +220,26 @@
       "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
       "severity": "MEDIUM",
       "framework": "Node.js",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 91,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 91,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express",
       "snippet": "session({",
       "confidence": "MEDIUM"
     },
@@ -284,23 +284,13 @@
       "confidence": "HIGH"
     },
     {
-      "file": "tests/rule_coverage.js",
-      "line": 30,
-      "column": 12,
-      "rule_id": "JS-STRING-TIMER-EXEC",
+      "file": "tests/framework_rule_coverage.js",
+      "line": 27,
+      "column": 5,
+      "rule_id": "NEXTJS-DANGEROUSLY-ALLOW-SVG",
       "severity": "MEDIUM",
-      "framework": "JavaScript",
-      "snippet": "setTimeout(\"console.log('timer string')\", 1000);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/test.js",
-      "line": 16,
-      "column": 19,
-      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
-      "severity": "LOW",
-      "framework": "React",
-      "snippet": "const profile = { ...payload, role: 'reader' };",
+      "framework": "Next.js",
+      "snippet": "dangerouslyAllowSVG: true",
       "confidence": "MEDIUM"
     },
     {
@@ -364,16 +354,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/test.js",
-      "line": 9,
-      "column": 18,
-      "rule_id": "XSS-01",
-      "severity": "HIGH",
-      "framework": "React",
-      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: rawHTMLContent }} /\u003e",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 98,
       "column": 1,
@@ -414,16 +394,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 27,
-      "column": 5,
-      "rule_id": "NEXTJS-DANGEROUSLY-ALLOW-SVG",
-      "severity": "MEDIUM",
-      "framework": "Next.js",
-      "snippet": "dangerouslyAllowSVG: true",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 37,
       "column": 1,
@@ -451,16 +421,6 @@
       "severity": "MEDIUM",
       "framework": "JavaScript",
       "snippet": "window.open(userInput, '_blank');",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-vue/main.js",
-      "line": 11,
-      "column": 17,
-      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
-      "severity": "LOW",
-      "framework": "React",
-      "snippet": "const state = { ...payload, active: true };",
       "confidence": "MEDIUM"
     },
     {
@@ -514,6 +474,16 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/test.js",
+      "line": 16,
+      "column": 19,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const profile = { ...payload, role: 'reader' };",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 47,
       "column": 1,
@@ -534,6 +504,16 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/sample-site/app.js",
+      "line": 21,
+      "column": 18,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const merged = { ...payload, active: true };",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 101,
       "column": 1,
@@ -541,6 +521,16 @@
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "db.query(`SELECT * FROM users WHERE id = '${userInput}'`);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/test.js",
+      "line": 9,
+      "column": 18,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React",
+      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: rawHTMLContent }} /\u003e",
       "confidence": "MEDIUM"
     },
     {
@@ -554,6 +544,16 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/framework_rule_coverage.js",
+      "line": 21,
+      "column": 26,
+      "rule_id": "VUE-RENDER-INNERHTML",
+      "severity": "HIGH",
+      "framework": "Vue",
+      "snippet": "const vnode = h('div', { innerHTML: html });",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 30,
       "column": 1,
@@ -561,6 +561,16 @@
       "severity": "HIGH",
       "framework": "JavaScript",
       "snippet": "fetch(userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 7,
+      "column": 12,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React",
+      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: html }} /\u003e",
       "confidence": "MEDIUM"
     },
     {
@@ -584,13 +594,23 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/sample-site/app.js",
-      "line": 21,
-      "column": 18,
+      "file": "tests/sample-vue/main.js",
+      "line": 11,
+      "column": 17,
       "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
       "severity": "LOW",
       "framework": "React",
-      "snippet": "const merged = { ...payload, active: true };",
+      "snippet": "const state = { ...payload, active: true };",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 30,
+      "column": 12,
+      "rule_id": "JS-STRING-TIMER-EXEC",
+      "severity": "MEDIUM",
+      "framework": "JavaScript",
+      "snippet": "setTimeout(\"console.log('timer string')\", 1000);",
       "confidence": "MEDIUM"
     },
     {
@@ -614,16 +634,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 21,
-      "column": 26,
-      "rule_id": "VUE-RENDER-INNERHTML",
-      "severity": "HIGH",
-      "framework": "Vue",
-      "snippet": "const vnode = h('div', { innerHTML: html });",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 102,
       "column": 1,
@@ -641,16 +651,6 @@
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "serialize.deserialize(userInput);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-site/app.js",
-      "line": 7,
-      "column": 12,
-      "rule_id": "XSS-01",
-      "severity": "HIGH",
-      "framework": "React",
-      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: html }} /\u003e",
       "confidence": "MEDIUM"
     },
     {

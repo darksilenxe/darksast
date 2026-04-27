@@ -107,3 +107,7 @@ console.log(nextConfig, sessionConfig, insecureTlsOptions, expressSessionConfig)
 export function DangerousLink() {
   return <a href={userInput}>Open</a>;
 }
+
+export function JavaScriptSchemeLink() {
+  return <a href="javascript:alert('xss')">Click me</a>;
+}
