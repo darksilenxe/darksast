@@ -4,19 +4,19 @@ framework: "React"
 description: "Detects dangerous javascript: or HTML data URL usage in URL-bearing JSX props."
 query: |
   (jsx_attribute
-    (property_identifier) @prop (#match? @prop "^(href|src|action|formAction)$")
-    value: (string) @url
+    (property_identifier)
+    (string) @url
     (#match? @url "(?i)^[\"']\\s*(javascript:|data:text/html)")
   ) @url_prop
 
   (jsx_attribute
-    (property_identifier) @prop (#match? @prop "^(href|src|action|formAction)$")
-    value: (jsx_expression (string) @url)
+    (property_identifier)
+    (jsx_expression (string) @url)
     (#match? @url "(?i)^[\"']\\s*(javascript:|data:text/html)")
   ) @url_prop
 
   (jsx_attribute
-    (property_identifier) @prop (#match? @prop "^(href|src|action|formAction)$")
-    value: (jsx_expression (template_string) @url)
+    (property_identifier)
+    (jsx_expression (template_string) @url)
     (#match? @url "(?i)(javascript:|data:text/html)")
   ) @url_prop

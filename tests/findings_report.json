@@ -1,18 +1,8 @@
 {
-  "timestamp": "2026-04-27T20:48:01Z",
+  "timestamp": "2026-04-27T20:49:59Z",
   "target_directory": "./tests",
   "total_findings": 68,
   "findings": [
-    {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 17,
-      "column": 17,
-      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-HTML",
-      "severity": "HIGH",
-      "framework": "Angular",
-      "snippet": "const trusted = sanitizer.bypassSecurityTrustHtml(html);",
-      "confidence": "MEDIUM"
-    },
     {
       "file": "tests/advanced_rule_coverage.js",
       "line": 56,
@@ -24,13 +14,13 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 55,
+      "file": "tests/framework_rule_coverage.js",
+      "line": 17,
       "column": 17,
-      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-URL",
+      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-HTML",
       "severity": "HIGH",
       "framework": "Angular",
-      "snippet": "const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);",
+      "snippet": "const trusted = sanitizer.bypassSecurityTrustHtml(html);",
       "confidence": "MEDIUM"
     },
     {
@@ -45,12 +35,12 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 100,
-      "column": 1,
-      "rule_id": "COOKIE-SECURE-FALSE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "res.cookie('sid', token, { secure: false, httpOnly: true });",
+      "line": 55,
+      "column": 17,
+      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-URL",
+      "severity": "HIGH",
+      "framework": "Angular",
+      "snippet": "const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);",
       "confidence": "MEDIUM"
     },
     {
@@ -74,13 +64,13 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 52,
+      "file": "tests/sample-vue/main.js",
+      "line": 4,
       "column": 1,
-      "rule_id": "CORS-WILDCARD-CREDENTIALS",
-      "severity": "HIGH",
-      "framework": "Node.js",
-      "snippet": "cors({ origin: '*', credentials: true });",
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
+      "snippet": "session({",
       "confidence": "MEDIUM"
     },
     {
@@ -91,6 +81,26 @@
       "severity": "HIGH",
       "framework": "JavaScript",
       "snippet": "document.write(userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-vue/main.js",
+      "line": 4,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 100,
+      "column": 1,
+      "rule_id": "COOKIE-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "res.cookie('sid', token, { secure: false, httpOnly: true });",
       "confidence": "MEDIUM"
     },
     {
@@ -114,38 +124,18 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 4,
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 52,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
+      "rule_id": "CORS-WILDCARD-CREDENTIALS",
+      "severity": "HIGH",
+      "framework": "Node.js",
+      "snippet": "cors({ origin: '*', credentials: true });",
       "confidence": "MEDIUM"
     },
     {
       "file": "tests/rule_coverage.js",
       "line": 6,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 4,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-vue/main.js",
-      "line": 4,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
       "severity": "LOW",
@@ -164,12 +154,12 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/sample-site/app.js",
-      "line": 13,
+      "file": "tests/rule_coverage.js",
+      "line": 6,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
+      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js",
       "snippet": "session({",
       "confidence": "MEDIUM"
     },
@@ -184,7 +174,17 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/sample-vue/main.js",
+      "file": "tests/framework_rule_coverage.js",
+      "line": 4,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/framework_rule_coverage.js",
       "line": 4,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
@@ -194,12 +194,12 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/rule_coverage.js",
-      "line": 6,
+      "file": "tests/sample-site/app.js",
+      "line": 13,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
-      "severity": "MEDIUM",
-      "framework": "Node.js",
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
       "snippet": "session({",
       "confidence": "MEDIUM"
     },
@@ -214,6 +214,16 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 91,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/sample-site/app.js",
       "line": 13,
       "column": 1,
@@ -224,18 +234,8 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
+      "file": "tests/sample-site/app.js",
+      "line": 13,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
       "severity": "MEDIUM",
@@ -244,8 +244,8 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/sample-site/app.js",
-      "line": 13,
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 91,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
       "severity": "MEDIUM",
@@ -282,6 +282,26 @@
       "framework": "Node.js",
       "snippet": "crypto.createHash('md5');",
       "confidence": "HIGH"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 30,
+      "column": 12,
+      "rule_id": "JS-STRING-TIMER-EXEC",
+      "severity": "MEDIUM",
+      "framework": "JavaScript",
+      "snippet": "setTimeout(\"console.log('timer string')\", 1000);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/test.js",
+      "line": 16,
+      "column": 19,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const profile = { ...payload, role: 'reader' };",
+      "confidence": "MEDIUM"
     },
     {
       "file": "tests/advanced_rule_coverage.js",
@@ -344,6 +364,16 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/test.js",
+      "line": 9,
+      "column": 18,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React",
+      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: rawHTMLContent }} /\u003e",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 98,
       "column": 1,
@@ -384,16 +414,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 37,
-      "column": 1,
-      "rule_id": "OPEN-REDIRECT-LOCATION-ASSIGN",
-      "severity": "MEDIUM",
-      "framework": "JavaScript",
-      "snippet": "window.location.href = userInput;",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/framework_rule_coverage.js",
       "line": 27,
       "column": 5,
@@ -401,6 +421,16 @@
       "severity": "MEDIUM",
       "framework": "Next.js",
       "snippet": "dangerouslyAllowSVG: true",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 37,
+      "column": 1,
+      "rule_id": "OPEN-REDIRECT-LOCATION-ASSIGN",
+      "severity": "MEDIUM",
+      "framework": "JavaScript",
+      "snippet": "window.location.href = userInput;",
       "confidence": "MEDIUM"
     },
     {
@@ -421,6 +451,16 @@
       "severity": "MEDIUM",
       "framework": "JavaScript",
       "snippet": "window.open(userInput, '_blank');",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-vue/main.js",
+      "line": 11,
+      "column": 17,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const state = { ...payload, active: true };",
       "confidence": "MEDIUM"
     },
     {
@@ -445,12 +485,12 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 108,
+      "line": 112,
       "column": 13,
       "rule_id": "REACT-UNSAFE-URL-PROP",
       "severity": "MEDIUM",
       "framework": "React",
-      "snippet": "return \u003ca href={userInput}\u003eOpen\u003c/a\u003e;",
+      "snippet": "return \u003ca href=\"javascript:alert('xss')\"\u003eClick me\u003c/a\u003e;",
       "confidence": "MEDIUM"
     },
     {
@@ -461,16 +501,6 @@
       "severity": "CRITICAL",
       "framework": "Node.js",
       "snippet": "shelljs.exec(userInput);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/rule_coverage.js",
-      "line": 30,
-      "column": 12,
-      "rule_id": "JS-STRING-TIMER-EXEC",
-      "severity": "MEDIUM",
-      "framework": "JavaScript",
-      "snippet": "setTimeout(\"console.log('timer string')\", 1000);",
       "confidence": "MEDIUM"
     },
     {
@@ -504,16 +534,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/test.js",
-      "line": 16,
-      "column": 19,
-      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
-      "severity": "LOW",
-      "framework": "React",
-      "snippet": "const profile = { ...payload, role: 'reader' };",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 101,
       "column": 1,
@@ -521,16 +541,6 @@
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "db.query(`SELECT * FROM users WHERE id = '${userInput}'`);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/test.js",
-      "line": 9,
-      "column": 18,
-      "rule_id": "XSS-01",
-      "severity": "HIGH",
-      "framework": "React",
-      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: rawHTMLContent }} /\u003e",
       "confidence": "MEDIUM"
     },
     {
@@ -574,6 +584,16 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/sample-site/app.js",
+      "line": 21,
+      "column": 18,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const merged = { ...payload, active: true };",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 49,
       "column": 1,
@@ -591,6 +611,16 @@
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "rejectUnauthorized: false",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/framework_rule_coverage.js",
+      "line": 21,
+      "column": 26,
+      "rule_id": "VUE-RENDER-INNERHTML",
+      "severity": "HIGH",
+      "framework": "Vue",
+      "snippet": "const vnode = h('div', { innerHTML: html });",
       "confidence": "MEDIUM"
     },
     {
@@ -614,6 +644,16 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/sample-site/app.js",
+      "line": 7,
+      "column": 12,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React",
+      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: html }} /\u003e",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 51,
       "column": 1,
@@ -624,26 +664,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/sample-site/app.js",
-      "line": 21,
-      "column": 18,
-      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
-      "severity": "LOW",
-      "framework": "React",
-      "snippet": "const merged = { ...payload, active: true };",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-vue/main.js",
-      "line": 11,
-      "column": 17,
-      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
-      "severity": "LOW",
-      "framework": "React",
-      "snippet": "const state = { ...payload, active: true };",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 50,
       "column": 1,
@@ -651,26 +671,6 @@
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "yaml.load(userInput);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 21,
-      "column": 26,
-      "rule_id": "VUE-RENDER-INNERHTML",
-      "severity": "HIGH",
-      "framework": "Vue",
-      "snippet": "const vnode = h('div', { innerHTML: html });",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-site/app.js",
-      "line": 7,
-      "column": 12,
-      "rule_id": "XSS-01",
-      "severity": "HIGH",
-      "framework": "React",
-      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: html }} /\u003e",
       "confidence": "MEDIUM"
     },
     {
