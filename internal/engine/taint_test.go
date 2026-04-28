@@ -60,4 +60,3 @@ func TestCollectReferencedIdentifiersFromComplexExpression(t *testing.T) {
 	ids := collectReferencedIdentifiers(args.NamedChild(0), source)
 	assert.ElementsMatch(t, []string{"foo", "bar", "qux", "zap"}, ids)
 }
-
