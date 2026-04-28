@@ -301,8 +301,9 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *T
 	if node.Type() == "arguments" {
 		if cfg != nil && cfg.SinkArgIndex != nil {
 			idx := *cfg.SinkArgIndex
-			if idx < 0 || idx >= int(node.NamedChildCount()) {
-				log.Printf("WARNING: sink_arg_index %d out of range (args=%d)", idx, node.NamedChildCount())
+			argCount := int(node.NamedChildCount())
+			if idx < 0 || idx >= argCount {
+				log.Printf("WARNING: sink_arg_index %d out of range (argument count=%d, valid range=0..%d)", idx, argCount, argCount-1)
 				return taintUnknown
 			}
 			return m.resolveCapture(node.NamedChild(idx), source, cfg)
