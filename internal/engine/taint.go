@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"log"
+
 	sitter "github.com/smacker/go-tree-sitter"
 )
 
@@ -46,12 +48,7 @@ var commonSanitizerIdentifiers = map[string]struct{}{
 // sanitizerPassthroughMethods preserve sanitized status when called on
 // an already-sanitized receiver.
 var sanitizerPassthroughMethods = map[string]struct{}{
-	"trim":        {},
-	"toString":    {},
-	"slice":       {},
-	"substring":   {},
-	"toLowerCase": {},
-	"toUpperCase": {},
+	"trim": {},
 }
 
 // commonTaintSourceObjects is the set of root identifiers whose member
@@ -305,6 +302,7 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *T
 		if cfg != nil && cfg.SinkArgIndex != nil {
 			idx := *cfg.SinkArgIndex
 			if idx < 0 || idx >= int(node.NamedChildCount()) {
+				log.Printf("[-] Warning: sink_arg_index %d out of range (args=%d)", idx, node.NamedChildCount())
 				return taintUnknown
 			}
 			return m.resolveCapture(node.NamedChild(idx), source, cfg)
@@ -343,11 +341,6 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *T
 		}
 	}
 	if hasKnownSanitized {
-		for _, name := range identifiers {
-			if m.tainted[name] {
-				return taintTainted
-			}
-		}
 		if !knownAllConstants {
 			return taintSanitized
 		}

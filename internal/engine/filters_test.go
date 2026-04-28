@@ -289,7 +289,7 @@ func TestTaintArgumentsCaptureSupportsSinkArgIndex(t *testing.T) {
 	assert.Len(t, findings, 0, "sink_arg_index should scope taint evaluation to configured arg")
 }
 
-func TestTaintAliasChainAndDestructuringWithNestedMembers(t *testing.T) {
+func TestTaintAliasChainStaysProvablyTainted(t *testing.T) {
 	rule := testRule("REDIR-ALIAS", "MEDIUM",
 		`(assignment_expression
             left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
@@ -298,9 +298,37 @@ func TestTaintAliasChainAndDestructuringWithNestedMembers(t *testing.T) {
 	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true, RequireProvenTainted: true}
 	require.NoError(t, rule.compile())
 
-	src := `const src = req.body.next; const alias = src; const { deep } = req.body.user; a.href = alias; b.href = deep; c.href = req.body.user.next;` + "\n"
+	src := `const src = req.body.next; const alias = src; a.href = alias;` + "\n"
 	findings := scanContent(t, src, []Rule{rule}, nil)
-	assert.Len(t, findings, 3, "aliases, destructured bindings, and nested member chains should stay provably tainted")
+	assert.Len(t, findings, 1, "alias chains should stay provably tainted")
+}
+
+func TestTaintDestructuredBindingStaysProvablyTainted(t *testing.T) {
+	rule := testRule("REDIR-DESTRUCTURED", "MEDIUM",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true, RequireProvenTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const { deep } = req.body.user; b.href = deep;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 1, "destructured tainted bindings should stay provably tainted")
+}
+
+func TestTaintNestedMemberChainStaysProvablyTainted(t *testing.T) {
+	rule := testRule("REDIR-NESTED", "MEDIUM",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true, RequireProvenTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `c.href = req.body.user.next;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 1, "nested taint source member chains should be recognized as tainted")
 }
 
 // --- Layer 5: dependency gating ------------------------------------
