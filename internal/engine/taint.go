@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"strings"
+	"log"
 
 	sitter "github.com/smacker/go-tree-sitter"
 )
@@ -16,26 +16,39 @@ const (
 	taintSanitized                    // wrapped in a known sanitizer call
 )
 
-// commonSanitizers are member-call expressions whose result is treated
-// as cleansed regardless of what their argument is. The check is shape
-// based: we look for a call whose function ends in one of these names.
-var commonSanitizers = map[string]struct{}{
-	"sanitize":          {}, // DOMPurify.sanitize, sanitize-html
-	"escape":            {}, // validator.escape, lodash.escape
-	"escapeHTML":        {},
-	"escapeHtml":        {},
-	"encodeURIComponent": {},
-	"encodeURI":         {},
-	"normalize":         {}, // path.normalize
+// vettedSanitizerMemberCalls enumerates known-safe fully-qualified
+// sanitizer calls as root object -> method name.
+var vettedSanitizerMemberCalls = map[string]map[string]struct{}{
+	"DOMPurify": {
+		"sanitize": {},
+	},
+	"validator": {
+		"escape": {},
+	},
+	"xssFilters": {
+		"inHTMLData":            {},
+		"inDoubleQuotedAttr":    {},
+		"inSingleQuotedAttr":    {},
+		"inUnQuotedAttr":        {},
+		"uriPathInHTMLData":     {},
+		"uriInDoubleQuotedAttr": {},
+		"uriInSingleQuotedAttr": {},
+	},
+	"he": {
+		"encode": {},
+	},
 }
 
 // commonSanitizerIdentifiers covers bare-identifier sanitizer calls.
 var commonSanitizerIdentifiers = map[string]struct{}{
 	"encodeURIComponent": {},
 	"encodeURI":          {},
-	"Number":             {},
-	"parseInt":           {},
-	"parseFloat":         {},
+}
+
+// sanitizerPassthroughMethods preserve sanitized status when called on
+// an already-sanitized receiver.
+var sanitizerPassthroughMethods = map[string]struct{}{
+	"trim": {},
 }
 
 // commonTaintSourceObjects is the set of root identifiers whose member
@@ -91,15 +104,23 @@ func walkForTaint(node *sitter.Node, source []byte, model *fileTaintModel) {
 	if node.Type() == "variable_declarator" {
 		nameNode := node.ChildByFieldName("name")
 		valueNode := node.ChildByFieldName("value")
-		if nameNode != nil && valueNode != nil && nameNode.Type() == "identifier" {
-			name := nameNode.Content(source)
-			switch classifyExpression(valueNode, source) {
-			case taintConstant:
-				model.constants[name] = true
-			case taintSanitized:
-				model.sanitized[name] = true
-			case taintTainted:
-				model.tainted[name] = true
+		if nameNode != nil && valueNode != nil {
+			flavor := model.resolveCapture(valueNode, source, nil)
+			names := collectBoundIdentifiers(nameNode, source)
+			for _, name := range names {
+				model.setIdentifierFlavor(name, flavor)
+			}
+		}
+	}
+
+	if node.Type() == "assignment_expression" {
+		leftNode := node.ChildByFieldName("left")
+		rightNode := node.ChildByFieldName("right")
+		if leftNode != nil && rightNode != nil {
+			flavor := model.resolveCapture(rightNode, source, nil)
+			names := collectBoundIdentifiers(leftNode, source)
+			for _, name := range names {
+				model.setIdentifierFlavor(name, flavor)
 			}
 		}
 	}
@@ -153,10 +174,8 @@ func classifyExpression(node *sitter.Node, source []byte) taintFlavor {
 	case "member_expression":
 		// Treat known untrusted source roots as tainted.
 		obj := node.ChildByFieldName("object")
-		if obj != nil && obj.Type() == "identifier" {
-			if _, ok := commonTaintSourceObjects[obj.Content(source)]; ok {
-				return taintTainted
-			}
+		if obj != nil && rootsTainted(obj, source) {
+			return taintTainted
 		}
 		return taintUnknown
 	case "identifier":
@@ -181,20 +200,39 @@ func classifyCall(node *sitter.Node, source []byte) taintFlavor {
 		}
 	case "member_expression":
 		prop := fn.ChildByFieldName("property")
-		if prop != nil {
-			name := prop.Content(source)
-			if _, ok := commonSanitizers[name]; ok {
+		obj := fn.ChildByFieldName("object")
+		if prop != nil && obj != nil {
+			method := prop.Content(source)
+			root := rootIdentifier(obj, source)
+			if isVettedSanitizerMemberCall(root, method) {
 				return taintSanitized
 			}
-		}
-		// e.g. req.query.id() — treat root-tainted member chains as
-		// tainted even when wrapped in an unknown call.
-		obj := fn.ChildByFieldName("object")
-		if obj != nil && rootsTainted(obj, source) {
-			return taintTainted
+			if _, ok := sanitizerPassthroughMethods[method]; ok {
+				if classifyExpression(obj, source) == taintSanitized {
+					return taintSanitized
+				}
+			}
+
+			// e.g. req.query.id() — treat root-tainted member chains as
+			// tainted even when wrapped in an unknown call.
+			if rootsTainted(obj, source) {
+				return taintTainted
+			}
 		}
 	}
 	return taintUnknown
+}
+
+func isVettedSanitizerMemberCall(root, method string) bool {
+	if root == "" || method == "" {
+		return false
+	}
+	methods, ok := vettedSanitizerMemberCalls[root]
+	if !ok {
+		return false
+	}
+	_, ok = methods[method]
+	return ok
 }
 
 // rootsTainted walks down the receiver chain of a member expression
@@ -235,7 +273,7 @@ func mergeFlavor(a, b taintFlavor) taintFlavor {
 
 // resolveCapture classifies a captured node using both its expression
 // shape and the per-file constant/sanitizer/source model.
-func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte) taintFlavor {
+func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *TaintConfig) taintFlavor {
 	if node == nil {
 		return taintUnknown
 	}
@@ -254,10 +292,30 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte) taintF
 		return taintUnknown
 	}
 
-	// For arguments lists and similar wrappers, classify the first
-	// non-trivial named child.
-	if node.Type() == "arguments" && node.NamedChildCount() > 0 {
-		return m.resolveCapture(node.NamedChild(0), source)
+	if node.Type() == "parenthesized_expression" && node.NamedChildCount() > 0 {
+		return m.resolveCapture(node.NamedChild(0), source, cfg)
+	}
+
+	// For arguments lists, either resolve a configured positional
+	// argument or merge all arguments.
+	if node.Type() == "arguments" {
+		if cfg != nil && cfg.SinkArgIndex != nil {
+			idx := *cfg.SinkArgIndex
+			argCount := int(node.NamedChildCount())
+			if idx < 0 || idx >= argCount {
+				log.Printf("WARNING: rule configuration error: sink_arg_index %d out of range (argument count=%d, valid range=0..%d)", idx, argCount, argCount-1)
+				return taintUnknown
+			}
+			return m.resolveCapture(node.NamedChild(idx), source, cfg)
+		}
+		if node.NamedChildCount() == 0 {
+			return taintUnknown
+		}
+		flavor := taintConstant
+		for i := 0; i < int(node.NamedChildCount()); i++ {
+			flavor = mergeFlavor(flavor, m.resolveCapture(node.NamedChild(i), source, cfg))
+		}
+		return flavor
 	}
 
 	flavor := classifyExpression(node, source)
@@ -265,61 +323,125 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte) taintF
 		return flavor
 	}
 
-	// Fall back to substring identifier scanning for nested expressions
-	// like `prefix + userId`.
-	text := node.Content(source)
-	for name := range m.tainted {
-		if containsIdentifier(text, name) {
+	identifiers := collectReferencedIdentifiers(node, source)
+	if len(identifiers) == 0 {
+		return taintUnknown
+	}
+
+	allKnownConstants := true
+	hasKnownSanitized := false
+	for _, name := range identifiers {
+		if m.tainted[name] {
 			return taintTainted
 		}
-	}
-	for name := range m.sanitized {
-		if containsIdentifier(text, name) {
-			return taintSanitized
+		if m.sanitized[name] {
+			hasKnownSanitized = true
 		}
+		if !m.constants[name] {
+			allKnownConstants = false
+		}
+	}
+	if hasKnownSanitized && !allKnownConstants {
+		return taintSanitized
+	}
+	if allKnownConstants {
+		return taintConstant
 	}
 	return taintUnknown
 }
 
-// containsIdentifier returns true when name appears as a standalone
-// identifier (not a substring of a larger identifier) in text.
-func containsIdentifier(text, name string) bool {
+func (m *fileTaintModel) setIdentifierFlavor(name string, flavor taintFlavor) {
 	if name == "" {
-		return false
+		return
 	}
-	idx := 0
-	for {
-		hit := strings.Index(text[idx:], name)
-		if hit < 0 {
-			return false
-		}
-		start := idx + hit
-		end := start + len(name)
-		before := byte(' ')
-		after := byte(' ')
-		if start > 0 {
-			before = text[start-1]
-		}
-		if end < len(text) {
-			after = text[end]
-		}
-		if !isIdentChar(before) && !isIdentChar(after) {
-			return true
-		}
-		idx = end
+	delete(m.constants, name)
+	delete(m.sanitized, name)
+	delete(m.tainted, name)
+
+	switch flavor {
+	case taintConstant:
+		m.constants[name] = true
+	case taintSanitized:
+		m.sanitized[name] = true
+	case taintTainted:
+		m.tainted[name] = true
 	}
 }
 
-func isIdentChar(b byte) bool {
-	switch {
-	case b >= 'a' && b <= 'z':
-		return true
-	case b >= 'A' && b <= 'Z':
-		return true
-	case b >= '0' && b <= '9':
-		return true
-	case b == '_' || b == '$':
-		return true
+func collectBoundIdentifiers(node *sitter.Node, source []byte) []string {
+	if node == nil {
+		return nil
 	}
-	return false
+	out := make(map[string]struct{})
+	var walk func(*sitter.Node)
+	walk = func(n *sitter.Node) {
+		if n == nil {
+			return
+		}
+		switch n.Type() {
+		case "identifier", "shorthand_property_identifier_pattern":
+			name := n.Content(source)
+			if name != "" {
+				out[name] = struct{}{}
+			}
+			return
+		}
+		for i := 0; i < int(n.NamedChildCount()); i++ {
+			walk(n.NamedChild(i))
+		}
+	}
+	walk(node)
+
+	names := make([]string, 0, len(out))
+	for name := range out {
+		names = append(names, name)
+	}
+	return names
+}
+
+func collectReferencedIdentifiers(node *sitter.Node, source []byte) []string {
+	if node == nil {
+		return nil
+	}
+	out := make(map[string]struct{})
+	var walk func(*sitter.Node)
+	walk = func(n *sitter.Node) {
+		if n == nil {
+			return
+		}
+		switch n.Type() {
+		case "identifier":
+			name := n.Content(source)
+			if name != "" {
+				out[name] = struct{}{}
+			}
+			return
+		}
+		for i := 0; i < int(n.NamedChildCount()); i++ {
+			walk(n.NamedChild(i))
+		}
+	}
+	walk(node)
+
+	names := make([]string, 0, len(out))
+	for name := range out {
+		names = append(names, name)
+	}
+	return names
+}
+
+func rootIdentifier(node *sitter.Node, source []byte) string {
+	for node != nil {
+		switch node.Type() {
+		case "identifier":
+			return node.Content(source)
+		case "member_expression", "subscript_expression":
+			node = node.ChildByFieldName("object")
+		case "call_expression":
+			node = node.ChildByFieldName("function")
+		default:
+			return ""
+		}
+	}
+	return ""
 }
