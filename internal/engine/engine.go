@@ -236,8 +236,15 @@ func (e *Engine) passesFilters(rule Rule, captures map[string]*sitter.Node, sour
 	// capture resolves to a constant or sanitized expression.
 	if rule.Taint != nil && rule.Taint.RequireTainted && taint != nil {
 		node, ok := captures[rule.Taint.SinkCapture]
-		if ok && node != nil {
-			flavor := taint.resolveCapture(node, source)
+		if !ok || node == nil {
+			if rule.Taint.RequireProvenTainted {
+				return false
+			}
+		} else {
+			flavor := taint.resolveCapture(node, source, rule.Taint)
+			if rule.Taint.RequireProvenTainted {
+				return flavor == taintTainted
+			}
 			if flavor == taintConstant || flavor == taintSanitized {
 				return false
 			}

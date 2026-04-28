@@ -213,6 +213,96 @@ func TestTaintSanitizerCallSuppresses(t *testing.T) {
 	assert.Len(t, findings, 0, "sanitizer-wrapped value should not fire taint-required rule")
 }
 
+func TestTaintRequireProvenTaintedDropsUnknown(t *testing.T) {
+	rule := testRule("REDIR-PROVEN", "MEDIUM",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true, RequireProvenTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const maybe = userChosen; a.href = maybe; b.href = req.body.next;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	require.Len(t, findings, 1, "unknown sink should be dropped in proven-tainted mode")
+	assert.Contains(t, findings[0].Snippet, "req.body.next")
+}
+
+func TestTaintReassignmentInvalidatesOldState(t *testing.T) {
+	rule := testRule("REDIR-REASSIGN", "MEDIUM",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `let next = req.body.next; next = "/safe"; a.href = next;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 0, "reassignment to constant should clear tainted state")
+}
+
+func TestTaintSanitizerThenTransformSuppresses(t *testing.T) {
+	rule := testRule("INNER-TRANSFORM", "HIGH",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "innerHTML"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const clean = DOMPurify.sanitize(req.body.html).trim(); el.innerHTML = clean;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 0, "string transforms on sanitized data should remain sanitized")
+}
+
+func TestTaintArgumentsCaptureScansAllArgsByDefault(t *testing.T) {
+	rule := testRule("WINDOW-OPEN", "MEDIUM",
+		`(call_expression
+            function: (member_expression
+                object: (identifier) @o (#eq? @o "window")
+                property: (property_identifier) @m (#eq? @m "open"))
+            arguments: (arguments) @args
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "args", RequireTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `window.open("about:blank", req.body.next);` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 1, "tainted non-first argument should be considered")
+}
+
+func TestTaintArgumentsCaptureSupportsSinkArgIndex(t *testing.T) {
+	rule := testRule("WINDOW-OPEN-INDEXED", "MEDIUM",
+		`(call_expression
+            function: (member_expression
+                object: (identifier) @o (#eq? @o "window")
+                property: (property_identifier) @m (#eq? @m "open"))
+            arguments: (arguments) @args
+        ) @finding`)
+	first := 0
+	rule.Taint = &TaintConfig{SinkCapture: "args", SinkArgIndex: &first, RequireTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `window.open("about:blank", req.body.next);` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 0, "sink_arg_index should scope taint evaluation to configured arg")
+}
+
+func TestTaintAliasChainAndDestructuringWithNestedMembers(t *testing.T) {
+	rule := testRule("REDIR-ALIAS", "MEDIUM",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true, RequireProvenTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const src = req.body.next; const alias = src; const { deep } = req.body.user; a.href = alias; b.href = deep; c.href = req.body.user.next;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 3, "aliases, destructured bindings, and nested member chains should stay provably tainted")
+}
+
 // --- Layer 5: dependency gating ------------------------------------
 
 func TestDependencyGatingSkipsRule(t *testing.T) {

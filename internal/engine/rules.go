@@ -19,6 +19,13 @@ type TaintConfig struct {
 	// RequireTainted drops the finding when the sink is provably a
 	// constant or sanitized expression (i.e. not tainted).
 	RequireTainted bool `yaml:"require_tainted"`
+	// RequireProvenTainted keeps findings only when taint analysis can
+	// prove the sink is tainted; unknown sinks are dropped.
+	RequireProvenTainted bool `yaml:"require_proven_tainted"`
+	// SinkArgIndex, when SinkCapture targets an `arguments` node, limits
+	// taint analysis to a specific positional argument (0-based). When
+	// omitted, all arguments are analyzed.
+	SinkArgIndex *int `yaml:"sink_arg_index"`
 }
 
 // Rule represents the structure of our YAML signature files.
