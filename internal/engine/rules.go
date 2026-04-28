@@ -20,7 +20,7 @@ type TaintConfig struct {
 	// constant or sanitized expression (i.e. not tainted).
 	RequireTainted bool `yaml:"require_tainted"`
 	// RequireProvenTainted keeps findings only when taint analysis can
-	// prove the sink is tainted; unknown sinks are dropped.
+	// prove the sink is tainted; sinks with unknown taint status are dropped.
 	// This is only applied when RequireTainted is true.
 	RequireProvenTainted bool `yaml:"require_proven_tainted"`
 	// SinkArgIndex, when SinkCapture targets an `arguments` node, limits

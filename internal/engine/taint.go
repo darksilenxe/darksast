@@ -303,7 +303,7 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *T
 			idx := *cfg.SinkArgIndex
 			argCount := int(node.NamedChildCount())
 			if idx < 0 || idx >= argCount {
-				log.Printf("WARNING: sink_arg_index %d out of range (argument count=%d, valid range=0..%d)", idx, argCount, argCount-1)
+				log.Printf("WARNING: rule configuration error: sink_arg_index %d out of range (argument count=%d, valid range=0..%d)", idx, argCount, argCount-1)
 				return taintUnknown
 			}
 			return m.resolveCapture(node.NamedChild(idx), source, cfg)
@@ -328,7 +328,7 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *T
 		return taintUnknown
 	}
 
-	knownAllConstants := true
+	allKnownConstants := true
 	hasKnownSanitized := false
 	for _, name := range identifiers {
 		if m.tainted[name] {
@@ -338,13 +338,13 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *T
 			hasKnownSanitized = true
 		}
 		if !m.constants[name] {
-			knownAllConstants = false
+			allKnownConstants = false
 		}
 	}
-	if hasKnownSanitized && !knownAllConstants {
+	if hasKnownSanitized && !allKnownConstants {
 		return taintSanitized
 	}
-	if knownAllConstants {
+	if allKnownConstants {
 		return taintConstant
 	}
 	return taintUnknown
