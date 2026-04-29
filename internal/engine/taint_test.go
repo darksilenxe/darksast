@@ -77,6 +77,22 @@ func TestBuildFileTaintModelTracksSanitizedBinaryAssignments(t *testing.T) {
 	assert.Equal(t, taintSanitized, model.resolveIdentifier("clean"))
 }
 
+func TestBuildFileTaintModelTracksSanitizedPassthroughAssignments(t *testing.T) {
+	tree, source := parseTree(t, `const clean = DOMPurify.sanitize(req.body.html).toLowerCase(); sink(clean);`)
+	defer tree.Close()
+
+	model := buildFileTaintModel(tree.RootNode(), source)
+	assert.Equal(t, taintSanitized, model.resolveIdentifier("clean"))
+}
+
+func TestBuildFileTaintModelTracksChainedSanitizedPassthroughAssignments(t *testing.T) {
+	tree, source := parseTree(t, `const clean = DOMPurify.sanitize(req.body.html).trimStart().trimEnd(); sink(clean);`)
+	defer tree.Close()
+
+	model := buildFileTaintModel(tree.RootNode(), source)
+	assert.Equal(t, taintSanitized, model.resolveIdentifier("clean"))
+}
+
 func TestBuildFileTaintModelTracksTaintedBinaryAssignments(t *testing.T) {
 	tree, source := parseTree(t, `const nextUrl = "/go?next=" + req.body.next; sink(nextUrl);`)
 	defer tree.Close()

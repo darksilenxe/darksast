@@ -48,7 +48,12 @@ var commonSanitizerIdentifiers = map[string]struct{}{
 // sanitizerPassthroughMethods preserve sanitized status when called on
 // an already-sanitized receiver.
 var sanitizerPassthroughMethods = map[string]struct{}{
-	"trim": {},
+	"trim":        {},
+	"trimStart":   {},
+	"trimEnd":     {},
+	"toLowerCase": {},
+	"toUpperCase": {},
+	"toString":    {},
 }
 
 // commonTaintSourceObjects is the set of root identifiers whose member
