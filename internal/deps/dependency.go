@@ -21,12 +21,15 @@ type PackageJSON struct {
 
 // PackageRecord represents one dependency entry from a discovered manifest.
 type PackageRecord struct {
-	ProjectPath  string
-	ManifestPath string
-	Scope        string
-	Ecosystem    string
-	Name         string
-	Version      string
+	ProjectPath    string
+	ManifestPath   string
+	Scope          string
+	Ecosystem      string
+	Name           string
+	Version        string
+	Relationship   string
+	DependencyPath string
+	Resolved       bool
 }
 
 // SummaryStats captures high-level metrics for CI-friendly reporting.
@@ -133,6 +136,8 @@ func CollectPackageRecords(targetDir string) ([]PackageRecord, error) {
 		switch d.Name() {
 		case "package.json":
 			parsed = parseNPMManifest(path)
+		case "package-lock.json", "npm-shrinkwrap.json":
+			parsed = parseNPMPackageLock(path)
 		case "requirements.txt":
 			parsed = parseRequirementsManifest(path)
 		case "go.mod":
@@ -149,6 +154,8 @@ func CollectPackageRecords(targetDir string) ([]PackageRecord, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	records = preferResolvedPackageRecords(records)
 
 	sort.Slice(records, func(i, j int) bool {
 		if records[i].ProjectPath != records[j].ProjectPath {
@@ -184,22 +191,26 @@ func parseNPMManifest(path string) []PackageRecord {
 	records := make([]PackageRecord, 0, len(pkg.Dependencies)+len(pkg.DevDependencies))
 	for name, version := range pkg.Dependencies {
 		records = append(records, PackageRecord{
-			ProjectPath:  projectPath,
-			ManifestPath: path,
-			Scope:        "dependencies",
-			Ecosystem:    "npm",
-			Name:         name,
-			Version:      version,
+			ProjectPath:    projectPath,
+			ManifestPath:   path,
+			Scope:          "dependencies",
+			Ecosystem:      "npm",
+			Name:           name,
+			Version:        version,
+			Relationship:   "direct",
+			DependencyPath: name,
 		})
 	}
 	for name, version := range pkg.DevDependencies {
 		records = append(records, PackageRecord{
-			ProjectPath:  projectPath,
-			ManifestPath: path,
-			Scope:        "devDependencies",
-			Ecosystem:    "npm",
-			Name:         name,
-			Version:      version,
+			ProjectPath:    projectPath,
+			ManifestPath:   path,
+			Scope:          "devDependencies",
+			Ecosystem:      "npm",
+			Name:           name,
+			Version:        version,
+			Relationship:   "direct",
+			DependencyPath: name,
 		})
 	}
 	return records
@@ -235,12 +246,14 @@ func parseRequirementsManifest(path string) []PackageRecord {
 			continue
 		}
 		records = append(records, PackageRecord{
-			ProjectPath:  filepath.Dir(path),
-			ManifestPath: path,
-			Scope:        "dependencies",
-			Ecosystem:    "pip",
-			Name:         name,
-			Version:      version,
+			ProjectPath:    filepath.Dir(path),
+			ManifestPath:   path,
+			Scope:          "dependencies",
+			Ecosystem:      "pip",
+			Name:           name,
+			Version:        version,
+			Relationship:   "direct",
+			DependencyPath: name,
 		})
 	}
 	return records
@@ -284,12 +297,14 @@ func parseGoModManifest(path string) []PackageRecord {
 			continue
 		}
 		records = append(records, PackageRecord{
-			ProjectPath:  filepath.Dir(path),
-			ManifestPath: path,
-			Scope:        "dependencies",
-			Ecosystem:    "go",
-			Name:         fields[0],
-			Version:      fields[1],
+			ProjectPath:    filepath.Dir(path),
+			ManifestPath:   path,
+			Scope:          "dependencies",
+			Ecosystem:      "go",
+			Name:           fields[0],
+			Version:        fields[1],
+			Relationship:   "direct",
+			DependencyPath: fields[0],
 		})
 	}
 	return records
@@ -327,12 +342,14 @@ func parseCargoManifest(path string) []PackageRecord {
 
 		if matches := cargoKVRE.FindStringSubmatch(line); len(matches) == 3 {
 			records = append(records, PackageRecord{
-				ProjectPath:  filepath.Dir(path),
-				ManifestPath: path,
-				Scope:        scope,
-				Ecosystem:    "cargo",
-				Name:         strings.TrimSpace(matches[1]),
-				Version:      strings.TrimSpace(matches[2]),
+				ProjectPath:    filepath.Dir(path),
+				ManifestPath:   path,
+				Scope:          scope,
+				Ecosystem:      "cargo",
+				Name:           strings.TrimSpace(matches[1]),
+				Version:        strings.TrimSpace(matches[2]),
+				Relationship:   "direct",
+				DependencyPath: strings.TrimSpace(matches[1]),
 			})
 			continue
 		}
@@ -351,15 +368,52 @@ func parseCargoManifest(path string) []PackageRecord {
 			continue
 		}
 		records = append(records, PackageRecord{
-			ProjectPath:  filepath.Dir(path),
-			ManifestPath: path,
-			Scope:        scope,
-			Ecosystem:    "cargo",
-			Name:         name,
-			Version:      strings.TrimSpace(matches[1]),
+			ProjectPath:    filepath.Dir(path),
+			ManifestPath:   path,
+			Scope:          scope,
+			Ecosystem:      "cargo",
+			Name:           name,
+			Version:        strings.TrimSpace(matches[1]),
+			Relationship:   "direct",
+			DependencyPath: name,
 		})
 	}
 	return records
+}
+
+func preferResolvedPackageRecords(records []PackageRecord) []PackageRecord {
+	bestByKey := make(map[string]PackageRecord, len(records))
+	order := make([]string, 0, len(records))
+	for _, record := range records {
+		key := strings.Join([]string{
+			record.ProjectPath,
+			record.Ecosystem,
+			record.Scope,
+			record.Name,
+			defaultRelationship(record.Relationship),
+		}, "\x00")
+		existing, ok := bestByKey[key]
+		if !ok {
+			bestByKey[key] = record
+			order = append(order, key)
+			continue
+		}
+		if record.Resolved && !existing.Resolved {
+			bestByKey[key] = record
+		}
+	}
+	out := make([]PackageRecord, 0, len(bestByKey))
+	for _, key := range order {
+		out = append(out, bestByKey[key])
+	}
+	return out
+}
+
+func defaultRelationship(relationship string) string {
+	if strings.TrimSpace(relationship) == "" {
+		return "direct"
+	}
+	return strings.TrimSpace(relationship)
 }
 
 // DetectFrameworks returns unique framework names found from dependency indicators.

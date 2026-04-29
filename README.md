@@ -10,6 +10,8 @@ JavaScript-Security-Scanner is a lightweight Go-based static scanner for applica
 - Produces findings in JSON, CSV, and optional SARIF formats.
 - Produces compromised-package intel outputs from local YAML plus an optional remote JSON feed with IoCs.
 - Produces package inventory outputs (table text + CSV + summary CSV) across supported dependency manifests including `package.json`, `requirements.txt`, `go.mod`, and `Cargo.toml`.
+- Produces OSS dependency vulnerability outputs from local/remote advisory feeds with fixed-version guidance, direct-vs-transitive labeling, optional policy ignores, and CI gating.
+- Resolves npm dependencies from `package-lock.json` / `npm-shrinkwrap.json` so direct and transitive package versions can be matched more accurately.
 - Supports Windows-first scripts and cross-platform shell scripts.
 
 ## Requirements
@@ -98,6 +100,14 @@ Relevant flags:
 | `-compromised-generated-rules-out` | (empty) | Optional YAML path to write the merged compromised package ruleset. |
 | `-compromised-json-out` | `./compromised_packages.json` | JSON report for compromised package matches. |
 | `-compromised-csv-out` | `./compromised_packages.csv` | CSV report for compromised package matches. |
+| `-advisory-rules` | `./intel/advisories.yaml` | Local YAML/JSON advisory bundle for OSS dependency vulnerability matching. |
+| `-advisory-feed-url` | (empty) | Optional remote JSON feed for OSS dependency advisories. |
+| `-advisory-generated-rules-out` | (empty) | Optional YAML path to write the merged advisory ruleset. |
+| `-advisory-policy` | (empty) | Optional YAML policy file with `ignores:` entries keyed by advisory ID, package, and optional expiry. |
+| `-oss-vulns-json-out` | `./oss_vulnerabilities.json` | JSON report for OSS dependency vulnerability matches. |
+| `-oss-vulns-csv-out` | `./oss_vulnerabilities.csv` | CSV report for OSS dependency vulnerability matches. |
+| `-oss-vulns-summary-csv-out` | `./oss_vulnerabilities_summary.csv` | Summary CSV for OSS dependency vulnerability matches. |
+| `-fail-on-oss-vuln-severity` | (empty) | Exit non-zero when OSS dependency findings at or above the selected severity remain after policy filtering. |
 | `-findings-sarif-out` | (empty) | Optional SARIF output path for findings. |
 
 Notes and limitations:
@@ -114,6 +124,9 @@ Notes and limitations:
 - Package summary CSV: `package_summary.csv`
 - Compromised package JSON: `compromised_packages.json`
 - Compromised package CSV: `compromised_packages.csv`
+- OSS dependency vulnerability JSON: `oss_vulnerabilities.json`
+- OSS dependency vulnerability CSV: `oss_vulnerabilities.csv`
+- OSS dependency vulnerability summary CSV: `oss_vulnerabilities_summary.csv`
 - Findings JSON: `findings_report.json`
 - Findings SARIF (optional): user-specified via `-findings-sarif-out`
 - Findings CSV: `findings.csv`

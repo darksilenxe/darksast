@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -45,6 +46,17 @@ func main() {
 	compromisedGeneratedRulesOut := flag.String("compromised-generated-rules-out", "", "Optional path to write the merged compromised package rule set as YAML before the SAST scan")
 	compromisedJSONOut := flag.String("compromised-json-out", "./compromised_packages.json", "Output JSON file for compromised package matches")
 	compromisedCSVOut := flag.String("compromised-csv-out", "./compromised_packages.csv", "Output CSV file for compromised package matches")
+	advisoryRules := flag.String("advisory-rules", "./intel/advisories.yaml", "YAML or JSON file containing package vulnerability advisories")
+	advisoryFeedURL := flag.String("advisory-feed-url", "", "Optional JSON API URL that returns package vulnerability advisories")
+	advisoryFeedTimeout := flag.Duration("advisory-feed-timeout", 15*time.Second, "HTTP timeout used when fetching package vulnerability advisories")
+	advisoryFeedUserAgent := flag.String("advisory-feed-user-agent", "", "User-Agent header used when fetching package vulnerability advisories")
+	advisoryFeedMaxBytes := flag.Int64("advisory-feed-max-bytes", 2*1024*1024, "Maximum bytes accepted from the package vulnerability advisory feed")
+	advisoryGeneratedRulesOut := flag.String("advisory-generated-rules-out", "", "Optional path to write the merged advisory rule set as YAML")
+	advisoryPolicyPath := flag.String("advisory-policy", "", "Optional YAML policy file that suppresses specific advisory findings with expiry support")
+	advisoryJSONOut := flag.String("oss-vulns-json-out", "./oss_vulnerabilities.json", "Output JSON file for OSS dependency vulnerability matches")
+	advisoryCSVOut := flag.String("oss-vulns-csv-out", "./oss_vulnerabilities.csv", "Output CSV file for OSS dependency vulnerability matches")
+	advisorySummaryCSVOut := flag.String("oss-vulns-summary-csv-out", "./oss_vulnerabilities_summary.csv", "Output summary CSV file for OSS dependency vulnerability matches")
+	failOnOSSVulnSeverity := flag.String("fail-on-oss-vuln-severity", "", "Exit with code 1 when OSS dependency findings at or above this severity remain after policy filtering: LOW, MEDIUM, HIGH, CRITICAL")
 	findingsJSONOut := flag.String("findings-json-out", "./findings_report.json", "Output JSON file for SAST findings")
 	findingsSARIFOut := flag.String("findings-sarif-out", "", "Optional SARIF file for SAST findings")
 	findingsFrameworkCSVOut := flag.String("findings-framework-csv-out", "./findings_framework_summary.csv", "Output CSV file for framework/severity finding counts")
@@ -122,6 +134,8 @@ func main() {
 	}
 
 	compromisedFindings := make([]deps.CompromisedFinding, 0)
+	advisoryFindings := make([]deps.AdvisoryFinding, 0)
+	shouldFailForOSSVulns := false
 	if len(packageRecords) > 0 {
 		seedRules, ruleErr := deps.LoadCompromisedRules(*compromisedRules)
 		if ruleErr != nil {
@@ -158,6 +172,66 @@ func main() {
 		}
 		if csvErr := reporter.WriteCompromisedCSV(compromisedFindings, *compromisedCSVOut); csvErr != nil {
 			log.Printf("[!] Failed to write compromised package CSV: %v\n", csvErr)
+		}
+
+		seedAdvisories, advisoryErr := deps.LoadAdvisories(*advisoryRules)
+		if advisoryErr != nil {
+			log.Printf("[!] Failed to load package vulnerability advisories: %v\n", advisoryErr)
+		}
+		feedAdvisories, advisoryFeedErr := deps.FetchAdvisories(*advisoryFeedURL, deps.AdvisoryFeedOptions{
+			Timeout:   *advisoryFeedTimeout,
+			UserAgent: *advisoryFeedUserAgent,
+			MaxBytes:  *advisoryFeedMaxBytes,
+		})
+		if advisoryFeedErr != nil {
+			log.Printf("[!] Failed to fetch package vulnerability advisories: %v\n", advisoryFeedErr)
+		}
+		mergedAdvisories := deps.MergeAdvisories(seedAdvisories, feedAdvisories)
+		if out := strings.TrimSpace(*advisoryGeneratedRulesOut); out != "" {
+			if writeErr := deps.WriteAdvisoriesYAML(out, mergedAdvisories); writeErr != nil {
+				log.Printf("[!] Failed to write merged package vulnerability advisories: %v\n", writeErr)
+			} else {
+				fmt.Printf("[+] Merged package vulnerability advisories written to %s.\n", out)
+			}
+		}
+
+		advisoryFindings = deps.MatchAdvisories(packageRecords, mergedAdvisories)
+		policy, policyErr := deps.LoadAdvisoryPolicy(*advisoryPolicyPath)
+		if policyErr != nil {
+			log.Printf("[!] Failed to load advisory policy: %v\n", policyErr)
+		}
+		filteredAdvisoryFindings, ignoredAdvisories := deps.ApplyAdvisoryPolicy(advisoryFindings, policy, time.Now().UTC())
+		advisoryFindings = filteredAdvisoryFindings
+
+		if len(advisoryFindings) == 0 {
+			fmt.Println("[*] No OSS dependency vulnerabilities detected.")
+		} else {
+			fmt.Println("[*] OSS dependency vulnerabilities:")
+			for _, finding := range advisoryFindings {
+				fmt.Printf("[!] %-8s | %-6s | %-25s | %-10s | %s\n    %s\n", finding.Severity, finding.Ecosystem, deps.FormatIdentifiers(finding.AdvisoryID, finding.Aliases), finding.Relationship, finding.ManifestPath, finding.Remediation)
+			}
+		}
+		if ignoredAdvisories > 0 {
+			fmt.Printf("[*] Advisory policy suppressed %d OSS vulnerability finding(s).\n", ignoredAdvisories)
+		}
+		if jsonErr := reporter.WriteAdvisoryJSON(advisoryFindings, *targetDir, *advisoryJSONOut); jsonErr != nil {
+			log.Printf("[!] Failed to write OSS vulnerability JSON: %v\n", jsonErr)
+		}
+		if csvErr := reporter.WriteAdvisoryCSV(advisoryFindings, *advisoryCSVOut); csvErr != nil {
+			log.Printf("[!] Failed to write OSS vulnerability CSV: %v\n", csvErr)
+		}
+		if summaryErr := reporter.WriteAdvisorySummaryCSV(advisoryFindings, *advisorySummaryCSVOut); summaryErr != nil {
+			log.Printf("[!] Failed to write OSS vulnerability summary CSV: %v\n", summaryErr)
+		}
+
+		minSeverityRank := severityRank[strings.ToUpper(strings.TrimSpace(*failOnOSSVulnSeverity))]
+		if minSeverityRank > 0 {
+			for _, finding := range advisoryFindings {
+				if severityRank[strings.ToUpper(finding.Severity)] >= minSeverityRank {
+					shouldFailForOSSVulns = true
+					break
+				}
+			}
 		}
 		fmt.Println()
 	}
@@ -236,4 +310,8 @@ func main() {
 	}
 
 	fmt.Println("[*] Scan complete.")
+	if shouldFailForOSSVulns {
+		log.Printf("[!] Failing because OSS dependency vulnerabilities met the -fail-on-oss-vuln-severity threshold.\n")
+		os.Exit(1)
+	}
 }
