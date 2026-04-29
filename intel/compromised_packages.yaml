@@ -1,0 +1,172 @@
+source: curated seed feed from public 2025-2026 supply-chain incidents
+updated_at: 2026-04-29T00:00:00Z
+rules:
+  - id: COMPROMISED-NPM-AXIOS-MAR-2026
+    ecosystem: npm
+    package: axios
+    versions:
+      - 0.30.4
+      - 1.14.1
+    severity: CRITICAL
+    description: Axios packages compromised in March 2026 delivered a phantom dependency that installed a cross-platform RAT.
+    source: curated-seed
+    references:
+      - https://securitylabs.datadoghq.com/articles/axios-npm-supply-chain-compromise/
+      - https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all
+      - https://www.cisa.gov/news-events/alerts/2026/04/20/supply-chain-compromise-impacts-axios-node-package-manager
+    iocs:
+      - type: package
+        value: plain-crypto-js@4.2.1
+      - type: domain
+        value: sfrclak.com
+      - type: ip
+        value: 142.11.206.73:8000
+      - type: file
+        value: node_modules/plain-crypto-js/
+      - type: script
+        value: postinstall node setup.js
+  - id: COMPROMISED-NPM-PLAIN-CRYPTO-JS-MAR-2026
+    ecosystem: npm
+    package: plain-crypto-js
+    versions:
+      - 4.2.1
+    severity: CRITICAL
+    description: Malicious phantom dependency observed in the 2026 Axios compromise.
+    source: curated-seed
+    references:
+      - https://securitylabs.datadoghq.com/articles/axios-npm-supply-chain-compromise/
+      - https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all
+    iocs:
+      - type: domain
+        value: sfrclak.com
+      - type: ip
+        value: 142.11.206.73:8000
+      - type: script
+        value: postinstall node setup.js
+  - id: COMPROMISED-NPM-DEBUG-SEP-2025
+    ecosystem: npm
+    package: debug
+    versions:
+      - 4.4.2
+    severity: CRITICAL
+    description: Compromised maintainer release from the September 2025 npm wallet-stealing campaign.
+    source: curated-seed
+    references:
+      - https://www.stepsecurity.io/blog/20-popular-npm-packages-compromised-chalk-debug-strip-ansi-color-convert-wrap-ansi
+      - https://www.ox.security/blog/npm-packages-compromised/
+    iocs:
+      - type: code-pattern
+        value: const _0x112
+      - type: behavior
+        value: browser wallet interception and transaction rewriting
+  - id: COMPROMISED-NPM-CHALK-SEP-2025
+    ecosystem: npm
+    package: chalk
+    versions:
+      - 5.6.1
+    severity: CRITICAL
+    description: Compromised maintainer release from the September 2025 npm wallet-stealing campaign.
+    source: curated-seed
+    references:
+      - https://www.stepsecurity.io/blog/20-popular-npm-packages-compromised-chalk-debug-strip-ansi-color-convert-wrap-ansi
+      - https://www.ox.security/blog/npm-packages-compromised/
+    iocs:
+      - type: code-pattern
+        value: const _0x112
+      - type: behavior
+        value: browser wallet interception and transaction rewriting
+  - id: COMPROMISED-NPM-STRIP-ANSI-SEP-2025
+    ecosystem: npm
+    package: strip-ansi
+    versions:
+      - 7.1.1
+    severity: CRITICAL
+    description: Compromised maintainer release from the September 2025 npm wallet-stealing campaign.
+    source: curated-seed
+    references:
+      - https://www.stepsecurity.io/blog/20-popular-npm-packages-compromised-chalk-debug-strip-ansi-color-convert-wrap-ansi
+    iocs:
+      - type: code-pattern
+        value: const _0x112
+  - id: COMPROMISED-NPM-COLOR-CONVERT-SEP-2025
+    ecosystem: npm
+    package: color-convert
+    versions:
+      - 3.1.1
+    severity: CRITICAL
+    description: Compromised maintainer release from the September 2025 npm wallet-stealing campaign.
+    source: curated-seed
+    references:
+      - https://www.stepsecurity.io/blog/20-popular-npm-packages-compromised-chalk-debug-strip-ansi-color-convert-wrap-ansi
+    iocs:
+      - type: code-pattern
+        value: const _0x112
+  - id: COMPROMISED-NPM-DUCKDB-SEP-2025
+    ecosystem: npm
+    package: duckdb
+    versions:
+      - 1.3.3
+    severity: CRITICAL
+    description: Compromised maintainer release from the September 2025 npm wallet-stealing campaign.
+    source: curated-seed
+    references:
+      - https://www.stepsecurity.io/blog/20-popular-npm-packages-compromised-chalk-debug-strip-ansi-color-convert-wrap-ansi
+    iocs:
+      - type: code-pattern
+        value: const _0x112
+  - id: COMPROMISED-NPM-ANGULARTICS2-SHAI-HULUD-SEP-2025
+    ecosystem: npm
+    package: angulartics2
+    versions:
+      - 14.1.2
+    severity: CRITICAL
+    description: Self-replicating npm worm package observed in the 2025 Shai-Hulud campaign.
+    source: curated-seed
+    references:
+      - https://thehackernews.com/2025/09/40-npm-packages-compromised-in-supply.html
+      - https://www.mend.io/blog/npm-supply-chain-attack-packages-compromised-by-self-spreading-malware/
+    iocs:
+      - type: file
+        value: bundle.js
+      - type: file
+        value: .github/workflows/
+      - type: tool
+        value: TruffleHog
+      - type: behavior
+        value: secrets exfiltration to attacker webhook
+  - id: COMPROMISED-NPM-CTRL-DELUGE-SHAI-HULUD-SEP-2025
+    ecosystem: npm
+    package: '@ctrl/deluge'
+    versions:
+      - 7.2.2
+    severity: CRITICAL
+    description: Self-replicating npm worm package observed in the 2025 Shai-Hulud campaign.
+    source: curated-seed
+    references:
+      - https://thehackernews.com/2025/09/40-npm-packages-compromised-in-supply.html
+      - https://www.mend.io/blog/npm-supply-chain-attack-packages-compromised-by-self-spreading-malware/
+    iocs:
+      - type: file
+        value: bundle.js
+      - type: file
+        value: .github/workflows/
+      - type: tool
+        value: TruffleHog
+  - id: COMPROMISED-NPM-NGX-COLOR-SHAI-HULUD-SEP-2025
+    ecosystem: npm
+    package: ngx-color
+    versions:
+      - 10.0.2
+    severity: CRITICAL
+    description: Self-replicating npm worm package observed in the 2025 Shai-Hulud campaign.
+    source: curated-seed
+    references:
+      - https://thehackernews.com/2025/09/40-npm-packages-compromised-in-supply.html
+      - https://www.mend.io/blog/npm-supply-chain-attack-packages-compromised-by-self-spreading-malware/
+    iocs:
+      - type: file
+        value: bundle.js
+      - type: file
+        value: .github/workflows/
+      - type: tool
+        value: TruffleHog

@@ -1,0 +1,14 @@
+id: "JAVA-INSECURE-HOSTNAME-VERIFIER"
+severity: "HIGH"
+framework: "Java"
+language: "Java"
+description: "Detects Java setHostnameVerifier lambdas that always return true."
+query: |
+  (method_invocation
+    name: (identifier) @name (#eq? @name "setHostnameVerifier")
+    arguments: (argument_list
+      (lambda_expression
+        body: (true)
+      )
+    )
+  ) @finding

@@ -1,0 +1,17 @@
+id: "GO-OS-EXEC-SHELL"
+severity: "HIGH"
+framework: "Go"
+language: "Go"
+description: "Detects Go os/exec shell invocations that pass sh -c or cmd /c."
+query: |
+  (call_expression
+    function: (selector_expression
+      operand: (identifier) @pkg (#eq? @pkg "exec")
+      field: (field_identifier) @fn (#eq? @fn "Command")
+    )
+    arguments: (argument_list
+      (interpreted_string_literal) @shell (#match? @shell "\"(sh|bash|cmd|powershell)\"")
+      (interpreted_string_literal) @flag (#match? @flag "\"(-c|/c)\"")
+      (_)
+    )
+  ) @finding

@@ -1,7 +1,7 @@
 category,metric,value
-inventory,total_projects,2
-inventory,total_packages,11
-inventory,dependencies,7
+inventory,total_projects,3
+inventory,total_packages,17
+inventory,dependencies,13
 inventory,dev_dependencies,4
 frameworks,count,4
 frameworks,names,Next.js;Nuxt;React;Vue

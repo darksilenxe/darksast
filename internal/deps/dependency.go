@@ -1,28 +1,32 @@
 package deps
 
 import (
+	"bufio"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
 
-// PackageJSON defines the fields we want to extract from the file
+// PackageJSON defines the fields we want to extract from the file.
 type PackageJSON struct {
 	Name            string            `json:"name"`
 	Dependencies    map[string]string `json:"dependencies"`
 	DevDependencies map[string]string `json:"devDependencies"`
 }
 
-// PackageRecord represents one dependency entry from a discovered package.json file.
+// PackageRecord represents one dependency entry from a discovered manifest.
 type PackageRecord struct {
-	ProjectPath string
-	Scope       string
-	Name        string
-	Version     string
+	ProjectPath  string
+	ManifestPath string
+	Scope        string
+	Ecosystem    string
+	Name         string
+	Version      string
 }
 
 // SummaryStats captures high-level metrics for CI-friendly reporting.
@@ -62,64 +66,52 @@ var frameworkIndicators = map[string]string{
 	"@remix-run/react": "Remix",
 }
 
-// CheckDependencies parses package.json and flags vulnerable packages
+var (
+	requirementsLineRE = regexp.MustCompile(`^([A-Za-z0-9_.-]+(?:\[[^\]]+\])?)\s*([^;\s]+)?`)
+	cargoKVRE          = regexp.MustCompile(`^([A-Za-z0-9_.-]+)\s*=\s*"([^"]+)"`)
+	cargoVersionRE     = regexp.MustCompile(`version\s*=\s*"([^"]+)"`)
+)
+
+// CheckDependencies prints the legacy React2Shell audit summary across discovered npm manifests.
 func CheckDependencies(targetDir string) {
-	pkgPath := filepath.Join(targetDir, "package.json")
-
-	data, err := os.ReadFile(pkgPath)
+	records, err := CollectPackageRecords(targetDir)
 	if err != nil {
-		fmt.Printf("[-] No package.json found in %s. Skipping dependency audit.\n\n", targetDir)
+		fmt.Printf("[!] Failed to collect manifests for dependency audit: %v\n\n", err)
 		return
 	}
 
-	var pkg PackageJSON
-	if err := json.Unmarshal(data, &pkg); err != nil {
-		fmt.Printf("[!] Error parsing package.json: %v\n\n", err)
-		return
-	}
-
-	// Combine dependencies and devDependencies into one map for easy scanning
-	allDeps := make(map[string]string)
-	for k, v := range pkg.Dependencies {
-		allDeps[k] = v
-	}
-	for k, v := range pkg.DevDependencies {
-		allDeps[k] = v
-	}
-
-	fmt.Println("[*] Auditing package.json for React2Shell (CVE-2025-55182) targets...")
-
-	// The specific packages compromised in the React2Shell exploit path
-	targetPackages := []string{
-		"react",
-		"react-dom",
-		"next",
-		"react-server-dom-webpack",
-		"react-server-dom-turbopack",
-		"react-server-dom-parcel",
-	}
-
-	foundVulnerability := false
-
-	for _, pkgName := range targetPackages {
-		if version, exists := allDeps[pkgName]; exists {
-			// A simplified check for the known vulnerable React 19.x and Next 15.x versions
-			if isVulnerableVersion(version) {
-				fmt.Printf("   🚨 CRITICAL: %s (%s) is highly vulnerable to remote code execution!\n", pkgName, version)
-				foundVulnerability = true
-			} else {
-				fmt.Printf("   [i] Found %s (%s) - Version appears to be outside the primary CVE range, but verify patches.\n", pkgName, version)
-			}
+	npmRecords := make([]PackageRecord, 0)
+	for _, record := range records {
+		if record.Ecosystem == "npm" {
+			npmRecords = append(npmRecords, record)
 		}
 	}
 
+	if len(npmRecords) == 0 {
+		fmt.Printf("[-] No npm package manifests found in %s. Skipping legacy dependency audit.\n\n", targetDir)
+		return
+	}
+
+	fmt.Println("[*] Auditing discovered npm manifests for React2Shell (CVE-2025-55182) targets...")
+	foundVulnerability := false
+	for _, record := range npmRecords {
+		if _, exists := react2ShellTargetPackages[record.Name]; !exists {
+			continue
+		}
+		if isVulnerableVersion(record.Version) {
+			fmt.Printf("   🚨 CRITICAL: %s (%s) in %s is highly vulnerable to remote code execution!\n", record.Name, record.Version, record.ManifestPath)
+			foundVulnerability = true
+			continue
+		}
+		fmt.Printf("   [i] Found %s (%s) in %s - Version appears to be outside the primary CVE range, but verify patches.\n", record.Name, record.Version, record.ManifestPath)
+	}
 	if !foundVulnerability {
 		fmt.Println("   [+] No critical React2Shell dependency versions detected.")
 	}
 	fmt.Println()
 }
 
-// CollectPackageRecords scans for package.json files and returns all dependencies and devDependencies.
+// CollectPackageRecords scans for supported dependency manifests and returns all discovered records.
 func CollectPackageRecords(targetDir string) ([]PackageRecord, error) {
 	records := make([]PackageRecord, 0)
 
@@ -130,48 +122,30 @@ func CollectPackageRecords(targetDir string) ([]PackageRecord, error) {
 
 		if d.IsDir() {
 			name := d.Name()
-			if name == "node_modules" || name == ".git" || name == "dist" || name == "build" {
+			switch name {
+			case "node_modules", ".git", "dist", "build", "vendor", "target", ".next", "coverage":
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
-		if d.Name() != "package.json" {
+		var parsed []PackageRecord
+		switch d.Name() {
+		case "package.json":
+			parsed = parseNPMManifest(path)
+		case "requirements.txt":
+			parsed = parseRequirementsManifest(path)
+		case "go.mod":
+			parsed = parseGoModManifest(path)
+		case "Cargo.toml":
+			parsed = parseCargoManifest(path)
+		default:
 			return nil
 		}
 
-		data, readErr := os.ReadFile(path)
-		if readErr != nil {
-			return nil
-		}
-
-		var pkg PackageJSON
-		if unmarshalErr := json.Unmarshal(data, &pkg); unmarshalErr != nil {
-			return nil
-		}
-
-		projectPath := filepath.Dir(path)
-		for name, version := range pkg.Dependencies {
-			records = append(records, PackageRecord{
-				ProjectPath: projectPath,
-				Scope:       "dependencies",
-				Name:        name,
-				Version:     version,
-			})
-		}
-
-		for name, version := range pkg.DevDependencies {
-			records = append(records, PackageRecord{
-				ProjectPath: projectPath,
-				Scope:       "devDependencies",
-				Name:        name,
-				Version:     version,
-			})
-		}
-
+		records = append(records, parsed...)
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -180,19 +154,221 @@ func CollectPackageRecords(targetDir string) ([]PackageRecord, error) {
 		if records[i].ProjectPath != records[j].ProjectPath {
 			return records[i].ProjectPath < records[j].ProjectPath
 		}
+		if records[i].Ecosystem != records[j].Ecosystem {
+			return records[i].Ecosystem < records[j].Ecosystem
+		}
 		if records[i].Name != records[j].Name {
 			return records[i].Name < records[j].Name
 		}
-		return records[i].Scope < records[j].Scope
+		if records[i].Scope != records[j].Scope {
+			return records[i].Scope < records[j].Scope
+		}
+		return records[i].Version < records[j].Version
 	})
 
 	return records, nil
+}
+
+func parseNPMManifest(path string) []PackageRecord {
+	data, readErr := os.ReadFile(path)
+	if readErr != nil {
+		return nil
+	}
+
+	var pkg PackageJSON
+	if unmarshalErr := json.Unmarshal(data, &pkg); unmarshalErr != nil {
+		return nil
+	}
+
+	projectPath := filepath.Dir(path)
+	records := make([]PackageRecord, 0, len(pkg.Dependencies)+len(pkg.DevDependencies))
+	for name, version := range pkg.Dependencies {
+		records = append(records, PackageRecord{
+			ProjectPath:  projectPath,
+			ManifestPath: path,
+			Scope:        "dependencies",
+			Ecosystem:    "npm",
+			Name:         name,
+			Version:      version,
+		})
+	}
+	for name, version := range pkg.DevDependencies {
+		records = append(records, PackageRecord{
+			ProjectPath:  projectPath,
+			ManifestPath: path,
+			Scope:        "devDependencies",
+			Ecosystem:    "npm",
+			Name:         name,
+			Version:      version,
+		})
+	}
+	return records
+}
+
+func parseRequirementsManifest(path string) []PackageRecord {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil
+	}
+	defer file.Close()
+
+	records := make([]PackageRecord, 0)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, "-") {
+			continue
+		}
+		if idx := strings.Index(line, " #"); idx >= 0 {
+			line = strings.TrimSpace(line[:idx])
+		}
+		matches := requirementsLineRE.FindStringSubmatch(line)
+		if len(matches) == 0 {
+			continue
+		}
+		name := strings.TrimSpace(matches[1])
+		version := ""
+		if len(matches) > 2 {
+			version = strings.TrimSpace(matches[2])
+		}
+		if name == "" {
+			continue
+		}
+		records = append(records, PackageRecord{
+			ProjectPath:  filepath.Dir(path),
+			ManifestPath: path,
+			Scope:        "dependencies",
+			Ecosystem:    "pip",
+			Name:         name,
+			Version:      version,
+		})
+	}
+	return records
+}
+
+func parseGoModManifest(path string) []PackageRecord {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil
+	}
+	defer file.Close()
+
+	records := make([]PackageRecord, 0)
+	scanner := bufio.NewScanner(file)
+	inRequireBlock := false
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "//") {
+			continue
+		}
+		if strings.HasPrefix(line, "require (") {
+			inRequireBlock = true
+			continue
+		}
+		if inRequireBlock && line == ")" {
+			inRequireBlock = false
+			continue
+		}
+
+		entry := line
+		if strings.HasPrefix(line, "require ") {
+			entry = strings.TrimSpace(strings.TrimPrefix(line, "require "))
+		} else if !inRequireBlock {
+			continue
+		}
+		if idx := strings.Index(entry, "//"); idx >= 0 {
+			entry = strings.TrimSpace(entry[:idx])
+		}
+		fields := strings.Fields(entry)
+		if len(fields) < 2 {
+			continue
+		}
+		records = append(records, PackageRecord{
+			ProjectPath:  filepath.Dir(path),
+			ManifestPath: path,
+			Scope:        "dependencies",
+			Ecosystem:    "go",
+			Name:         fields[0],
+			Version:      fields[1],
+		})
+	}
+	return records
+}
+
+func parseCargoManifest(path string) []PackageRecord {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil
+	}
+	defer file.Close()
+
+	records := make([]PackageRecord, 0)
+	scanner := bufio.NewScanner(file)
+	section := ""
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
+			section = strings.Trim(line, "[]")
+			continue
+		}
+
+		scope := ""
+		switch section {
+		case "dependencies", "workspace.dependencies":
+			scope = "dependencies"
+		case "dev-dependencies":
+			scope = "devDependencies"
+		default:
+			continue
+		}
+
+		if matches := cargoKVRE.FindStringSubmatch(line); len(matches) == 3 {
+			records = append(records, PackageRecord{
+				ProjectPath:  filepath.Dir(path),
+				ManifestPath: path,
+				Scope:        scope,
+				Ecosystem:    "cargo",
+				Name:         strings.TrimSpace(matches[1]),
+				Version:      strings.TrimSpace(matches[2]),
+			})
+			continue
+		}
+
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		name := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
+		if name == "" || strings.EqualFold(value, "{ workspace = true }") {
+			continue
+		}
+		matches := cargoVersionRE.FindStringSubmatch(value)
+		if len(matches) != 2 {
+			continue
+		}
+		records = append(records, PackageRecord{
+			ProjectPath:  filepath.Dir(path),
+			ManifestPath: path,
+			Scope:        scope,
+			Ecosystem:    "cargo",
+			Name:         name,
+			Version:      strings.TrimSpace(matches[1]),
+		})
+	}
+	return records
 }
 
 // DetectFrameworks returns unique framework names found from dependency indicators.
 func DetectFrameworks(records []PackageRecord) []string {
 	found := make(map[string]struct{})
 	for _, record := range records {
+		if record.Ecosystem != "npm" {
+			continue
+		}
 		if fw, ok := frameworkIndicators[record.Name]; ok {
 			found[fw] = struct{}{}
 		}
@@ -223,10 +399,14 @@ func WritePackageTable(records []PackageRecord, frameworks []string, outputPath 
 	b.WriteString("| Project Path | Scope | Package | Version |\n")
 	b.WriteString("|---|---|---|---|\n")
 	for _, record := range records {
+		scope := record.Scope
+		if record.Ecosystem != "npm" {
+			scope = record.Ecosystem + ":" + scope
+		}
 		b.WriteString("| ")
 		b.WriteString(strings.ReplaceAll(record.ProjectPath, "|", "\\|"))
 		b.WriteString(" | ")
-		b.WriteString(record.Scope)
+		b.WriteString(scope)
 		b.WriteString(" | ")
 		b.WriteString(strings.ReplaceAll(record.Name, "|", "\\|"))
 		b.WriteString(" | ")
@@ -234,7 +414,7 @@ func WritePackageTable(records []PackageRecord, frameworks []string, outputPath 
 		b.WriteString(" |\n")
 	}
 
-	if err := os.WriteFile(outputPath, []byte(b.String()), 0644); err != nil {
+	if err := os.WriteFile(outputPath, []byte(b.String()), 0o644); err != nil {
 		return fmt.Errorf("failed to write package table: %w", err)
 	}
 
@@ -257,7 +437,11 @@ func WritePackageCSV(records []PackageRecord, outputPath string) error {
 	}
 
 	for _, record := range records {
-		if err := writer.Write([]string{record.ProjectPath, record.Scope, record.Name, record.Version}); err != nil {
+		scope := record.Scope
+		if record.Ecosystem != "npm" {
+			scope = record.Ecosystem + ":" + scope
+		}
+		if err := writer.Write([]string{record.ProjectPath, scope, record.Name, record.Version}); err != nil {
 			return fmt.Errorf("failed to write CSV row: %w", err)
 		}
 	}
@@ -279,19 +463,20 @@ func BuildSummaryStats(records []PackageRecord, frameworks []string) SummaryStat
 
 	for _, record := range records {
 		projectSet[record.ProjectPath] = struct{}{}
-		if record.Scope == "dependencies" {
+		switch record.Scope {
+		case "dependencies":
 			dependencyCount++
-		}
-		if record.Scope == "devDependencies" {
+		case "devDependencies":
 			devDependencyCount++
 		}
 
-		if frameworkName, ok := frameworkIndicators[record.Name]; ok {
-			frameworkPackageCounts[frameworkName]++
-		}
-
-		if _, tracked := react2ShellTargetPackages[record.Name]; tracked && isVulnerableVersion(record.Version) {
-			vulnerableEntries = append(vulnerableEntries, fmt.Sprintf("%s@%s (%s)", record.Name, record.Version, record.ProjectPath))
+		if record.Ecosystem == "npm" {
+			if frameworkName, ok := frameworkIndicators[record.Name]; ok {
+				frameworkPackageCounts[frameworkName]++
+			}
+			if _, tracked := react2ShellTargetPackages[record.Name]; tracked && isVulnerableVersion(record.Version) {
+				vulnerableEntries = append(vulnerableEntries, fmt.Sprintf("%s@%s (%s)", record.Name, record.Version, record.ProjectPath))
+			}
 		}
 	}
 
@@ -368,12 +553,10 @@ func frameworkMetricName(name string) string {
 // isVulnerableVersion performs basic string matching against known bad versions.
 // (Note: In a production tool, replace this with a library like github.com/Masterminds/semver)
 func isVulnerableVersion(version string) bool {
-	// React 19.0.0, 19.1.0, 19.1.1, 19.2.0 are vulnerable
 	if strings.Contains(version, "19.0.0") || strings.Contains(version, "19.1.0") ||
 		strings.Contains(version, "19.1.1") || strings.Contains(version, "19.2.0") {
 		return true
 	}
-	// Next.js 15.x and 16.x are vulnerable prior to their specific patch releases
 	if strings.Contains(version, "15.") || strings.Contains(version, "16.0.") {
 		return true
 	}

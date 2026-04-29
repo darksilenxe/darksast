@@ -1,0 +1,12 @@
+id: "RUST-MD5-COMPUTE"
+severity: "MEDIUM"
+framework: "Rust"
+language: "Rust"
+description: "Detects Rust md5::compute() usage."
+query: |
+  (call_expression
+    function: (scoped_identifier
+      path: (identifier) @mod (#eq? @mod "md5")
+      name: (identifier) @fn (#eq? @fn "compute")
+    )
+  ) @finding

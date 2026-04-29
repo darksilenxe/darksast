@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	sitter "github.com/smacker/go-tree-sitter"
-	"github.com/smacker/go-tree-sitter/javascript"
 )
 
 // Finding represents a discovered vulnerability
@@ -72,6 +71,10 @@ type Engine struct {
 	// packages appear in the scanned project's inventory. Off by default
 	// so existing scan baselines are preserved.
 	EnableDependencyGating bool
+
+	// ExcludedPaths are absolute paths that should not be scanned. Entries
+	// may be files or directories.
+	ExcludedPaths []string
 }
 
 // New constructs an Engine with default (false-positive-conservative)
@@ -100,6 +103,9 @@ func (e *Engine) SetProjectDependencies(names []string) {
 // shouldScanFile returns false when path-based filters mean the file
 // should be skipped given the engine's include flags.
 func (e *Engine) shouldScanFile(path string) bool {
+	if e.isExcludedPath(path) {
+		return false
+	}
 	if !e.IncludeVendored && IsVendoredPath(path) {
 		return false
 	}
@@ -107,6 +113,59 @@ func (e *Engine) shouldScanFile(path string) bool {
 		return false
 	}
 	return true
+}
+
+// SetExcludedPaths records files/directories that should not be scanned.
+func (e *Engine) SetExcludedPaths(paths []string) {
+	if len(paths) == 0 {
+		e.ExcludedPaths = nil
+		return
+	}
+
+	seen := make(map[string]struct{}, len(paths))
+	normalized := make([]string, 0, len(paths))
+	for _, path := range paths {
+		trimmed := strings.TrimSpace(path)
+		if trimmed == "" {
+			continue
+		}
+		abs, err := filepath.Abs(trimmed)
+		if err != nil {
+			continue
+		}
+		clean := filepath.Clean(abs)
+		if _, ok := seen[clean]; ok {
+			continue
+		}
+		seen[clean] = struct{}{}
+		normalized = append(normalized, clean)
+	}
+
+	e.ExcludedPaths = normalized
+}
+
+func (e *Engine) isExcludedPath(path string) bool {
+	if len(e.ExcludedPaths) == 0 {
+		return false
+	}
+
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	clean := filepath.Clean(abs)
+
+	for _, excluded := range e.ExcludedPaths {
+		if clean == excluded {
+			return true
+		}
+		rel, err := filepath.Rel(excluded, clean)
+		if err == nil && rel != "." && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // ruleAppliesToProject returns false when the rule declares a
@@ -286,9 +345,12 @@ func argumentCountFromCaptures(captures map[string]*sitter.Node) (int, bool) {
 	return 0, false
 }
 
-func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, findings chan<- Finding, suppress suppressionMap, taint *fileTaintModel) {
+func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, languageKey string, findings chan<- Finding, suppress suppressionMap, taint *fileTaintModel) {
 	for _, rule := range e.Rules {
 		if !e.ruleAppliesToProject(rule) {
+			continue
+		}
+		if normalizeLanguageName(rule.EffectiveLanguage()) != languageKey {
 			continue
 		}
 
@@ -374,8 +436,7 @@ func (e *Engine) ScanDirectory(targetDir string, findings chan<- Finding) error 
 			return nil
 		}
 
-		ext := filepath.Ext(path)
-		if ext != ".js" && ext != ".jsx" && ext != ".ts" && ext != ".tsx" && ext != ".mjs" && ext != ".cjs" {
+		if _, ok := languageSpecForPath(path); !ok {
 			return nil
 		}
 		if !e.shouldScanFile(path) {
@@ -404,8 +465,13 @@ func (e *Engine) scanFile(path string, wg *sync.WaitGroup, findings chan<- Findi
 		return
 	}
 
+	spec, ok := languageSpecForPath(path)
+	if !ok {
+		return
+	}
+
 	parser := sitter.NewParser()
-	parser.SetLanguage(javascript.GetLanguage())
+	parser.SetLanguage(spec.language)
 
 	tree, _ := parser.ParseCtx(context.Background(), nil, content)
 	if tree == nil {
@@ -413,9 +479,12 @@ func (e *Engine) scanFile(path string, wg *sync.WaitGroup, findings chan<- Findi
 	}
 
 	suppress := buildSuppressionMap(content)
-	taint := buildFileTaintModel(tree.RootNode(), content)
+	var taint *fileTaintModel
+	if spec.supportsTaint {
+		taint = buildFileTaintModel(tree.RootNode(), content)
+	}
 
-	e.matchRules(tree, content, path, findings, suppress, taint)
+	e.matchRules(tree, content, path, spec.key, findings, suppress, taint)
 
 	// Initialize our state tracker for this specific file
 	symTable := &SymbolTable{

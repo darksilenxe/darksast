@@ -149,14 +149,14 @@ func buildSuppressionMap(sourceCode []byte) suppressionMap {
 }
 
 // lineHasCommentBefore returns true when `marker` appears in `line`
-// preceded by a JavaScript comment opener (`//`, `/*`, or `*`).
+// preceded by a supported comment opener (`//`, `#`, `/*`, or `*`).
 func lineHasCommentBefore(line, marker string) bool {
 	idx := strings.Index(strings.ToLower(line), strings.ToLower(marker))
 	if idx < 0 {
 		return false
 	}
 	prefix := line[:idx]
-	if strings.Contains(prefix, "//") {
+	if strings.Contains(prefix, "//") || strings.Contains(prefix, "#") {
 		return true
 	}
 	if strings.Contains(prefix, "/*") {

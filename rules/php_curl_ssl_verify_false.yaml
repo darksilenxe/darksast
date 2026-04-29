@@ -1,0 +1,18 @@
+id: "PHP-CURL-SSL-VERIFY-FALSE"
+severity: "HIGH"
+framework: "PHP"
+language: "PHP"
+description: "Detects PHP curl_setopt() calls that disable certificate verification."
+query: |
+  (function_call_expression
+    function: (name) @fn (#eq? @fn "curl_setopt")
+    arguments: (arguments
+      (argument)
+      (argument
+        (name) @option (#eq? @option "CURLOPT_SSL_VERIFYPEER")
+      )
+      (argument
+        (boolean) @value (#eq? @value "false")
+      )
+    )
+  ) @finding

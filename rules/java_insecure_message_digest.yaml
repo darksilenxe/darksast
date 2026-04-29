@@ -1,0 +1,15 @@
+id: "JAVA-INSECURE-MESSAGE-DIGEST"
+severity: "MEDIUM"
+framework: "Java"
+language: "Java"
+description: "Detects Java MessageDigest.getInstance() calls for MD5 and SHA-1."
+query: |
+  (method_invocation
+    object: (identifier) @obj (#eq? @obj "MessageDigest")
+    name: (identifier) @name (#eq? @name "getInstance")
+    arguments: (argument_list
+      (string_literal
+        (string_fragment) @alg (#match? @alg "^(MD5|SHA-1)$")
+      )
+    )
+  ) @finding

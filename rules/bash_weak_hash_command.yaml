@@ -1,0 +1,9 @@
+id: "BASH-WEAK-HASH-COMMAND"
+severity: "MEDIUM"
+framework: "Bash"
+language: "Bash"
+description: "Detects shell commands that use md5sum or sha1sum."
+query: |
+  (command
+    name: (command_name (word) @cmd (#match? @cmd "^(md5sum|sha1sum)$"))
+  ) @finding
