@@ -11,6 +11,42 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// StringList accepts either a single YAML scalar or a string sequence.
+type StringList []string
+
+// UnmarshalYAML normalizes a scalar-or-sequence YAML node into a slice.
+func (s *StringList) UnmarshalYAML(value *yaml.Node) error {
+	switch value.Kind {
+	case yaml.ScalarNode:
+		trimmed := strings.TrimSpace(value.Value)
+		if trimmed == "" {
+			*s = nil
+			return nil
+		}
+		*s = []string{trimmed}
+		return nil
+	case yaml.SequenceNode:
+		out := make([]string, 0, len(value.Content))
+		for _, child := range value.Content {
+			if child.Kind != yaml.ScalarNode {
+				return fmt.Errorf("expected string sequence item, got YAML kind %d", child.Kind)
+			}
+			trimmed := strings.TrimSpace(child.Value)
+			if trimmed == "" {
+				continue
+			}
+			out = append(out, trimmed)
+		}
+		*s = out
+		return nil
+	case 0:
+		*s = nil
+		return nil
+	default:
+		return fmt.Errorf("expected string or string sequence, got YAML kind %d", value.Kind)
+	}
+}
+
 // TaintConfig declares how a rule wants intra-file taint analysis applied.
 type TaintConfig struct {
 	// SinkCapture is the @capture name whose argument should be analyzed.
@@ -36,12 +72,18 @@ type TaintConfig struct {
 // positives. All such fields are optional and additive — rules that omit
 // them keep their previous behavior.
 type Rule struct {
-	ID          string `yaml:"id"`
-	Severity    string `yaml:"severity"`
-	Framework   string `yaml:"framework"`
-	Description string `yaml:"description"`
-	Query       string `yaml:"query"`
-	Language    string `yaml:"language"`
+	ID          string     `yaml:"id"`
+	Severity    string     `yaml:"severity"`
+	Framework   string     `yaml:"framework"`
+	Description string     `yaml:"description"`
+	Query       string     `yaml:"query"`
+	Language    string     `yaml:"language"`
+	Message     string     `yaml:"message"`
+	Tags        StringList `yaml:"tags"`
+	References  StringList `yaml:"references"`
+	CWE         StringList `yaml:"cwe"`
+	OWASP       StringList `yaml:"owasp"`
+	Remediation string     `yaml:"remediation"`
 
 	// Confidence is reported alongside severity. Defaults to "MEDIUM".
 	Confidence string `yaml:"confidence"`
@@ -82,11 +124,16 @@ type Rule struct {
 }
 
 type semgrepMetadata struct {
-	Framework          string   `yaml:"framework"`
-	Description        string   `yaml:"description"`
-	Confidence         string   `yaml:"confidence"`
-	Query              string   `yaml:"query"`
-	RequiresDependency []string `yaml:"requires_dependency"`
+	Framework          string     `yaml:"framework"`
+	Description        string     `yaml:"description"`
+	Confidence         string     `yaml:"confidence"`
+	Query              string     `yaml:"query"`
+	RequiresDependency []string   `yaml:"requires_dependency"`
+	Tags               StringList `yaml:"tags"`
+	References         StringList `yaml:"references"`
+	CWE                StringList `yaml:"cwe"`
+	OWASP              StringList `yaml:"owasp"`
+	Remediation        string     `yaml:"remediation"`
 }
 
 type semgrepRule struct {
@@ -175,6 +222,17 @@ func (r *Rule) EffectiveConfidence() string {
 	return strings.ToUpper(r.Confidence)
 }
 
+// EffectiveDescription returns the best available descriptive text.
+func (r *Rule) EffectiveDescription() string {
+	if strings.TrimSpace(r.Description) != "" {
+		return strings.TrimSpace(r.Description)
+	}
+	if strings.TrimSpace(r.Message) != "" {
+		return strings.TrimSpace(r.Message)
+	}
+	return fmt.Sprintf("Rule %s matched", strings.TrimSpace(r.ID))
+}
+
 // LoadRules scans a directory for .yaml files and parses them into a slice of Rule structs.
 func LoadRules(rulesDir string) ([]Rule, error) {
 	var rules []Rule
@@ -251,8 +309,14 @@ func semgrepToRule(in semgrepRule) (Rule, bool) {
 		Description:        description,
 		Query:              query,
 		Language:           language,
+		Message:            strings.TrimSpace(in.Message),
 		Confidence:         strings.TrimSpace(in.Metadata.Confidence),
 		RequiresDependency: in.Metadata.RequiresDependency,
+		Tags:               in.Metadata.Tags,
+		References:         in.Metadata.References,
+		CWE:                in.Metadata.CWE,
+		OWASP:              in.Metadata.OWASP,
+		Remediation:        strings.TrimSpace(in.Metadata.Remediation),
 	}
 	return out, true
 }

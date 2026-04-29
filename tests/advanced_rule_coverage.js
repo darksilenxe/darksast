@@ -49,6 +49,8 @@ users.find({ '$where': userInput, username: { '$regex': userInput } });
 Handlebars.compile(userInput);
 yaml.load(userInput);
 vm.runInNewContext(userInput);
+vm.compileFunction(userInput, []);
+new vm.Script(userInput);
 cors({ origin: '*', credentials: true });
 shelljs.exec(userInput);
 execa(userInput);
@@ -74,6 +76,8 @@ const sessionConfig = {
 const insecureTlsOptions = {
   rejectUnauthorized: false
 };
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const serialize = {
   unserialize(value) { return value; },

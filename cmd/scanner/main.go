@@ -46,6 +46,7 @@ func main() {
 	compromisedJSONOut := flag.String("compromised-json-out", "./compromised_packages.json", "Output JSON file for compromised package matches")
 	compromisedCSVOut := flag.String("compromised-csv-out", "./compromised_packages.csv", "Output CSV file for compromised package matches")
 	findingsJSONOut := flag.String("findings-json-out", "./findings_report.json", "Output JSON file for SAST findings")
+	findingsSARIFOut := flag.String("findings-sarif-out", "", "Optional SARIF file for SAST findings")
 	findingsFrameworkCSVOut := flag.String("findings-framework-csv-out", "./findings_framework_summary.csv", "Output CSV file for framework/severity finding counts")
 	findingsCSVOut := flag.String("findings-csv-out", "./findings.csv", "Output CSV file with one row per finding")
 	includeTests := flag.Bool("include-tests", false, "Include test/spec files (*.test.*, *.spec.*, __tests__, cypress, e2e, playwright) in scans")
@@ -221,6 +222,11 @@ func main() {
 
 	if jsonErr := reporter.WriteJSON(findings, *targetDir, *findingsJSONOut); jsonErr != nil {
 		log.Printf("[!] Failed to write findings JSON: %v\n", jsonErr)
+	}
+	if out := strings.TrimSpace(*findingsSARIFOut); out != "" {
+		if sarifErr := reporter.WriteSARIF(findings, rules, *targetDir, out); sarifErr != nil {
+			log.Printf("[!] Failed to write findings SARIF: %v\n", sarifErr)
+		}
 	}
 	if summaryErr := reporter.WriteFrameworkSummaryCSV(findings, *findingsFrameworkCSVOut); summaryErr != nil {
 		log.Printf("[!] Failed to write findings framework summary CSV: %v\n", summaryErr)
