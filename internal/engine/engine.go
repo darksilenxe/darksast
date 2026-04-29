@@ -71,6 +71,10 @@ type Engine struct {
 	// packages appear in the scanned project's inventory. Off by default
 	// so existing scan baselines are preserved.
 	EnableDependencyGating bool
+
+	// ExcludedPaths are absolute paths that should not be scanned. Entries
+	// may be files or directories.
+	ExcludedPaths []string
 }
 
 // New constructs an Engine with default (false-positive-conservative)
@@ -99,6 +103,9 @@ func (e *Engine) SetProjectDependencies(names []string) {
 // shouldScanFile returns false when path-based filters mean the file
 // should be skipped given the engine's include flags.
 func (e *Engine) shouldScanFile(path string) bool {
+	if e.isExcludedPath(path) {
+		return false
+	}
 	if !e.IncludeVendored && IsVendoredPath(path) {
 		return false
 	}
@@ -106,6 +113,59 @@ func (e *Engine) shouldScanFile(path string) bool {
 		return false
 	}
 	return true
+}
+
+// SetExcludedPaths records files/directories that should not be scanned.
+func (e *Engine) SetExcludedPaths(paths []string) {
+	if len(paths) == 0 {
+		e.ExcludedPaths = nil
+		return
+	}
+
+	seen := make(map[string]struct{}, len(paths))
+	normalized := make([]string, 0, len(paths))
+	for _, path := range paths {
+		trimmed := strings.TrimSpace(path)
+		if trimmed == "" {
+			continue
+		}
+		abs, err := filepath.Abs(trimmed)
+		if err != nil {
+			continue
+		}
+		clean := filepath.Clean(abs)
+		if _, ok := seen[clean]; ok {
+			continue
+		}
+		seen[clean] = struct{}{}
+		normalized = append(normalized, clean)
+	}
+
+	e.ExcludedPaths = normalized
+}
+
+func (e *Engine) isExcludedPath(path string) bool {
+	if len(e.ExcludedPaths) == 0 {
+		return false
+	}
+
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	clean := filepath.Clean(abs)
+
+	for _, excluded := range e.ExcludedPaths {
+		if clean == excluded {
+			return true
+		}
+		rel, err := filepath.Rel(excluded, clean)
+		if err == nil && rel != "." && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // ruleAppliesToProject returns false when the rule declares a

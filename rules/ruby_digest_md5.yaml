@@ -1,0 +1,13 @@
+id: "RUBY-DIGEST-MD5"
+severity: "MEDIUM"
+framework: "Ruby"
+language: "Ruby"
+description: "Detects Ruby Digest::MD5 usage."
+query: |
+  (call
+    receiver: (scope_resolution
+      scope: (constant) @digest (#eq? @digest "Digest")
+      name: (constant) @alg (#eq? @alg "MD5")
+    )
+    method: (identifier) @fn (#eq? @fn "hexdigest")
+  ) @finding

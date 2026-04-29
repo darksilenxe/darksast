@@ -1,0 +1,18 @@
+id: "YAML-VERIFY-FALSE"
+severity: "HIGH"
+framework: "YAML"
+language: "YAML"
+description: "Detects YAML settings that disable verification."
+query: |
+  (block_mapping_pair
+    key: (flow_node
+      (plain_scalar
+        (string_scalar) @key (#match? @key "^(verify|insecureSkipTlsVerify)$")
+      )
+    )
+    value: (flow_node
+      (plain_scalar
+        (boolean_scalar) @value (#eq? @value "false")
+      )
+    )
+  ) @finding

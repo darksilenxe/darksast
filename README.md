@@ -1,10 +1,10 @@
 # JavaScript-Security-Scanner
 
-JavaScript-Security-Scanner is a lightweight Go-based static scanner for JavaScript and framework projects. It now also supports Python, Go, and Rust source scanning, reports findings in JSON/CSV, and exports package inventory, framework summaries, and compromised-package intel matches.
+JavaScript-Security-Scanner is a lightweight Go-based static scanner for application and configuration code. It supports JavaScript/TypeScript, Python, Go, Rust, Java, PHP, Ruby, C#, Bash, and YAML scanning, reports findings in JSON/CSV, and exports package inventory, framework summaries, and compromised-package intel matches.
 
 ## Features
 
-- Scans JavaScript/TypeScript, Python, Go, and Rust source files (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.rs`).
+- Scans JavaScript/TypeScript, Python, Go, Rust, Java, PHP, Ruby, C#, Bash, and YAML files (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.rs`, `.java`, `.php`, `.rb`, `.cs`, `.sh`, `.bash`, `.zsh`, `.yaml`, `.yml`).
 - Loads security signatures from YAML rule files in `rules/`.
 - Supports native rule files plus Semgrep/OpenGrep bundle files (`rules: [...]`) when each imported rule provides a Tree-sitter-compatible `query` (or `metadata.query`).
 - Produces findings in JSON and CSV formats.

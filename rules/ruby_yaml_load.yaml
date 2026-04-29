@@ -1,0 +1,10 @@
+id: "RUBY-YAML-LOAD"
+severity: "HIGH"
+framework: "Ruby"
+language: "Ruby"
+description: "Detects Ruby YAML.load() usage."
+query: |
+  (call
+    receiver: (constant) @obj (#eq? @obj "YAML")
+    method: (identifier) @fn (#eq? @fn "load")
+  ) @finding

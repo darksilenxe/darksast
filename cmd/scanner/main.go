@@ -188,6 +188,7 @@ func main() {
 		}
 		scannerEngine.SetProjectDependencies(names)
 	}
+	scannerEngine.SetExcludedPaths([]string{*rulesDir, *compromisedRules})
 
 	findingsChan := make(chan engine.Finding, 100)
 	findings := make([]engine.Finding, 0)

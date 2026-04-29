@@ -1,0 +1,15 @@
+id: "JAVA-RUNTIME-EXEC"
+severity: "HIGH"
+framework: "Java"
+language: "Java"
+description: "Detects Java Runtime.getRuntime().exec() usage."
+query: |
+  (method_invocation
+    object: (method_invocation
+      object: (identifier) @runtime (#eq? @runtime "Runtime")
+      name: (identifier) @getter (#eq? @getter "getRuntime")
+      arguments: (argument_list)
+    )
+    name: (identifier) @exec (#eq? @exec "exec")
+    arguments: (argument_list)
+  ) @finding
