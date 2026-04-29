@@ -247,7 +247,7 @@ func (e *Engine) passesFilters(rule Rule, captures map[string]*sitter.Node, sour
 		if !ok || node == nil {
 			continue
 		}
-		if classifyExpression(node, source) == taintConstant {
+		if classifyExpression(node, source, nil) == taintConstant {
 			return false
 		}
 	}

@@ -131,9 +131,11 @@ func walkForTaint(node *sitter.Node, source []byte, model *fileTaintModel) {
 }
 
 // classifyExpression returns the taintFlavor of an arbitrary expression
-// node. The classification is intentionally conservative: anything we
-// cannot reason about is reported as taintUnknown.
-func classifyExpression(node *sitter.Node, source []byte) taintFlavor {
+// node. When model is non-nil, identifier lookups consult the file-level
+// constant / sanitizer / taint state before falling back to unknown.
+// The classification is intentionally conservative: anything we cannot
+// reason about is reported as taintUnknown.
+func classifyExpression(node *sitter.Node, source []byte, model *fileTaintModel) taintFlavor {
 	if node == nil {
 		return taintUnknown
 	}
@@ -156,7 +158,7 @@ func classifyExpression(node *sitter.Node, source []byte) taintFlavor {
 				continue
 			}
 			if child.Type() == "template_substitution" && child.NamedChildCount() > 0 {
-				inner := classifyExpression(child.NamedChild(0), source)
+				inner := classifyExpression(child.NamedChild(0), source, model)
 				flavor = mergeFlavor(flavor, inner)
 			}
 		}
@@ -164,13 +166,13 @@ func classifyExpression(node *sitter.Node, source []byte) taintFlavor {
 	case "unary_expression":
 		// e.g. -1, !flag — treat as constant when the operand is.
 		operand := node.ChildByFieldName("argument")
-		return classifyExpression(operand, source)
+		return classifyExpression(operand, source, model)
 	case "binary_expression":
-		left := classifyExpression(node.ChildByFieldName("left"), source)
-		right := classifyExpression(node.ChildByFieldName("right"), source)
+		left := classifyExpression(node.ChildByFieldName("left"), source, model)
+		right := classifyExpression(node.ChildByFieldName("right"), source, model)
 		return mergeFlavor(left, right)
 	case "call_expression":
-		return classifyCall(node, source)
+		return classifyCall(node, source, model)
 	case "member_expression":
 		// Treat known untrusted source roots as tainted.
 		obj := node.ChildByFieldName("object")
@@ -179,15 +181,24 @@ func classifyExpression(node *sitter.Node, source []byte) taintFlavor {
 		}
 		return taintUnknown
 	case "identifier":
-		// An identifier is unresolved here — callers consult the
-		// per-file taint model to look up declarations.
+		if model == nil {
+			return taintUnknown
+		}
+		switch model.resolveIdentifier(node.Content(source)) {
+		case taintConstant:
+			return taintConstant
+		case taintSanitized:
+			return taintSanitized
+		case taintTainted:
+			return taintTainted
+		}
 		return taintUnknown
 	}
 	return taintUnknown
 }
 
 // classifyCall handles call_expression nodes by inspecting the callee.
-func classifyCall(node *sitter.Node, source []byte) taintFlavor {
+func classifyCall(node *sitter.Node, source []byte, model *fileTaintModel) taintFlavor {
 	fn := node.ChildByFieldName("function")
 	if fn == nil {
 		return taintUnknown
@@ -208,7 +219,7 @@ func classifyCall(node *sitter.Node, source []byte) taintFlavor {
 				return taintSanitized
 			}
 			if _, ok := sanitizerPassthroughMethods[method]; ok {
-				if classifyExpression(obj, source) == taintSanitized {
+				if classifyExpression(obj, source, model) == taintSanitized {
 					return taintSanitized
 				}
 			}
@@ -255,7 +266,9 @@ func rootsTainted(node *sitter.Node, source []byte) bool {
 }
 
 // mergeFlavor combines two taintFlavors using the precedence:
-//   tainted > sanitized > unknown > constant.
+//
+//	tainted > sanitized > unknown > constant.
+//
 // In other words, any tainted operand makes the result tainted; otherwise
 // the most "interesting" non-constant flavor wins.
 func mergeFlavor(a, b taintFlavor) taintFlavor {
@@ -279,17 +292,7 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *T
 	}
 
 	if node.Type() == "identifier" {
-		name := node.Content(source)
-		if m.tainted[name] {
-			return taintTainted
-		}
-		if m.sanitized[name] {
-			return taintSanitized
-		}
-		if m.constants[name] {
-			return taintConstant
-		}
-		return taintUnknown
+		return m.resolveIdentifier(node.Content(source))
 	}
 
 	if node.Type() == "parenthesized_expression" && node.NamedChildCount() > 0 {
@@ -318,7 +321,7 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *T
 		return flavor
 	}
 
-	flavor := classifyExpression(node, source)
+	flavor := classifyExpression(node, source, m)
 	if flavor != taintUnknown {
 		return flavor
 	}
@@ -345,6 +348,22 @@ func (m *fileTaintModel) resolveCapture(node *sitter.Node, source []byte, cfg *T
 		return taintSanitized
 	}
 	if allKnownConstants {
+		return taintConstant
+	}
+	return taintUnknown
+}
+
+func (m *fileTaintModel) resolveIdentifier(name string) taintFlavor {
+	if m == nil || name == "" {
+		return taintUnknown
+	}
+	if m.tainted[name] {
+		return taintTainted
+	}
+	if m.sanitized[name] {
+		return taintSanitized
+	}
+	if m.constants[name] {
 		return taintConstant
 	}
 	return taintUnknown
