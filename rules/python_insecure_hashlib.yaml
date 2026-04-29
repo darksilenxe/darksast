@@ -1,0 +1,12 @@
+id: "PYTHON-INSECURE-HASHLIB"
+severity: "MEDIUM"
+framework: "Python"
+language: "Python"
+description: "Detects Python hashlib md5/sha1 usage."
+query: |
+  (call
+    function: (attribute
+      object: (identifier) @module (#eq? @module "hashlib")
+      attribute: (identifier) @fn (#match? @fn "^(md5|sha1)$")
+    )
+  ) @finding

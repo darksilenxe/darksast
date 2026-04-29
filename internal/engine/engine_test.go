@@ -165,3 +165,26 @@ func TestGoRuleScansGoFiles(t *testing.T) {
 	require.Len(t, findings, 1)
 	assert.Equal(t, "GO-EXEC", findings[0].RuleID)
 }
+
+func TestRustRuleScansRustFiles(t *testing.T) {
+	rule := Rule{
+		ID:       "RUST-MD5",
+		Severity: "MEDIUM",
+		Language: "Rust",
+		Query: `(call_expression
+    function: (scoped_identifier
+      path: (identifier) @mod (#eq? @mod "md5")
+      name: (identifier) @fn (#eq? @fn "compute")
+    )
+  ) @finding`,
+	}
+	require.NoError(t, rule.compile())
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "sample.rs")
+	require.NoError(t, os.WriteFile(path, []byte("fn main(){ let _ = md5::compute(data); }\n"), 0o644))
+
+	findings := scanFile(t, path, []Rule{rule})
+	require.Len(t, findings, 1)
+	assert.Equal(t, "RUST-MD5", findings[0].RuleID)
+}

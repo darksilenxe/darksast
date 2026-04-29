@@ -1,0 +1,12 @@
+id: "PYTHON-UNSAFE-YAML-LOAD"
+severity: "HIGH"
+framework: "Python"
+language: "Python"
+description: "Detects unsafe Python yaml.load() usage."
+query: |
+  (call
+    function: (attribute
+      object: (identifier) @module (#eq? @module "yaml")
+      attribute: (identifier) @fn (#eq? @fn "load")
+    )
+  ) @finding

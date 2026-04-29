@@ -46,6 +46,14 @@ while [[ $# -gt 0 ]]; do
       FINDINGS_CSV_OUT="$2"
       shift 2
       ;;
+    --compromised-json-out)
+      COMPROMISED_JSON_OUT="$2"
+      shift 2
+      ;;
+    --compromised-csv-out)
+      COMPROMISED_CSV_OUT="$2"
+      shift 2
+      ;;
     *)
       echo "Unknown argument: $1" >&2
       exit 1
@@ -74,6 +82,8 @@ echo "    packages-summary-csv-out: ${PACKAGES_SUMMARY_CSV_OUT}"
 echo "    findings-json-out: ${FINDINGS_JSON_OUT}"
 echo "    findings-framework-csv-out: ${FINDINGS_FRAMEWORK_CSV_OUT}"
 echo "    findings-csv-out: ${FINDINGS_CSV_OUT}"
+echo "    compromised-json-out: ${COMPROMISED_JSON_OUT}"
+echo "    compromised-csv-out: ${COMPROMISED_CSV_OUT}"
 
 go run ./cmd/scanner/main.go \
   -dir "${DIR}" \

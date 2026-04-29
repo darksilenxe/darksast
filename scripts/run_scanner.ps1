@@ -32,5 +32,7 @@ Write-Host "    packages-summary-csv-out: $PackagesSummaryCSVOut"
 Write-Host "    findings-json-out: $FindingsJSONOut"
 Write-Host "    findings-framework-csv-out: $FindingsFrameworkCSVOut"
 Write-Host "    findings-csv-out: $FindingsCSVOut"
+Write-Host "    compromised-json-out: $CompromisedJSONOut"
+Write-Host "    compromised-csv-out: $CompromisedCSVOut"
 
-go run ./cmd/scanner/main.go -dir $Dir -rules $Rules -packages-out $PackagesOut -packages-csv-out $PackagesCSVOut -packages-summary-csv-out $PackagesSummaryCSVOut -findings-json-out $FindingsJSONOut -findings-framework-csv-out $FindingsFrameworkCSVOut -findings-csv-out $FindingsCSVOut
+go run ./cmd/scanner/main.go -dir $Dir -rules $Rules -packages-out $PackagesOut -packages-csv-out $PackagesCSVOut -packages-summary-csv-out $PackagesSummaryCSVOut -findings-json-out $FindingsJSONOut -findings-framework-csv-out $FindingsFrameworkCSVOut -findings-csv-out $FindingsCSVOut -compromised-json-out $CompromisedJSONOut -compromised-csv-out $CompromisedCSVOut

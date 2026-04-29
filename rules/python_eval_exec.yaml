@@ -1,0 +1,9 @@
+id: "PYTHON-EVAL-EXEC"
+severity: "HIGH"
+framework: "Python"
+language: "Python"
+description: "Detects Python eval() usage."
+query: |
+  (call
+    function: (identifier) @fn (#eq? @fn "eval")
+  ) @finding

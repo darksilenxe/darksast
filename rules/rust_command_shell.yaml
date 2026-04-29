@@ -1,0 +1,38 @@
+id: "RUST-COMMAND-SHELL"
+severity: "HIGH"
+framework: "Rust"
+language: "Rust"
+description: "Detects Rust Command::new shell execution chains."
+query: |
+  (call_expression
+    function: (field_expression
+      value: (call_expression
+        function: (field_expression
+          value: (call_expression
+            function: (field_expression
+              value: (call_expression
+                function: (scoped_identifier
+                  path: (identifier) @cmd (#eq? @cmd "Command")
+                  name: (identifier) @ctor (#eq? @ctor "new")
+                )
+                arguments: (arguments
+                  (string_literal
+                    (string_content) @shell (#match? @shell "^(sh|bash|cmd|powershell)$")
+                  )
+                )
+              )
+              field: (field_identifier) @arg1 (#eq? @arg1 "arg")
+            )
+            arguments: (arguments
+              (string_literal
+                (string_content) @flag (#match? @flag "^(-c|/c)$")
+              )
+            )
+          )
+          field: (field_identifier) @arg2 (#eq? @arg2 "arg")
+        )
+        arguments: (arguments (_))
+      )
+      field: (field_identifier) @exec (#match? @exec "^(status|output|spawn)$")
+    )
+  ) @finding

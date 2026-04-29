@@ -1,14 +1,15 @@
 # JavaScript-Security-Scanner
 
-JavaScript-Security-Scanner is a lightweight Go-based static scanner for JavaScript and framework projects. It detects risky patterns through Tree-sitter AST queries, reports findings in JSON/CSV, and also exports package inventory and framework summaries.
+JavaScript-Security-Scanner is a lightweight Go-based static scanner for JavaScript and framework projects. It now also supports Python, Go, and Rust source scanning, reports findings in JSON/CSV, and exports package inventory, framework summaries, and compromised-package intel matches.
 
 ## Features
 
-- Scans JavaScript/TypeScript source files (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`).
+- Scans JavaScript/TypeScript, Python, Go, and Rust source files (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.rs`).
 - Loads security signatures from YAML rule files in `rules/`.
 - Supports native rule files plus Semgrep/OpenGrep bundle files (`rules: [...]`) when each imported rule provides a Tree-sitter-compatible `query` (or `metadata.query`).
 - Produces findings in JSON and CSV formats.
-- Produces package inventory outputs (table text + CSV + summary CSV).
+- Produces compromised-package intel outputs from local YAML plus an optional remote JSON feed with IoCs.
+- Produces package inventory outputs (table text + CSV + summary CSV) across supported dependency manifests including `package.json`, `requirements.txt`, `go.mod`, and `Cargo.toml`.
 - Supports Windows-first scripts and cross-platform shell scripts.
 
 ## Requirements
@@ -64,6 +65,8 @@ CC=gcc go run ./cmd/scanner/main.go \
   -packages-out ./tests/package_versions.txt \
   -packages-csv-out ./tests/package_versions.csv \
   -packages-summary-csv-out ./tests/package_summary.csv \
+  -compromised-json-out ./tests/compromised_packages.json \
+  -compromised-csv-out ./tests/compromised_packages.csv \
   -findings-json-out ./tests/findings_report.json \
   -findings-framework-csv-out ./tests/findings_framework_summary.csv \
   -findings-csv-out ./tests/findings.csv
@@ -82,14 +85,19 @@ CC=gcc go run ./cmd/scanner/main.go \
 
 Relevant flags:
 
-| Flag                  | Default          | Description                                                                 |
-|-----------------------|------------------|-----------------------------------------------------------------------------|
-| `-url`                | (empty)          | When set, fetch JavaScript from this URL before scanning.                   |
-| `-fetch-out`          | `./fetched-site` | Directory to write downloaded JavaScript and `manifest.json`.               |
-| `-fetch-timeout`      | `30s`            | Per-request HTTP timeout.                                                   |
-| `-fetch-user-agent`   | scanner UA       | `User-Agent` header sent on each request.                                   |
-| `-fetch-max-bytes`    | `5242880` (5 MiB)| Maximum bytes accepted per response; larger responses are skipped.          |
-| `-fetch-same-origin`  | `true`           | When `true`, skip external scripts whose host differs from the page URL.    |
+| Flag | Default | Description |
+|---|---|---|
+| `-url` | (empty) | When set, fetch JavaScript from this URL before scanning. |
+| `-fetch-out` | `./fetched-site` | Directory to write downloaded JavaScript and `manifest.json`. |
+| `-fetch-timeout` | `30s` | Per-request HTTP timeout. |
+| `-fetch-user-agent` | scanner UA | `User-Agent` header sent on each request. |
+| `-fetch-max-bytes` | `5242880` (5 MiB) | Maximum bytes accepted per response; larger responses are skipped. |
+| `-fetch-same-origin` | `true` | When `true`, skip external scripts whose host differs from the page URL. |
+| `-compromised-rules` | `./intel/compromised_packages.yaml` | Local YAML seed rules for compromised package intelligence. |
+| `-compromised-feed-url` | (empty) | Optional remote JSON feed for compromised package rules and IoCs. |
+| `-compromised-generated-rules-out` | (empty) | Optional YAML path to write the merged compromised package ruleset. |
+| `-compromised-json-out` | `./compromised_packages.json` | JSON report for compromised package matches. |
+| `-compromised-csv-out` | `./compromised_packages.csv` | CSV report for compromised package matches. |
 
 Notes and limitations:
 
@@ -103,6 +111,8 @@ Notes and limitations:
 - Package inventory text: `package_versions.txt`
 - Package inventory CSV: `package_versions.csv`
 - Package summary CSV: `package_summary.csv`
+- Compromised package JSON: `compromised_packages.json`
+- Compromised package CSV: `compromised_packages.csv`
 - Findings JSON: `findings_report.json`
 - Findings CSV: `findings.csv`
 - Findings framework summary CSV: `findings_framework_summary.csv`
