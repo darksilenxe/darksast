@@ -1,8 +1,18 @@
 {
-  "timestamp": "2026-04-29T00:42:43Z",
+  "timestamp": "2026-04-29T00:43:35Z",
   "target_directory": "./tests",
-  "total_findings": 98,
+  "total_findings": 104,
   "findings": [
+    {
+      "file": "tests/multilang_rule_coverage.java",
+      "line": 9,
+      "column": 9,
+      "rule_id": "JAVA-INSECURE-HOSTNAME-VERIFIER",
+      "severity": "HIGH",
+      "framework": "Java",
+      "snippet": "conn.setHostnameVerifier((host, session) -\u003e true);",
+      "confidence": "MEDIUM"
+    },
     {
       "file": "tests/multilang_rule_coverage.py",
       "line": 13,
@@ -11,6 +21,46 @@
       "severity": "HIGH",
       "framework": "Python",
       "snippet": "eval(user_input)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.php",
+      "line": 4,
+      "column": 1,
+      "rule_id": "PHP-CURL-SSL-VERIFY-FALSE",
+      "severity": "HIGH",
+      "framework": "PHP",
+      "snippet": "curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.rb",
+      "line": 2,
+      "column": 1,
+      "rule_id": "RUBY-DIGEST-MD5",
+      "severity": "MEDIUM",
+      "framework": "Ruby",
+      "snippet": "Digest::MD5.hexdigest(data)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.yaml",
+      "line": 9,
+      "column": 1,
+      "rule_id": "YAML-INSECURE-SKIP-TLS-VERIFY",
+      "severity": "HIGH",
+      "framework": "YAML",
+      "snippet": "insecureSkipTlsVerify: true",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.php",
+      "line": 5,
+      "column": 1,
+      "rule_id": "PHP-EVAL-EXEC",
+      "severity": "HIGH",
+      "framework": "PHP",
+      "snippet": "eval($input);",
       "confidence": "MEDIUM"
     },
     {
@@ -34,33 +84,13 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/multilang_rule_coverage.java",
-      "line": 9,
-      "column": 9,
-      "rule_id": "JAVA-INSECURE-HOSTNAME-VERIFIER",
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 58,
+      "column": 21,
+      "rule_id": "ANGULAR-BYPASS-SECURITY-RESOURCE-URL",
       "severity": "HIGH",
-      "framework": "Java",
-      "snippet": "conn.setHostnameVerifier((host, session) -\u003e true);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.php",
-      "line": 4,
-      "column": 1,
-      "rule_id": "PHP-CURL-SSL-VERIFY-FALSE",
-      "severity": "HIGH",
-      "framework": "PHP",
-      "snippet": "curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.py",
-      "line": 17,
-      "column": 1,
-      "rule_id": "PYTHON-INSECURE-HASHLIB",
-      "severity": "MEDIUM",
-      "framework": "Python",
-      "snippet": "hashlib.md5(data).hexdigest()",
+      "framework": "Angular",
+      "snippet": "const resourceUrl = sanitizer.bypassSecurityTrustResourceUrl(userInput);",
       "confidence": "MEDIUM"
     },
     {
@@ -74,16 +104,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/multilang_rule_coverage.go",
-      "line": 15,
-      "column": 6,
-      "rule_id": "GO-TLS-INSECURE-SKIP-VERIFY",
-      "severity": "HIGH",
-      "framework": "Go",
-      "snippet": "_ = \u0026tls.Config{InsecureSkipVerify: true}",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/multilang_rule_coverage.rs",
       "line": 6,
       "column": 13,
@@ -94,113 +114,13 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/multilang_rule_coverage.yaml",
-      "line": 9,
+      "file": "tests/multilang_rule_coverage.rb",
+      "line": 4,
       "column": 1,
-      "rule_id": "YAML-INSECURE-SKIP-TLS-VERIFY",
+      "rule_id": "RUBY-OPENSSL-VERIFY-NONE",
       "severity": "HIGH",
-      "framework": "YAML",
-      "snippet": "insecureSkipTlsVerify: true",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.py",
-      "line": 15,
-      "column": 1,
-      "rule_id": "PYTHON-PICKLE-LOADS",
-      "severity": "HIGH",
-      "framework": "Python",
-      "snippet": "pickle.loads(blob)",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 56,
-      "column": 21,
-      "rule_id": "ANGULAR-BYPASS-SECURITY-RESOURCE-URL",
-      "severity": "HIGH",
-      "framework": "Angular",
-      "snippet": "const resourceUrl = sanitizer.bypassSecurityTrustResourceUrl(userInput);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.rs",
-      "line": 7,
-      "column": 13,
-      "rule_id": "RUST-MD5-COMPUTE",
-      "severity": "MEDIUM",
-      "framework": "Rust",
-      "snippet": "let _ = md5::compute(data);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.java",
-      "line": 7,
-      "column": 9,
-      "rule_id": "JAVA-INSECURE-MESSAGE-DIGEST",
-      "severity": "MEDIUM",
-      "framework": "Java",
-      "snippet": "MessageDigest.getInstance(\"MD5\");",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.php",
-      "line": 5,
-      "column": 1,
-      "rule_id": "PHP-EVAL-EXEC",
-      "severity": "HIGH",
-      "framework": "PHP",
-      "snippet": "eval($input);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 17,
-      "column": 17,
-      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-HTML",
-      "severity": "HIGH",
-      "framework": "Angular",
-      "snippet": "const trusted = sanitizer.bypassSecurityTrustHtml(html);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.cs",
-      "line": 7,
-      "column": 9,
-      "rule_id": "CSHARP-INSECURE-HASH",
-      "severity": "MEDIUM",
-      "framework": "C#",
-      "snippet": "MD5.Create();",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 55,
-      "column": 17,
-      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-URL",
-      "severity": "HIGH",
-      "framework": "Angular",
-      "snippet": "const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.py",
-      "line": 16,
-      "column": 1,
-      "rule_id": "PYTHON-REQUESTS-VERIFY-FALSE",
-      "severity": "HIGH",
-      "framework": "Python",
-      "snippet": "requests.get(url, verify=False)",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.yaml",
-      "line": 7,
-      "column": 9,
-      "rule_id": "YAML-PRIVILEGED-CONTAINER",
-      "severity": "HIGH",
-      "framework": "YAML",
-      "snippet": "privileged: true",
+      "framework": "Ruby",
+      "snippet": "OpenSSL::SSL::VERIFY_NONE",
       "confidence": "MEDIUM"
     },
     {
@@ -214,13 +134,63 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/multilang_rule_coverage.java",
+      "line": 7,
+      "column": 9,
+      "rule_id": "JAVA-INSECURE-MESSAGE-DIGEST",
+      "severity": "MEDIUM",
+      "framework": "Java",
+      "snippet": "MessageDigest.getInstance(\"MD5\");",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/multilang_rule_coverage.py",
-      "line": 12,
+      "line": 17,
       "column": 1,
-      "rule_id": "PYTHON-SUBPROCESS-SHELL-TRUE",
-      "severity": "HIGH",
+      "rule_id": "PYTHON-INSECURE-HASHLIB",
+      "severity": "MEDIUM",
       "framework": "Python",
-      "snippet": "subprocess.run(user_input, shell=True)",
+      "snippet": "hashlib.md5(data).hexdigest()",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.yaml",
+      "line": 7,
+      "column": 9,
+      "rule_id": "YAML-PRIVILEGED-CONTAINER",
+      "severity": "HIGH",
+      "framework": "YAML",
+      "snippet": "privileged: true",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.go",
+      "line": 15,
+      "column": 6,
+      "rule_id": "GO-TLS-INSECURE-SKIP-VERIFY",
+      "severity": "HIGH",
+      "framework": "Go",
+      "snippet": "_ = \u0026tls.Config{InsecureSkipVerify: true}",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/framework_rule_coverage.js",
+      "line": 17,
+      "column": 17,
+      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-HTML",
+      "severity": "HIGH",
+      "framework": "Angular",
+      "snippet": "const trusted = sanitizer.bypassSecurityTrustHtml(html);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.yaml",
+      "line": 8,
+      "column": 1,
+      "rule_id": "YAML-VERIFY-FALSE",
+      "severity": "HIGH",
+      "framework": "YAML",
+      "snippet": "verify: false",
       "confidence": "MEDIUM"
     },
     {
@@ -244,16 +214,6 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/multilang_rule_coverage.rs",
-      "line": 8,
-      "column": 13,
-      "rule_id": "RUST-REQWEST-INVALID-CERTS",
-      "severity": "HIGH",
-      "framework": "Rust",
-      "snippet": "let _ = reqwest::Client::builder().danger_accept_invalid_certs(true).build();",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/multilang_rule_coverage.java",
       "line": 6,
       "column": 9,
@@ -264,23 +224,43 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/multilang_rule_coverage.yaml",
-      "line": 8,
+      "file": "tests/multilang_rule_coverage.py",
+      "line": 15,
       "column": 1,
-      "rule_id": "YAML-VERIFY-FALSE",
+      "rule_id": "PYTHON-PICKLE-LOADS",
       "severity": "HIGH",
-      "framework": "YAML",
-      "snippet": "verify: false",
+      "framework": "Python",
+      "snippet": "pickle.loads(blob)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.rs",
+      "line": 7,
+      "column": 13,
+      "rule_id": "RUST-MD5-COMPUTE",
+      "severity": "MEDIUM",
+      "framework": "Rust",
+      "snippet": "let _ = md5::compute(data);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 57,
+      "column": 17,
+      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-URL",
+      "severity": "HIGH",
+      "framework": "Angular",
+      "snippet": "const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);",
       "confidence": "MEDIUM"
     },
     {
       "file": "tests/multilang_rule_coverage.py",
-      "line": 14,
+      "line": 16,
       "column": 1,
-      "rule_id": "PYTHON-UNSAFE-YAML-LOAD",
+      "rule_id": "PYTHON-REQUESTS-VERIFY-FALSE",
       "severity": "HIGH",
       "framework": "Python",
-      "snippet": "yaml.load(data)",
+      "snippet": "requests.get(url, verify=False)",
       "confidence": "MEDIUM"
     },
     {
@@ -294,133 +274,33 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/multilang_rule_coverage.rb",
-      "line": 2,
-      "column": 1,
-      "rule_id": "RUBY-DIGEST-MD5",
-      "severity": "MEDIUM",
-      "framework": "Ruby",
-      "snippet": "Digest::MD5.hexdigest(data)",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 100,
-      "column": 1,
-      "rule_id": "COOKIE-SECURE-FALSE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "res.cookie('sid', token, { secure: false, httpOnly: true });",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.rb",
-      "line": 4,
-      "column": 1,
-      "rule_id": "RUBY-OPENSSL-VERIFY-NONE",
-      "severity": "HIGH",
-      "framework": "Ruby",
-      "snippet": "OpenSSL::SSL::VERIFY_NONE",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/multilang_rule_coverage.cs",
-      "line": 6,
-      "column": 9,
-      "rule_id": "CSHARP-PROCESS-START",
-      "severity": "HIGH",
-      "framework": "C#",
-      "snippet": "Process.Start(cmd);",
-      "confidence": "MEDIUM"
-    },
-    {
       "file": "tests/rule_coverage.js",
-      "line": 14,
+      "line": 22,
       "column": 1,
-      "rule_id": "JS-EVAL-EXEC",
-      "severity": "HIGH",
-      "framework": "JavaScript",
-      "snippet": "eval(userInput);",
-      "confidence": "HIGH"
-    },
-    {
-      "file": "tests/rule_coverage.js",
-      "line": 17,
-      "column": 16,
-      "rule_id": "JS-FUNCTION-CONSTRUCTOR",
-      "severity": "HIGH",
-      "framework": "JavaScript",
-      "snippet": "const fn = new Function(\"a\", \"b\", \"return a + b;\");",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-site/app.js",
-      "line": 13,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 52,
-      "column": 1,
-      "rule_id": "CORS-WILDCARD-CREDENTIALS",
-      "severity": "HIGH",
+      "rule_id": "NODE-CHILD-PROCESS-EXEC",
+      "severity": "CRITICAL",
       "framework": "Node.js",
-      "snippet": "cors({ origin: '*', credentials: true });",
+      "snippet": "child_process.execFile(userInput);",
       "confidence": "MEDIUM"
     },
     {
       "file": "tests/rule_coverage.js",
-      "line": 24,
+      "line": 23,
       "column": 1,
-      "rule_id": "DOM-XSS-DOCUMENT-WRITE",
-      "severity": "HIGH",
-      "framework": "JavaScript",
-      "snippet": "document.write(userInput);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-site/app.js",
-      "line": 13,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/rule_coverage.js",
-      "line": 27,
-      "column": 1,
-      "rule_id": "DOM-XSS-INNERHTML-ASSIGN",
-      "severity": "HIGH",
-      "framework": "JavaScript",
-      "snippet": "document.body.innerHTML = userInput;",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-site/app.js",
-      "line": 13,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
-      "severity": "MEDIUM",
+      "rule_id": "NODE-CHILD-PROCESS-EXEC",
+      "severity": "CRITICAL",
       "framework": "Node.js",
-      "snippet": "session({",
+      "snippet": "child_process.execFileSync(userInput);",
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/rule_coverage.js",
-      "line": 6,
+      "file": "tests/multilang_rule_coverage.py",
+      "line": 12,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-HTTPONLY-FALSE",
-      "severity": "MEDIUM",
-      "framework": "Node.js",
-      "snippet": "session({",
+      "rule_id": "PYTHON-SUBPROCESS-SHELL-TRUE",
+      "severity": "HIGH",
+      "framework": "Python",
+      "snippet": "subprocess.run(user_input, shell=True)",
       "confidence": "MEDIUM"
     },
     {
@@ -434,33 +314,73 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/rule_coverage.js",
-      "line": 6,
+      "file": "tests/multilang_rule_coverage.py",
+      "line": 14,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
+      "rule_id": "PYTHON-UNSAFE-YAML-LOAD",
+      "severity": "HIGH",
+      "framework": "Python",
+      "snippet": "yaml.load(data)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 104,
+      "column": 1,
+      "rule_id": "COOKIE-SECURE-FALSE",
+      "severity": "MEDIUM",
       "framework": "Express",
-      "snippet": "session({",
+      "snippet": "res.cookie('sid', token, { secure: false, httpOnly: true });",
       "confidence": "MEDIUM"
     },
     {
       "file": "tests/rule_coverage.js",
-      "line": 6,
+      "line": 14,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM"
+      "rule_id": "JS-EVAL-EXEC",
+      "severity": "HIGH",
+      "framework": "JavaScript",
+      "snippet": "eval(userInput);",
+      "confidence": "HIGH"
     },
     {
-      "file": "tests/rule_coverage.js",
-      "line": 6,
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 54,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
-      "severity": "MEDIUM",
+      "rule_id": "CORS-WILDCARD-CREDENTIALS",
+      "severity": "HIGH",
       "framework": "Node.js",
-      "snippet": "session({",
+      "snippet": "cors({ origin: '*', credentials: true });",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 17,
+      "column": 16,
+      "rule_id": "JS-FUNCTION-CONSTRUCTOR",
+      "severity": "HIGH",
+      "framework": "JavaScript",
+      "snippet": "const fn = new Function(\"a\", \"b\", \"return a + b;\");",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.rs",
+      "line": 8,
+      "column": 13,
+      "rule_id": "RUST-REQWEST-INVALID-CERTS",
+      "severity": "HIGH",
+      "framework": "Rust",
+      "snippet": "let _ = reqwest::Client::builder().danger_accept_invalid_certs(true).build();",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.cs",
+      "line": 7,
+      "column": 9,
+      "rule_id": "CSHARP-INSECURE-HASH",
+      "severity": "MEDIUM",
+      "framework": "C#",
+      "snippet": "MD5.Create();",
       "confidence": "MEDIUM"
     },
     {
@@ -474,8 +394,58 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
+      "file": "tests/rule_coverage.js",
+      "line": 26,
+      "column": 1,
+      "rule_id": "DOM-XSS-DOCUMENT-WRITE",
+      "severity": "HIGH",
+      "framework": "JavaScript",
+      "snippet": "document.write(userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-vue/main.js",
+      "line": 4,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 29,
+      "column": 1,
+      "rule_id": "DOM-XSS-INNERHTML-ASSIGN",
+      "severity": "HIGH",
+      "framework": "JavaScript",
+      "snippet": "document.body.innerHTML = userInput;",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 32,
+      "column": 1,
+      "rule_id": "DOM-XSS-INSERT-ADJACENT-HTML",
+      "severity": "HIGH",
+      "framework": "JavaScript",
+      "snippet": "document.body.insertAdjacentHTML('beforeend', userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/framework_rule_coverage.js",
+      "line": 4,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 6,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-HTTPONLY-FALSE",
       "severity": "MEDIUM",
@@ -484,11 +454,21 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/sample-vue/main.js",
+      "file": "tests/framework_rule_coverage.js",
       "line": 4,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
       "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 13,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
       "framework": "Express",
       "snippet": "session({",
       "confidence": "MEDIUM"
@@ -504,8 +484,18 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
+      "file": "tests/sample-site/app.js",
+      "line": 13,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 6,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
       "severity": "LOW",
@@ -515,7 +505,37 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
+      "line": 95,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-HTTPONLY-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 13,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 95,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 6,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
       "severity": "MEDIUM",
@@ -524,8 +544,38 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/multilang_rule_coverage.cs",
+      "line": 6,
+      "column": 9,
+      "rule_id": "CSHARP-PROCESS-START",
+      "severity": "HIGH",
+      "framework": "C#",
+      "snippet": "Process.Start(cmd);",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
+      "line": 95,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 6,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 95,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
       "severity": "MEDIUM",
@@ -564,23 +614,33 @@
       "confidence": "HIGH"
     },
     {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 4,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "file": "tests/sample-vue/main.js",
+      "line": 11,
+      "column": 17,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
       "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
+      "framework": "React",
+      "snippet": "const state = { ...payload, active: true };",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 35,
+      "column": 12,
+      "rule_id": "JS-STRING-TIMER-EXEC",
+      "severity": "MEDIUM",
+      "framework": "JavaScript",
+      "snippet": "setTimeout(\"console.log('timer string')\", 1000);",
       "confidence": "MEDIUM"
     },
     {
       "file": "tests/framework_rule_coverage.js",
-      "line": 4,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "line": 27,
+      "column": 5,
+      "rule_id": "NEXTJS-DANGEROUSLY-ALLOW-SVG",
       "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "session({",
+      "framework": "Next.js",
+      "snippet": "dangerouslyAllowSVG: true",
       "confidence": "MEDIUM"
     },
     {
@@ -645,7 +705,7 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 98,
+      "line": 102,
       "column": 1,
       "rule_id": "JWT-VERIFY-IGNORE-EXPIRATION",
       "severity": "MEDIUM",
@@ -655,12 +715,22 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 62,
+      "line": 64,
       "column": 9,
       "rule_id": "NEXTJS-REMOTE-PATTERN-WILDCARD",
       "severity": "MEDIUM",
       "framework": "Next.js",
       "snippet": "{ hostname: '*' }",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 80,
+      "column": 1,
+      "rule_id": "NODE-TLS-REJECT-UNAUTHORIZED-ENV-ZERO",
+      "severity": "HIGH",
+      "framework": "Node.js",
+      "snippet": "process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';",
       "confidence": "MEDIUM"
     },
     {
@@ -705,22 +775,12 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 99,
+      "line": 103,
       "column": 1,
       "rule_id": "OPEN-REDIRECT-WINDOW-OPEN",
       "severity": "MEDIUM",
       "framework": "JavaScript",
       "snippet": "window.open(userInput, '_blank');",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/rule_coverage.js",
-      "line": 30,
-      "column": 12,
-      "rule_id": "JS-STRING-TIMER-EXEC",
-      "severity": "MEDIUM",
-      "framework": "JavaScript",
-      "snippet": "setTimeout(\"console.log('timer string')\", 1000);",
       "confidence": "MEDIUM"
     },
     {
@@ -745,7 +805,7 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 112,
+      "line": 116,
       "column": 13,
       "rule_id": "REACT-UNSAFE-URL-PROP",
       "severity": "MEDIUM",
@@ -755,7 +815,7 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 53,
+      "line": 55,
       "column": 1,
       "rule_id": "SHELL-WRAPPER-EXEC",
       "severity": "CRITICAL",
@@ -765,7 +825,7 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 54,
+      "line": 56,
       "column": 1,
       "rule_id": "SHELL-WRAPPER-EXEC",
       "severity": "CRITICAL",
@@ -774,13 +834,13 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/sample-site/app.js",
-      "line": 21,
-      "column": 18,
+      "file": "tests/test.js",
+      "line": 16,
+      "column": 19,
       "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
       "severity": "LOW",
       "framework": "React",
-      "snippet": "const merged = { ...payload, active: true };",
+      "snippet": "const profile = { ...payload, role: 'reader' };",
       "confidence": "MEDIUM"
     },
     {
@@ -795,7 +855,7 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 101,
+      "line": 105,
       "column": 1,
       "rule_id": "SQL-RAW-QUERY",
       "severity": "HIGH",
@@ -804,18 +864,18 @@
       "confidence": "MEDIUM"
     },
     {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 27,
-      "column": 5,
-      "rule_id": "NEXTJS-DANGEROUSLY-ALLOW-SVG",
-      "severity": "MEDIUM",
-      "framework": "Next.js",
-      "snippet": "dangerouslyAllowSVG: true",
+      "file": "tests/sample-site/app.js",
+      "line": 21,
+      "column": 18,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const merged = { ...payload, active: true };",
       "confidence": "MEDIUM"
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 101,
+      "line": 105,
       "column": 1,
       "rule_id": "SQL-TEMPLATE-LITERAL-QUERY",
       "severity": "HIGH",
@@ -831,16 +891,6 @@
       "severity": "HIGH",
       "framework": "JavaScript",
       "snippet": "axios.get(userInput);",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-site/app.js",
-      "line": 7,
-      "column": 12,
-      "rule_id": "XSS-01",
-      "severity": "HIGH",
-      "framework": "React",
-      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: html }} /\u003e",
       "confidence": "MEDIUM"
     },
     {
@@ -874,6 +924,26 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/test.js",
+      "line": 9,
+      "column": 18,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React",
+      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: rawHTMLContent }} /\u003e",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 7,
+      "column": 12,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React",
+      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: html }} /\u003e",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 49,
       "column": 1,
@@ -885,7 +955,7 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 75,
+      "line": 77,
       "column": 3,
       "rule_id": "TLS-REJECT-UNAUTHORIZED-FALSE",
       "severity": "HIGH",
@@ -894,8 +964,18 @@
       "confidence": "MEDIUM"
     },
     {
+      "file": "tests/framework_rule_coverage.js",
+      "line": 21,
+      "column": 26,
+      "rule_id": "VUE-RENDER-INNERHTML",
+      "severity": "HIGH",
+      "framework": "Vue",
+      "snippet": "const vnode = h('div', { innerHTML: html });",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 102,
+      "line": 106,
       "column": 1,
       "rule_id": "UNSAFE-DESERIALIZATION-CALL",
       "severity": "HIGH",
@@ -905,7 +985,7 @@
     },
     {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 103,
+      "line": 107,
       "column": 1,
       "rule_id": "UNSAFE-DESERIALIZATION-CALL",
       "severity": "HIGH",
@@ -921,6 +1001,26 @@
       "severity": "CRITICAL",
       "framework": "Node.js",
       "snippet": "vm.runInNewContext(userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 52,
+      "column": 1,
+      "rule_id": "UNSAFE-VM-EXECUTION",
+      "severity": "CRITICAL",
+      "framework": "Node.js",
+      "snippet": "vm.compileFunction(userInput, []);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 53,
+      "column": 5,
+      "rule_id": "UNSAFE-VM-EXECUTION",
+      "severity": "CRITICAL",
+      "framework": "Node.js",
+      "snippet": "new vm.Script(userInput);",
       "confidence": "MEDIUM"
     },
     {
@@ -941,46 +1041,6 @@
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "const secret = process.env.JWT_SECRET || 'changeme';",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/sample-vue/main.js",
-      "line": 11,
-      "column": 17,
-      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
-      "severity": "LOW",
-      "framework": "React",
-      "snippet": "const state = { ...payload, active: true };",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/framework_rule_coverage.js",
-      "line": 21,
-      "column": 26,
-      "rule_id": "VUE-RENDER-INNERHTML",
-      "severity": "HIGH",
-      "framework": "Vue",
-      "snippet": "const vnode = h('div', { innerHTML: html });",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/test.js",
-      "line": 16,
-      "column": 19,
-      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
-      "severity": "LOW",
-      "framework": "React",
-      "snippet": "const profile = { ...payload, role: 'reader' };",
-      "confidence": "MEDIUM"
-    },
-    {
-      "file": "tests/test.js",
-      "line": 9,
-      "column": 18,
-      "rule_id": "XSS-01",
-      "severity": "HIGH",
-      "framework": "React",
-      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: rawHTMLContent }} /\u003e",
       "confidence": "MEDIUM"
     }
   ]
