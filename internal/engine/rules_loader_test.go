@@ -47,6 +47,13 @@ func TestLoadRulesMetadataFields(t *testing.T) {
     metadata:
       framework: React
       confidence: HIGH
+      tags: [xss, dom]
+      references:
+        - https://example.com/rules/opengrep-innerhtml
+      cwe: CWE-79
+      owasp:
+        - A03:2021-Injection
+      remediation: Avoid writing unsanitized HTML into the DOM.
       requires_dependency:
         - react
       category: Cross-Site Scripting
@@ -78,6 +85,11 @@ func TestLoadRulesMetadataFields(t *testing.T) {
 	assert.Equal(t, "MEDIUM", rules[0].Severity)
 	assert.Equal(t, "React", rules[0].Framework)
 	assert.Equal(t, "HIGH", rules[0].Confidence)
+	assert.Equal(t, []string{"xss", "dom"}, []string(rules[0].Tags))
+	assert.Equal(t, []string{"https://example.com/rules/opengrep-innerhtml"}, []string(rules[0].References))
+	assert.Equal(t, []string{"CWE-79"}, []string(rules[0].CWE))
+	assert.Equal(t, []string{"A03:2021-Injection"}, []string(rules[0].OWASP))
+	assert.Equal(t, "Avoid writing unsanitized HTML into the DOM.", rules[0].Remediation)
 	assert.Equal(t, []string{"react"}, rules[0].RequiresDependency)
 	assert.Equal(t, "Cross-Site Scripting", rules[0].Metadata.Category)
 	assert.Equal(t, []string{"code-pattern/framework"}, rules[0].Metadata.Taxonomy)
@@ -87,6 +99,44 @@ func TestLoadRulesMetadataFields(t *testing.T) {
 	assert.Equal(t, "Sanitize before rendering.", rules[0].Metadata.Remediation)
 	assert.Equal(t, "React sink.", rules[0].Metadata.ConfidenceRationale)
 	assert.Contains(t, rules[0].Query, "innerHTML")
+}
+
+func TestLoadRulesNativeMetadataFields(t *testing.T) {
+	dir := t.TempDir()
+	ruleFile := filepath.Join(dir, "native.yaml")
+	content := `id: NATIVE-EVAL
+severity: HIGH
+framework: JavaScript
+description: Detect eval usage from native format
+message: Prefer safer parsers over eval.
+tags:
+  - injection
+  - javascript
+references: https://example.com/rules/native-eval
+cwe:
+  - CWE-95
+owasp: A03:2021-Injection
+remediation: Remove eval on attacker-controlled input.
+query: |
+  (call_expression
+    function: (identifier) @fn
+    (#eq? @fn "eval")
+  ) @finding
+`
+	require.NoError(t, os.WriteFile(ruleFile, []byte(content), 0o644))
+
+	rules, err := LoadRules(dir)
+	require.NoError(t, err)
+	require.Len(t, rules, 1)
+
+	assert.Equal(t, "NATIVE-EVAL", rules[0].ID)
+	assert.Equal(t, "Prefer safer parsers over eval.", rules[0].Message)
+	assert.Equal(t, []string{"injection", "javascript"}, []string(rules[0].Tags))
+	assert.Equal(t, []string{"https://example.com/rules/native-eval"}, []string(rules[0].References))
+	assert.Equal(t, []string{"CWE-95"}, []string(rules[0].CWE))
+	assert.Equal(t, []string{"A03:2021-Injection"}, []string(rules[0].OWASP))
+	assert.Equal(t, "Remove eval on attacker-controlled input.", rules[0].Remediation)
+	assert.Equal(t, "Detect eval usage from native format", rules[0].EffectiveDescription())
 }
 
 func TestLoadRulesSkipsSemgrepPatternOnlyRules(t *testing.T) {

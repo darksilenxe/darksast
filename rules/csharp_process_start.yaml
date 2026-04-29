@@ -1,0 +1,12 @@
+id: "CSHARP-PROCESS-START"
+severity: "HIGH"
+framework: "C#"
+language: "C#"
+description: "Detects C# Process.Start() usage."
+query: |
+  (invocation_expression
+    function: (member_access_expression
+      expression: (identifier) @obj (#eq? @obj "Process")
+      name: (identifier) @name (#eq? @name "Start")
+    )
+  ) @finding

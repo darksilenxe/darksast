@@ -1,0 +1,16 @@
+id: "BASH-CURL-INSECURE"
+severity: "HIGH"
+framework: "Bash"
+language: "Bash"
+description: "Detects curl and wget commands that disable TLS verification."
+query: |
+  [
+    (command
+      name: (command_name (word) @cmd (#eq? @cmd "curl"))
+      argument: (word) @flag (#match? @flag "^(-k|--insecure)$")
+    )
+    (command
+      name: (command_name (word) @cmd (#eq? @cmd "wget"))
+      argument: (word) @flag (#eq? @flag "--no-check-certificate")
+    )
+  ] @finding

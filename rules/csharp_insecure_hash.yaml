@@ -1,0 +1,12 @@
+id: "CSHARP-INSECURE-HASH"
+severity: "MEDIUM"
+framework: "C#"
+language: "C#"
+description: "Detects C# MD5.Create() and SHA1.Create() usage."
+query: |
+  (invocation_expression
+    function: (member_access_expression
+      expression: (identifier) @obj (#match? @obj "^(MD5|SHA1)$")
+      name: (identifier) @name (#eq? @name "Create")
+    )
+  ) @finding

@@ -121,3 +121,70 @@ func TestExtractSnippetTruncation(t *testing.T) {
 	assert.Len(t, snippet, 123, "120 chars + '...' suffix = 123 total")
 	assert.True(t, len(snippet) <= 123)
 }
+
+func TestPythonRuleScansPyFiles(t *testing.T) {
+	rule := Rule{
+		ID:       "PYTHON-EVAL",
+		Severity: "HIGH",
+		Language: "Python",
+		Query: `(call
+    function: (identifier) @fn
+    (#eq? @fn "eval")
+  ) @finding`,
+	}
+	require.NoError(t, rule.compile())
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "sample.py")
+	require.NoError(t, os.WriteFile(path, []byte("eval(user_input)\n"), 0o644))
+
+	findings := scanFile(t, path, []Rule{rule})
+	require.Len(t, findings, 1)
+	assert.Equal(t, "PYTHON-EVAL", findings[0].RuleID)
+}
+
+func TestGoRuleScansGoFiles(t *testing.T) {
+	rule := Rule{
+		ID:       "GO-EXEC",
+		Severity: "HIGH",
+		Language: "Go",
+		Query: `(call_expression
+    function: (selector_expression
+      operand: (identifier) @pkg (#eq? @pkg "exec")
+      field: (field_identifier) @fn (#eq? @fn "Command")
+    )
+  ) @finding`,
+	}
+	require.NoError(t, rule.compile())
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "sample.go")
+	require.NoError(t, os.WriteFile(path, []byte("package main\nimport \"os/exec\"\nfunc main(){exec.Command(\"sh\", \"-c\", \"echo hi\")}\n"), 0o644))
+
+	findings := scanFile(t, path, []Rule{rule})
+	require.Len(t, findings, 1)
+	assert.Equal(t, "GO-EXEC", findings[0].RuleID)
+}
+
+func TestRustRuleScansRustFiles(t *testing.T) {
+	rule := Rule{
+		ID:       "RUST-MD5",
+		Severity: "MEDIUM",
+		Language: "Rust",
+		Query: `(call_expression
+    function: (scoped_identifier
+      path: (identifier) @mod (#eq? @mod "md5")
+      name: (identifier) @fn (#eq? @fn "compute")
+    )
+  ) @finding`,
+	}
+	require.NoError(t, rule.compile())
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "sample.rs")
+	require.NoError(t, os.WriteFile(path, []byte("fn main(){ let _ = md5::compute(data); }\n"), 0o644))
+
+	findings := scanFile(t, path, []Rule{rule})
+	require.Len(t, findings, 1)
+	assert.Equal(t, "RUST-MD5", findings[0].RuleID)
+}

@@ -256,6 +256,62 @@ func TestTaintSanitizerThenTransformSuppresses(t *testing.T) {
 	assert.Len(t, findings, 0, "string transforms on sanitized data should remain sanitized")
 }
 
+func TestTaintSanitizerLowercaseSuppresses(t *testing.T) {
+	rule := testRule("INNER-LOWER", "HIGH",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "innerHTML"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const clean = DOMPurify.sanitize(req.body.html).toLowerCase(); el.innerHTML = clean;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 0, "lowercasing sanitized data should remain sanitized")
+}
+
+func TestTaintSanitizerUppercaseSuppresses(t *testing.T) {
+	rule := testRule("INNER-UPPER", "HIGH",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "innerHTML"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const clean = DOMPurify.sanitize(req.body.html).toUpperCase(); el.innerHTML = clean;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 0, "uppercasing sanitized data should remain sanitized")
+}
+
+func TestTaintSanitizerTrimChainSuppresses(t *testing.T) {
+	rule := testRule("INNER-TRIM-CHAIN", "HIGH",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "innerHTML"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const clean = DOMPurify.sanitize(req.body.html).trimStart().trimEnd(); el.innerHTML = clean;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 0, "trim chains on sanitized data should remain sanitized")
+}
+
+func TestTaintTaintedLowercaseStillFires(t *testing.T) {
+	rule := testRule("INNER-TAINTED-LOWER", "HIGH",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "innerHTML"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true, RequireProvenTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const dirty = req.body.html.toLowerCase(); el.innerHTML = dirty;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 1, "tainted receiver transforms should stay tainted")
+}
+
 func TestTaintArgumentsCaptureScansAllArgsByDefault(t *testing.T) {
 	rule := testRule("WINDOW-OPEN", "MEDIUM",
 		`(call_expression
@@ -301,6 +357,34 @@ func TestTaintAliasChainStaysProvablyTainted(t *testing.T) {
 	src := `const src = req.body.next; const alias = src; a.href = alias;` + "\n"
 	findings := scanContent(t, src, []Rule{rule}, nil)
 	assert.Len(t, findings, 1, "alias chains should stay provably tainted")
+}
+
+func TestTaintConstantBinaryAliasSuppresses(t *testing.T) {
+	rule := testRule("REDIR-CONSTANT-BINARY", "MEDIUM",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const base = "/dashboard"; const next = base + "?tab=1"; a.href = next;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 0, "identifier backed by a constant binary expression should be suppressed")
+}
+
+func TestTaintBinaryAliasWithSourceRemainsProvablyTainted(t *testing.T) {
+	rule := testRule("REDIR-BINARY-TAINTED", "MEDIUM",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true, RequireProvenTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const next = "/go?next=" + req.body.next; a.href = next;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 1, "binary expressions with tainted operands should remain provably tainted")
 }
 
 func TestTaintDestructuredBindingStaysProvablyTainted(t *testing.T) {

@@ -61,22 +61,42 @@ func TestCollectReferencedIdentifiersFromComplexExpression(t *testing.T) {
 	assert.ElementsMatch(t, []string{"foo", "bar", "qux", "zap"}, ids)
 }
 
-func TestClassifyCallTreatsStorageReadsAsTainted(t *testing.T) {
-	tree, source := parseTree(t, `const value = localStorage.getItem("token");`)
+func TestBuildFileTaintModelTracksConstantBinaryAssignments(t *testing.T) {
+	tree, source := parseTree(t, `const base = "https://api.example"; const fullUrl = base + "/v1"; sink(fullUrl);`)
 	defer tree.Close()
 
-	call := findFirstNodeByType(tree.RootNode(), "call_expression")
-	require.NotNil(t, call)
-
-	assert.Equal(t, taintTainted, classifyCall(call, source))
+	model := buildFileTaintModel(tree.RootNode(), source)
+	assert.Equal(t, taintConstant, model.resolveIdentifier("fullUrl"))
 }
 
-func TestClassifyCallTreatsSanitizeHtmlAsSanitized(t *testing.T) {
-	tree, source := parseTree(t, `const safe = sanitizeHtml.sanitize(input);`)
+func TestBuildFileTaintModelTracksSanitizedBinaryAssignments(t *testing.T) {
+	tree, source := parseTree(t, `const clean = DOMPurify.sanitize(req.body.html) + ""; sink(clean);`)
 	defer tree.Close()
 
-	call := findFirstNodeByType(tree.RootNode(), "call_expression")
-	require.NotNil(t, call)
+	model := buildFileTaintModel(tree.RootNode(), source)
+	assert.Equal(t, taintSanitized, model.resolveIdentifier("clean"))
+}
 
-	assert.Equal(t, taintSanitized, classifyCall(call, source))
+func TestBuildFileTaintModelTracksSanitizedPassthroughAssignments(t *testing.T) {
+	tree, source := parseTree(t, `const clean = DOMPurify.sanitize(req.body.html).toLowerCase(); sink(clean);`)
+	defer tree.Close()
+
+	model := buildFileTaintModel(tree.RootNode(), source)
+	assert.Equal(t, taintSanitized, model.resolveIdentifier("clean"))
+}
+
+func TestBuildFileTaintModelTracksChainedSanitizedPassthroughAssignments(t *testing.T) {
+	tree, source := parseTree(t, `const clean = DOMPurify.sanitize(req.body.html).trimStart().trimEnd(); sink(clean);`)
+	defer tree.Close()
+
+	model := buildFileTaintModel(tree.RootNode(), source)
+	assert.Equal(t, taintSanitized, model.resolveIdentifier("clean"))
+}
+
+func TestBuildFileTaintModelTracksTaintedBinaryAssignments(t *testing.T) {
+	tree, source := parseTree(t, `const nextUrl = "/go?next=" + req.body.next; sink(nextUrl);`)
+	defer tree.Close()
+
+	model := buildFileTaintModel(tree.RootNode(), source)
+	assert.Equal(t, taintTainted, model.resolveIdentifier("nextUrl"))
 }

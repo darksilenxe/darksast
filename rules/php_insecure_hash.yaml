@@ -1,0 +1,9 @@
+id: "PHP-INSECURE-HASH"
+severity: "MEDIUM"
+framework: "PHP"
+language: "PHP"
+description: "Detects PHP md5()/sha1() usage."
+query: |
+  (function_call_expression
+    function: (name) @fn (#match? @fn "^(md5|sha1)$")
+  ) @finding

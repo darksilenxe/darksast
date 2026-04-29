@@ -25,7 +25,7 @@ query: |
   (call_expression
     function: (member_expression
       object: (identifier) @obj (#eq? @obj "child_process")
-      property: (property_identifier) @method (#match? @method "^(exec|execSync|spawn|spawnSync)$")
+      property: (property_identifier) @method (#match? @method "^(exec|execSync|execFile|execFileSync|spawn|spawnSync)$")
     ) @command_exec
     arguments: (arguments
       (_) @cmd

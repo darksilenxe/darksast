@@ -1,0 +1,22 @@
+id: "GO-TLS-INSECURE-SKIP-VERIFY"
+severity: "HIGH"
+framework: "Go"
+language: "Go"
+description: "Detects Go tls.Config with InsecureSkipVerify enabled."
+query: |
+  (composite_literal
+    type: (qualified_type
+      package: (package_identifier) @pkg (#eq? @pkg "tls")
+      name: (type_identifier) @type (#eq? @type "Config")
+    )
+    body: (literal_value
+      (keyed_element
+        (literal_element
+          (identifier) @key (#eq? @key "InsecureSkipVerify")
+        )
+        (literal_element
+          (true)
+        )
+      )
+    )
+  ) @finding

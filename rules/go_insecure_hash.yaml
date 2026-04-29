@@ -1,0 +1,12 @@
+id: "GO-INSECURE-HASH"
+severity: "MEDIUM"
+framework: "Go"
+language: "Go"
+description: "Detects Go md5.New() and sha1.New() usage."
+query: |
+  (call_expression
+    function: (selector_expression
+      operand: (identifier) @pkg (#match? @pkg "^(md5|sha1)$")
+      field: (field_identifier) @fn (#eq? @fn "New")
+    )
+  ) @finding

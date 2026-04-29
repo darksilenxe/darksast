@@ -1,0 +1,19 @@
+id: "PYTHON-SUBPROCESS-SHELL-TRUE"
+severity: "HIGH"
+framework: "Python"
+language: "Python"
+description: "Detects Python subprocess invocations that enable shell=True."
+query: |
+  (call
+    function: (attribute
+      object: (identifier) @module (#eq? @module "subprocess")
+      attribute: (identifier) @fn (#match? @fn "^(run|Popen|call|check_call|check_output)$")
+    )
+    arguments: (argument_list
+      (_)*
+      (keyword_argument
+        name: (identifier) @kw (#eq? @kw "shell")
+        value: (true)
+      )
+    )
+  ) @finding

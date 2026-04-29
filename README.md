@@ -1,16 +1,17 @@
 # JavaScript-Security-Scanner
 
-JavaScript-Security-Scanner is a lightweight Go-based static scanner for JavaScript and framework projects. It detects risky patterns through Tree-sitter AST queries, reports findings in JSON/CSV, and also exports package inventory and framework summaries.
+JavaScript-Security-Scanner is a lightweight Go-based static scanner for application and configuration code. It supports JavaScript/TypeScript, Python, Go, Rust, Java, PHP, Ruby, C#, Bash, and YAML scanning, reports findings in JSON/CSV, and exports package inventory, framework summaries, and compromised-package intel matches.
 
 ## Features
 
-- Scans JavaScript/TypeScript source files (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`).
+- Scans JavaScript/TypeScript, Python, Go, Rust, Java, PHP, Ruby, C#, Bash, and YAML files (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.rs`, `.java`, `.php`, `.rb`, `.cs`, `.sh`, `.bash`, `.zsh`, `.yaml`, `.yml`).
 - Loads security signatures from YAML rule files in `rules/`.
 - Supports native rule files plus Semgrep/OpenGrep bundle files (`rules: [...]`) when each imported rule provides a Tree-sitter-compatible `query` (or `metadata.query`).
-- Produces findings in JSON and CSV formats.
-- Produces package inventory outputs (table text + CSV + summary CSV).
-- Loads dependency advisories from YAML and reports dependency findings alongside code findings.
-- Resolves installed package versions from common lockfiles such as `package-lock.json`, `pnpm-lock.yaml`, and `yarn.lock`.
+- Produces findings in JSON, CSV, and optional SARIF formats.
+- Produces compromised-package intel outputs from local YAML plus an optional remote JSON feed with IoCs.
+- Produces package inventory outputs (table text + CSV + summary CSV) across supported dependency manifests including `package.json`, `requirements.txt`, `go.mod`, and `Cargo.toml`.
+- Produces OSS dependency vulnerability outputs from local/remote advisory feeds with fixed-version guidance, direct-vs-transitive labeling, optional policy ignores, and CI gating.
+- Resolves npm dependencies from `package-lock.json` / `npm-shrinkwrap.json` so direct and transitive package versions can be matched more accurately.
 - Supports Windows-first scripts and cross-platform shell scripts.
 
 ## Requirements
@@ -67,6 +68,8 @@ CC=gcc go run ./cmd/scanner/main.go \
   -packages-out ./tests/package_versions.txt \
   -packages-csv-out ./tests/package_versions.csv \
   -packages-summary-csv-out ./tests/package_summary.csv \
+  -compromised-json-out ./tests/compromised_packages.json \
+  -compromised-csv-out ./tests/compromised_packages.csv \
   -findings-json-out ./tests/findings_report.json \
   -findings-framework-csv-out ./tests/findings_framework_summary.csv \
   -findings-csv-out ./tests/findings.csv
@@ -85,15 +88,28 @@ CC=gcc go run ./cmd/scanner/main.go \
 
 Relevant flags:
 
-| Flag                  | Default          | Description                                                                 |
-|-----------------------|------------------|-----------------------------------------------------------------------------|
-| `-url`                | (empty)          | When set, fetch JavaScript from this URL before scanning.                   |
-| `-fetch-out`          | `./fetched-site` | Directory to write downloaded JavaScript and `manifest.json`.               |
-| `-fetch-timeout`      | `30s`            | Per-request HTTP timeout.                                                   |
-| `-fetch-user-agent`   | scanner UA       | `User-Agent` header sent on each request.                                   |
-| `-fetch-max-bytes`    | `5242880` (5 MiB)| Maximum bytes accepted per response; larger responses are skipped.          |
-| `-fetch-same-origin`  | `true`           | When `true`, skip external scripts whose host differs from the page URL.    |
-| `-advisories`         | `./advisories`   | Directory containing dependency advisory YAML files used for version checks. |
+| Flag | Default | Description |
+|---|---|---|
+| `-url` | (empty) | When set, fetch JavaScript from this URL before scanning. |
+| `-fetch-out` | `./fetched-site` | Directory to write downloaded JavaScript and `manifest.json`. |
+| `-fetch-timeout` | `30s` | Per-request HTTP timeout. |
+| `-fetch-user-agent` | scanner UA | `User-Agent` header sent on each request. |
+| `-fetch-max-bytes` | `5242880` (5 MiB) | Maximum bytes accepted per response; larger responses are skipped. |
+| `-fetch-same-origin` | `true` | When `true`, skip external scripts whose host differs from the page URL. |
+| `-compromised-rules` | `./intel/compromised_packages.yaml` | Local YAML seed rules for compromised package intelligence. |
+| `-compromised-feed-url` | (empty) | Optional remote JSON feed for compromised package rules and IoCs. |
+| `-compromised-generated-rules-out` | (empty) | Optional YAML path to write the merged compromised package ruleset. |
+| `-compromised-json-out` | `./compromised_packages.json` | JSON report for compromised package matches. |
+| `-compromised-csv-out` | `./compromised_packages.csv` | CSV report for compromised package matches. |
+| `-advisory-rules` | `./intel/advisories.yaml` | Local YAML/JSON advisory bundle for OSS dependency vulnerability matching. |
+| `-advisory-feed-url` | (empty) | Optional remote JSON feed for OSS dependency advisories. |
+| `-advisory-generated-rules-out` | (empty) | Optional YAML path to write the merged advisory ruleset. |
+| `-advisory-policy` | (empty) | Optional YAML policy file with `ignores:` entries keyed by advisory ID, package, and optional expiry. |
+| `-oss-vulns-json-out` | `./oss_vulnerabilities.json` | JSON report for OSS dependency vulnerability matches. |
+| `-oss-vulns-csv-out` | `./oss_vulnerabilities.csv` | CSV report for OSS dependency vulnerability matches. |
+| `-oss-vulns-summary-csv-out` | `./oss_vulnerabilities_summary.csv` | Summary CSV for OSS dependency vulnerability matches. |
+| `-fail-on-oss-vuln-severity` | (empty) | Exit non-zero when OSS dependency findings at or above the selected severity remain after policy filtering. |
+| `-findings-sarif-out` | (empty) | Optional SARIF output path for findings. |
 
 Notes and limitations:
 
@@ -107,7 +123,13 @@ Notes and limitations:
 - Package inventory text: `package_versions.txt`
 - Package inventory CSV: `package_versions.csv`
 - Package summary CSV: `package_summary.csv`
+- Compromised package JSON: `compromised_packages.json`
+- Compromised package CSV: `compromised_packages.csv`
+- OSS dependency vulnerability JSON: `oss_vulnerabilities.json`
+- OSS dependency vulnerability CSV: `oss_vulnerabilities.csv`
+- OSS dependency vulnerability summary CSV: `oss_vulnerabilities_summary.csv`
 - Findings JSON: `findings_report.json`
+- Findings SARIF (optional): user-specified via `-findings-sarif-out`
 - Findings CSV: `findings.csv`
 - Findings framework summary CSV: `findings_framework_summary.csv`
 - Fetched JavaScript manifest (only when `-url` is set): `<fetch-out>/manifest.json`

@@ -1,0 +1,29 @@
+id: "RUST-REQWEST-INVALID-CERTS"
+severity: "HIGH"
+framework: "Rust"
+language: "Rust"
+description: "Detects Rust reqwest clients that disable certificate validation."
+query: |
+  (call_expression
+    function: (field_expression
+      value: (call_expression
+        function: (field_expression
+          value: (call_expression
+            function: (scoped_identifier
+              path: (scoped_identifier
+                path: (identifier) @pkg (#eq? @pkg "reqwest")
+                name: (identifier) @typ (#eq? @typ "Client")
+              )
+              name: (identifier) @builder (#eq? @builder "builder")
+            )
+            arguments: (arguments)
+          )
+          field: (field_identifier) @method (#eq? @method "danger_accept_invalid_certs")
+        )
+        arguments: (arguments
+          (boolean_literal) @flag (#eq? @flag "true")
+        )
+      )
+      field: (field_identifier) @build (#eq? @build "build")
+    )
+  ) @finding

@@ -1,0 +1,13 @@
+id: "RUBY-OPENSSL-VERIFY-NONE"
+severity: "HIGH"
+framework: "Ruby"
+language: "Ruby"
+description: "Detects Ruby OpenSSL::SSL::VERIFY_NONE usage."
+query: |
+  (scope_resolution
+    scope: (scope_resolution
+      scope: (constant) @openssl (#eq? @openssl "OpenSSL")
+      name: (constant) @ssl (#eq? @ssl "SSL")
+    )
+    name: (constant) @verify (#eq? @verify "VERIFY_NONE")
+  ) @finding

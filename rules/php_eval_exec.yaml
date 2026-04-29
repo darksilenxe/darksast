@@ -1,0 +1,9 @@
+id: "PHP-EVAL-EXEC"
+severity: "HIGH"
+framework: "PHP"
+language: "PHP"
+description: "Detects PHP eval() usage."
+query: |
+  (function_call_expression
+    function: (name) @fn (#eq? @fn "eval")
+  ) @finding

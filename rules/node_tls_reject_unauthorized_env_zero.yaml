@@ -1,0 +1,15 @@
+id: "NODE-TLS-REJECT-UNAUTHORIZED-ENV-ZERO"
+severity: "HIGH"
+framework: "Node.js"
+description: "Detects disabling Node.js TLS certificate validation by setting process.env.NODE_TLS_REJECT_UNAUTHORIZED to 0."
+query: |
+  (assignment_expression
+    left: (member_expression
+      object: (member_expression
+        object: (identifier) @proc (#eq? @proc "process")
+        property: (property_identifier) @env (#eq? @env "env")
+      )
+      property: (property_identifier) @name (#eq? @name "NODE_TLS_REJECT_UNAUTHORIZED")
+    ) @env_setting
+    right: (string) @value (#match? @value "^[\"']0[\"']$")
+  ) @tls_bypass

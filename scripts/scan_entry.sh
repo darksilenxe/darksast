@@ -43,6 +43,8 @@ case "$TARGET_KEY" in
     FINDINGS_JSON_OUT="./findings_report.json"
     FINDINGS_FRAMEWORK_CSV_OUT="./findings_framework_summary.csv"
     FINDINGS_CSV_OUT="./findings.csv"
+    COMPROMISED_JSON_OUT="./compromised_packages.json"
+    COMPROMISED_CSV_OUT="./compromised_packages.csv"
     ;;
   tests)
     DIR="./tests"
@@ -53,6 +55,8 @@ case "$TARGET_KEY" in
     FINDINGS_JSON_OUT="./tests/findings_report.json"
     FINDINGS_FRAMEWORK_CSV_OUT="./tests/findings_framework_summary.csv"
     FINDINGS_CSV_OUT="./tests/findings.csv"
+    COMPROMISED_JSON_OUT="./tests/compromised_packages.json"
+    COMPROMISED_CSV_OUT="./tests/compromised_packages.csv"
     ;;
   sample-site)
     DIR="./tests/sample-site"
@@ -63,6 +67,8 @@ case "$TARGET_KEY" in
     FINDINGS_JSON_OUT="./tests/sample-site/findings_report.json"
     FINDINGS_FRAMEWORK_CSV_OUT="./tests/sample-site/findings_framework_summary.csv"
     FINDINGS_CSV_OUT="./tests/sample-site/findings.csv"
+    COMPROMISED_JSON_OUT="./tests/sample-site/compromised_packages.json"
+    COMPROMISED_CSV_OUT="./tests/sample-site/compromised_packages.csv"
     ;;
   sample-vue)
     DIR="./tests/sample-vue"
@@ -73,6 +79,8 @@ case "$TARGET_KEY" in
     FINDINGS_JSON_OUT="./tests/sample-vue/findings_report.json"
     FINDINGS_FRAMEWORK_CSV_OUT="./tests/sample-vue/findings_framework_summary.csv"
     FINDINGS_CSV_OUT="./tests/sample-vue/findings.csv"
+    COMPROMISED_JSON_OUT="./tests/sample-vue/compromised_packages.json"
+    COMPROMISED_CSV_OUT="./tests/sample-vue/compromised_packages.csv"
     ;;
 esac
 
@@ -98,4 +106,6 @@ fi
   --packages-summary-csv-out "$PACKAGES_SUMMARY_CSV_OUT" \
   --findings-json-out "$FINDINGS_JSON_OUT" \
   --findings-framework-csv-out "$FINDINGS_FRAMEWORK_CSV_OUT" \
-  --findings-csv-out "$FINDINGS_CSV_OUT"
+  --findings-csv-out "$FINDINGS_CSV_OUT" \
+  --compromised-json-out "$COMPROMISED_JSON_OUT" \
+  --compromised-csv-out "$COMPROMISED_CSV_OUT"

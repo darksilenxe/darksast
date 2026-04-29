@@ -1,0 +1,9 @@
+id: "RUBY-SYSTEM-CALL"
+severity: "HIGH"
+framework: "Ruby"
+language: "Ruby"
+description: "Detects Ruby system() shell invocation usage."
+query: |
+  (call
+    method: (identifier) @fn (#eq? @fn "system")
+  ) @finding

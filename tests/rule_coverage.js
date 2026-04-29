@@ -19,12 +19,17 @@ console.log(fn(1, 2));
 
 // Rule: NODE-CHILD-PROCESS-EXEC
 child_process.exec("dir " + userInput);
+child_process.execFile(userInput);
+child_process.execFileSync(userInput);
 
 // Rule: DOM-XSS-DOCUMENT-WRITE
 document.write(userInput);
 
 // Rule: DOM-XSS-INNERHTML-ASSIGN
 document.body.innerHTML = userInput;
+
+// Rule: DOM-XSS-INSERT-ADJACENT-HTML
+document.body.insertAdjacentHTML('beforeend', userInput);
 
 // Rule: JS-STRING-TIMER-EXEC
 setTimeout("console.log('timer string')", 1000);

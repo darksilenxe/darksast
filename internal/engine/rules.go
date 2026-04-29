@@ -8,9 +8,44 @@ import (
 	"strings"
 
 	sitter "github.com/smacker/go-tree-sitter"
-	"github.com/smacker/go-tree-sitter/javascript"
 	"gopkg.in/yaml.v3"
 )
+
+// StringList accepts either a single YAML scalar or a string sequence.
+type StringList []string
+
+// UnmarshalYAML normalizes a scalar-or-sequence YAML node into a slice.
+func (s *StringList) UnmarshalYAML(value *yaml.Node) error {
+	switch value.Kind {
+	case yaml.ScalarNode:
+		trimmed := strings.TrimSpace(value.Value)
+		if trimmed == "" {
+			*s = nil
+			return nil
+		}
+		*s = []string{trimmed}
+		return nil
+	case yaml.SequenceNode:
+		out := make([]string, 0, len(value.Content))
+		for _, child := range value.Content {
+			if child.Kind != yaml.ScalarNode {
+				return fmt.Errorf("expected string sequence item, got YAML kind %d", child.Kind)
+			}
+			trimmed := strings.TrimSpace(child.Value)
+			if trimmed == "" {
+				continue
+			}
+			out = append(out, trimmed)
+		}
+		*s = out
+		return nil
+	case 0:
+		*s = nil
+		return nil
+	default:
+		return fmt.Errorf("expected string or string sequence, got YAML kind %d", value.Kind)
+	}
+}
 
 // TaintConfig declares how a rule wants intra-file taint analysis applied.
 type TaintConfig struct {
@@ -47,11 +82,18 @@ type RuleMetadata struct {
 // positives. All such fields are optional and additive — rules that omit
 // them keep their previous behavior.
 type Rule struct {
-	ID          string `yaml:"id"`
-	Severity    string `yaml:"severity"`
-	Framework   string `yaml:"framework"`
-	Description string `yaml:"description"`
-	Query       string `yaml:"query"`
+	ID          string     `yaml:"id"`
+	Severity    string     `yaml:"severity"`
+	Framework   string     `yaml:"framework"`
+	Description string     `yaml:"description"`
+	Query       string     `yaml:"query"`
+	Language    string     `yaml:"language"`
+	Message     string     `yaml:"message"`
+	Tags        StringList `yaml:"tags"`
+	References  StringList `yaml:"references"`
+	CWE         StringList `yaml:"cwe"`
+	OWASP       StringList `yaml:"owasp"`
+	Remediation string     `yaml:"remediation"`
 
 	// Confidence is reported alongside severity. Defaults to "MEDIUM".
 	Confidence string `yaml:"confidence"`
@@ -86,6 +128,7 @@ type Rule struct {
 	Metadata RuleMetadata `yaml:"metadata"`
 
 	compiled         *sitter.Query
+	compiledLanguage string
 	ignoreMatchers   map[string]*regexp.Regexp
 	requireMatchers  map[string]*regexp.Regexp
 	literalCaptures  map[string]struct{}
@@ -93,18 +136,16 @@ type Rule struct {
 }
 
 type semgrepMetadata struct {
-	Framework           string   `yaml:"framework"`
-	Description         string   `yaml:"description"`
-	Confidence          string   `yaml:"confidence"`
-	Query               string   `yaml:"query"`
-	RequiresDependency  []string `yaml:"requires_dependency"`
-	Category            string   `yaml:"category"`
-	Taxonomy            []string `yaml:"taxonomy"`
-	CWE                 []string `yaml:"cwe"`
-	OWASP               []string `yaml:"owasp"`
-	References          []string `yaml:"references"`
-	Remediation         string   `yaml:"remediation"`
-	ConfidenceRationale string   `yaml:"confidence_rationale"`
+	Framework          string     `yaml:"framework"`
+	Description        string     `yaml:"description"`
+	Confidence         string     `yaml:"confidence"`
+	Query              string     `yaml:"query"`
+	RequiresDependency []string   `yaml:"requires_dependency"`
+	Tags               StringList `yaml:"tags"`
+	References         StringList `yaml:"references"`
+	CWE                StringList `yaml:"cwe"`
+	OWASP              StringList `yaml:"owasp"`
+	Remediation        string     `yaml:"remediation"`
 }
 
 type semgrepRule struct {
@@ -132,12 +173,18 @@ func (r *Rule) compile() error {
 		return fmt.Errorf("rule %s has an empty query", r.ID)
 	}
 
-	if r.compiled == nil {
-		compiled, err := sitter.NewQuery([]byte(r.Query), javascript.GetLanguage())
+	spec, err := languageSpecForName(r.EffectiveLanguage())
+	if err != nil {
+		return fmt.Errorf("rule %s: %w", r.ID, err)
+	}
+
+	if r.compiled == nil || r.compiledLanguage != spec.key {
+		compiled, err := sitter.NewQuery([]byte(r.Query), spec.language)
 		if err != nil {
 			return fmt.Errorf("failed to compile query for rule %s: %w", r.ID, err)
 		}
 		r.compiled = compiled
+		r.compiledLanguage = spec.key
 	}
 
 	// Rebuild the post-match filter caches every call. Compilation is
@@ -170,6 +217,14 @@ func (r *Rule) compile() error {
 	return nil
 }
 
+// EffectiveLanguage returns the rule's normalized parser language.
+func (r *Rule) EffectiveLanguage() string {
+	if strings.TrimSpace(r.Language) == "" {
+		return "javascript"
+	}
+	return normalizeLanguageName(r.Language)
+}
+
 // EffectiveConfidence returns the rule's confidence, defaulting to
 // "MEDIUM" when the rule does not declare one.
 func (r *Rule) EffectiveConfidence() string {
@@ -177,6 +232,17 @@ func (r *Rule) EffectiveConfidence() string {
 		return "MEDIUM"
 	}
 	return strings.ToUpper(r.Confidence)
+}
+
+// EffectiveDescription returns the best available descriptive text.
+func (r *Rule) EffectiveDescription() string {
+	if strings.TrimSpace(r.Description) != "" {
+		return strings.TrimSpace(r.Description)
+	}
+	if strings.TrimSpace(r.Message) != "" {
+		return strings.TrimSpace(r.Message)
+	}
+	return fmt.Sprintf("Rule %s matched", strings.TrimSpace(r.ID))
 }
 
 // LoadRules scans a directory for .yaml files and parses them into a slice of Rule structs.
@@ -232,10 +298,7 @@ func LoadRules(rulesDir string) ([]Rule, error) {
 
 func semgrepToRule(in semgrepRule) (Rule, bool) {
 	id := strings.TrimSpace(in.ID)
-	query := strings.TrimSpace(resolveSemgrepQuery(in))
-	if id == "" || query == "" {
-		return Rule{}, false
-	}
+	query := ""
 
 	description := strings.TrimSpace(in.Message)
 	if description == "" {
@@ -245,28 +308,32 @@ func semgrepToRule(in semgrepRule) (Rule, bool) {
 		description = fmt.Sprintf("Imported from Semgrep/OpenGrep rule %s", id)
 	}
 
+	language := normalizeSemgrepLanguage(in.Metadata.Framework, in.Languages)
+	query = strings.TrimSpace(resolveSemgrepQuery(in, language))
+	if id == "" || query == "" {
+		return Rule{}, false
+	}
+
 	out := Rule{
 		ID:                 id,
 		Severity:           normalizeSemgrepSeverity(in.Severity),
 		Framework:          normalizeSemgrepFramework(in.Metadata.Framework, in.Languages),
 		Description:        description,
 		Query:              query,
+		Language:           language,
+		Message:            strings.TrimSpace(in.Message),
 		Confidence:         strings.TrimSpace(in.Metadata.Confidence),
 		RequiresDependency: in.Metadata.RequiresDependency,
-		Metadata: RuleMetadata{
-			Category:            strings.TrimSpace(in.Metadata.Category),
-			Taxonomy:            append([]string(nil), in.Metadata.Taxonomy...),
-			CWE:                 append([]string(nil), in.Metadata.CWE...),
-			OWASP:               append([]string(nil), in.Metadata.OWASP...),
-			References:          append([]string(nil), in.Metadata.References...),
-			Remediation:         strings.TrimSpace(in.Metadata.Remediation),
-			ConfidenceRationale: strings.TrimSpace(in.Metadata.ConfidenceRationale),
-		},
+		Tags:               in.Metadata.Tags,
+		References:         in.Metadata.References,
+		CWE:                in.Metadata.CWE,
+		OWASP:              in.Metadata.OWASP,
+		Remediation:        strings.TrimSpace(in.Metadata.Remediation),
 	}
 	return out, true
 }
 
-func resolveSemgrepQuery(in semgrepRule) string {
+func resolveSemgrepQuery(in semgrepRule, language string) string {
 	candidates := []string{
 		strings.TrimSpace(in.Query),
 		strings.TrimSpace(in.Metadata.Query),
@@ -279,13 +346,15 @@ func resolveSemgrepQuery(in semgrepRule) string {
 		candidates = append(candidates, strings.TrimSpace(p.Pattern))
 	}
 
+	spec, err := languageSpecForName(language)
+	if err != nil {
+		return ""
+	}
 	for _, candidate := range candidates {
 		if candidate == "" {
 			continue
 		}
-		// Scanner queries are JavaScript Tree-sitter queries because this
-		// engine currently scans JavaScript/TypeScript syntax only.
-		if _, err := sitter.NewQuery([]byte(candidate), javascript.GetLanguage()); err == nil {
+		if _, err := sitter.NewQuery([]byte(candidate), spec.language); err == nil {
 			return candidate
 		}
 	}
@@ -337,6 +406,23 @@ func normalizeSemgrepFramework(explicit string, languages []string) string {
 			return "Express"
 		case "next", "nextjs", "next.js":
 			return "Next.js"
+		}
+	}
+
+	return "JavaScript"
+}
+
+func normalizeSemgrepLanguage(explicit string, languages []string) string {
+	if language := normalizeLanguageName(explicit); language != "javascript" || strings.TrimSpace(explicit) != "" {
+		if _, ok := languageSpecs[language]; ok {
+			return languageSpecs[language].displayName
+		}
+	}
+
+	for _, language := range languages {
+		normalized := normalizeLanguageName(language)
+		if spec, ok := languageSpecs[normalized]; ok {
+			return spec.displayName
 		}
 	}
 

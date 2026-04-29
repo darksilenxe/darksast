@@ -1,0 +1,20 @@
+id: "DOM-XSS-INSERT-ADJACENT-HTML"
+severity: "HIGH"
+framework: "JavaScript"
+confidence: "MEDIUM"
+description: "Detects insertAdjacentHTML() usage, which can enable DOM XSS when HTML content is user-controlled."
+ignore_if_literal:
+  - "html"
+taint:
+  sink_capture: "html"
+  require_tainted: false
+query: |
+  (call_expression
+    function: (member_expression
+      property: (property_identifier) @method (#eq? @method "insertAdjacentHTML")
+    )
+    arguments: (arguments
+      (_)
+      (_) @html
+    )
+  ) @finding

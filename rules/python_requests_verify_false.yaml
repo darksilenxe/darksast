@@ -1,0 +1,19 @@
+id: "PYTHON-REQUESTS-VERIFY-FALSE"
+severity: "HIGH"
+framework: "Python"
+language: "Python"
+description: "Detects Python requests calls with TLS verification disabled."
+query: |
+  (call
+    function: (attribute
+      object: (identifier) @module (#eq? @module "requests")
+      attribute: (identifier) @fn (#match? @fn "^(get|post|put|patch|delete|request)$")
+    )
+    arguments: (argument_list
+      (_)*
+      (keyword_argument
+        name: (identifier) @kw (#eq? @kw "verify")
+        value: (false)
+      )
+    )
+  ) @finding

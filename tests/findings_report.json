@@ -1,54 +1,149 @@
 {
-  "timestamp": "2026-04-29T13:43:01Z",
+  "timestamp": "2026-04-29T12:51:47Z",
   "target_directory": "./tests",
-  "total_findings": 70,
-  "code_findings": 67,
-  "dependency_findings": 3,
-  "framework_summary": {
-    "Angular": 3,
-    "Express": 11,
-    "JavaScript": 15,
-    "Next.js": 3,
-    "Node.js": 29,
-    "React": 8,
-    "Vue": 1
-  },
-  "finding_category_summary": {
-    "Cross-Site Scripting": 6,
-    "Dependency Advisory": 3,
-    "Open Redirect": 2,
-    "code": 59
-  },
+  "total_findings": 104,
   "findings": [
     {
-      "kind": "code",
+      "file": "tests/multilang_rule_coverage.py",
+      "line": 13,
+      "column": 1,
+      "rule_id": "PYTHON-EVAL-EXEC",
+      "severity": "HIGH",
+      "framework": "Python",
+      "snippet": "eval(user_input)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.go",
+      "line": 13,
+      "column": 5,
+      "rule_id": "GO-INSECURE-HASH",
+      "severity": "MEDIUM",
+      "framework": "Go",
+      "snippet": "_ = md5.New()",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.go",
+      "line": 14,
+      "column": 5,
+      "rule_id": "GO-INSECURE-HASH",
+      "severity": "MEDIUM",
+      "framework": "Go",
+      "snippet": "_ = sha1.New()",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.php",
+      "line": 4,
+      "column": 1,
+      "rule_id": "PHP-CURL-SSL-VERIFY-FALSE",
+      "severity": "HIGH",
+      "framework": "PHP",
+      "snippet": "curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.yaml",
+      "line": 9,
+      "column": 1,
+      "rule_id": "YAML-INSECURE-SKIP-TLS-VERIFY",
+      "severity": "HIGH",
+      "framework": "YAML",
+      "snippet": "insecureSkipTlsVerify: true",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.java",
+      "line": 9,
+      "column": 9,
+      "rule_id": "JAVA-INSECURE-HOSTNAME-VERIFIER",
+      "severity": "HIGH",
+      "framework": "Java",
+      "snippet": "conn.setHostnameVerifier((host, session) -\u003e true);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.go",
+      "line": 12,
+      "column": 1,
+      "rule_id": "GO-OS-EXEC-SHELL",
+      "severity": "HIGH",
+      "framework": "Go",
+      "snippet": "exec.Command(\"sh\", \"-c\", userInput)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.py",
+      "line": 17,
+      "column": 1,
+      "rule_id": "PYTHON-INSECURE-HASHLIB",
+      "severity": "MEDIUM",
+      "framework": "Python",
+      "snippet": "hashlib.md5(data).hexdigest()",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.php",
+      "line": 5,
+      "column": 1,
+      "rule_id": "PHP-EVAL-EXEC",
+      "severity": "HIGH",
+      "framework": "PHP",
+      "snippet": "eval($input);",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 56,
+      "line": 58,
       "column": 21,
       "rule_id": "ANGULAR-BYPASS-SECURITY-RESOURCE-URL",
       "severity": "HIGH",
       "framework": "Angular",
       "snippet": "const resourceUrl = sanitizer.bypassSecurityTrustResourceUrl(userInput);",
-      "confidence": "MEDIUM",
-      "description": "Detects Angular bypassSecurityTrustResourceUrl usage, which can disable resource URL sanitization.",
-      "category": "Cross-Site Scripting",
-      "taxonomy": [
-        "code-pattern/framework"
-      ],
-      "cwe": [
-        "CWE-79"
-      ],
-      "owasp": [
-        "A03:2021"
-      ],
-      "references": [
-        "https://angular.dev/best-practices/security/"
-      ],
-      "remediation": "Review resource URLs against a strict allowlist before calling bypassSecurityTrustResourceUrl.",
-      "confidence_rationale": "The API intentionally opts out of Angular resource URL protection and is highly specific."
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "code",
+      "file": "tests/multilang_rule_coverage.cs",
+      "line": 7,
+      "column": 9,
+      "rule_id": "CSHARP-INSECURE-HASH",
+      "severity": "MEDIUM",
+      "framework": "C#",
+      "snippet": "MD5.Create();",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.go",
+      "line": 15,
+      "column": 6,
+      "rule_id": "GO-TLS-INSECURE-SKIP-VERIFY",
+      "severity": "HIGH",
+      "framework": "Go",
+      "snippet": "_ = \u0026tls.Config{InsecureSkipVerify: true}",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.php",
+      "line": 6,
+      "column": 1,
+      "rule_id": "PHP-INSECURE-HASH",
+      "severity": "MEDIUM",
+      "framework": "PHP",
+      "snippet": "md5($data);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.py",
+      "line": 15,
+      "column": 1,
+      "rule_id": "PYTHON-PICKLE-LOADS",
+      "severity": "HIGH",
+      "framework": "Python",
+      "snippet": "pickle.loads(blob)",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/framework_rule_coverage.js",
       "line": 17,
       "column": 17,
@@ -56,26 +151,189 @@
       "severity": "HIGH",
       "framework": "Angular",
       "snippet": "const trusted = sanitizer.bypassSecurityTrustHtml(html);",
-      "confidence": "MEDIUM",
-      "description": "Detects Angular DomSanitizer bypassSecurityTrustHtml usage, which can bypass built-in sanitization when fed untrusted HTML.",
-      "category": "Cross-Site Scripting",
-      "taxonomy": [
-        "code-pattern/framework"
-      ],
-      "cwe": [
-        "CWE-79"
-      ],
-      "owasp": [
-        "A03:2021"
-      ],
-      "references": [
-        "https://angular.dev/best-practices/security/"
-      ],
-      "remediation": "Prefer Angular's default sanitization flow and reserve bypassSecurityTrustHtml for reviewed, trusted content only.",
-      "confidence_rationale": "The rule targets Angular's explicit sanitizer bypass API, which is a precise framework-specific signal."
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "code",
+      "file": "tests/multilang_rule_coverage.java",
+      "line": 7,
+      "column": 9,
+      "rule_id": "JAVA-INSECURE-MESSAGE-DIGEST",
+      "severity": "MEDIUM",
+      "framework": "Java",
+      "snippet": "MessageDigest.getInstance(\"MD5\");",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.yaml",
+      "line": 7,
+      "column": 9,
+      "rule_id": "YAML-PRIVILEGED-CONTAINER",
+      "severity": "HIGH",
+      "framework": "YAML",
+      "snippet": "privileged: true",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.py",
+      "line": 16,
+      "column": 1,
+      "rule_id": "PYTHON-REQUESTS-VERIFY-FALSE",
+      "severity": "HIGH",
+      "framework": "Python",
+      "snippet": "requests.get(url, verify=False)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.java",
+      "line": 6,
+      "column": 9,
+      "rule_id": "JAVA-RUNTIME-EXEC",
+      "severity": "HIGH",
+      "framework": "Java",
+      "snippet": "Runtime.getRuntime().exec(cmd);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.py",
+      "line": 12,
+      "column": 1,
+      "rule_id": "PYTHON-SUBPROCESS-SHELL-TRUE",
+      "severity": "HIGH",
+      "framework": "Python",
+      "snippet": "subprocess.run(user_input, shell=True)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.yaml",
+      "line": 8,
+      "column": 1,
+      "rule_id": "YAML-VERIFY-FALSE",
+      "severity": "HIGH",
+      "framework": "YAML",
+      "snippet": "verify: false",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.sh",
+      "line": 3,
+      "column": 1,
+      "rule_id": "BASH-WEAK-HASH-COMMAND",
+      "severity": "MEDIUM",
+      "framework": "Bash",
+      "snippet": "md5sum file.txt",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.sh",
+      "line": 4,
+      "column": 1,
+      "rule_id": "BASH-WEAK-HASH-COMMAND",
+      "severity": "MEDIUM",
+      "framework": "Bash",
+      "snippet": "sha1sum file.txt",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 57,
+      "column": 17,
+      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-URL",
+      "severity": "HIGH",
+      "framework": "Angular",
+      "snippet": "const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.py",
+      "line": 14,
+      "column": 1,
+      "rule_id": "PYTHON-UNSAFE-YAML-LOAD",
+      "severity": "HIGH",
+      "framework": "Python",
+      "snippet": "yaml.load(data)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 21,
+      "column": 1,
+      "rule_id": "NODE-CHILD-PROCESS-EXEC",
+      "severity": "CRITICAL",
+      "framework": "Node.js",
+      "snippet": "child_process.exec(\"dir \" + userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 22,
+      "column": 1,
+      "rule_id": "NODE-CHILD-PROCESS-EXEC",
+      "severity": "CRITICAL",
+      "framework": "Node.js",
+      "snippet": "child_process.execFile(userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 23,
+      "column": 1,
+      "rule_id": "NODE-CHILD-PROCESS-EXEC",
+      "severity": "CRITICAL",
+      "framework": "Node.js",
+      "snippet": "child_process.execFileSync(userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.rs",
+      "line": 6,
+      "column": 13,
+      "rule_id": "RUST-COMMAND-SHELL",
+      "severity": "HIGH",
+      "framework": "Rust",
+      "snippet": "let _ = Command::new(\"sh\").arg(\"-c\").arg(user_input).status();",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.cs",
+      "line": 6,
+      "column": 9,
+      "rule_id": "CSHARP-PROCESS-START",
+      "severity": "HIGH",
+      "framework": "C#",
+      "snippet": "Process.Start(cmd);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.rb",
+      "line": 2,
+      "column": 1,
+      "rule_id": "RUBY-DIGEST-MD5",
+      "severity": "MEDIUM",
+      "framework": "Ruby",
+      "snippet": "Digest::MD5.hexdigest(data)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.rs",
+      "line": 7,
+      "column": 13,
+      "rule_id": "RUST-MD5-COMPUTE",
+      "severity": "MEDIUM",
+      "framework": "Rust",
+      "snippet": "let _ = md5::compute(data);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 104,
+      "column": 1,
+      "rule_id": "COOKIE-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "res.cookie('sid', token, { secure: false, httpOnly: true });",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/rule_coverage.js",
       "line": 14,
       "column": 1,
@@ -95,32 +353,58 @@
       "severity": "HIGH",
       "framework": "JavaScript",
       "snippet": "const fn = new Function(\"a\", \"b\", \"return a + b;\");",
-      "confidence": "MEDIUM",
-      "description": "Detects use of new Function(...), which creates executable code from strings and is equivalent to eval risk."
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 54,
+      "column": 1,
+      "rule_id": "CORS-WILDCARD-CREDENTIALS",
+      "severity": "HIGH",
+      "framework": "Node.js",
+      "snippet": "cors({ origin: '*', credentials: true });",
+      "confidence": "MEDIUM"
     },
     {
       "kind": "code",
       "file": "tests/rule_coverage.js",
-      "line": 24,
+      "line": 26,
       "column": 1,
       "rule_id": "DOM-XSS-DOCUMENT-WRITE",
       "severity": "HIGH",
       "framework": "JavaScript",
       "snippet": "document.write(userInput);",
-      "confidence": "MEDIUM",
-      "description": "Detects document.write(), a common DOM XSS sink when input content is not strictly sanitized."
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "code",
       "file": "tests/rule_coverage.js",
-      "line": 27,
+      "line": 29,
       "column": 1,
       "rule_id": "DOM-XSS-INNERHTML-ASSIGN",
       "severity": "HIGH",
       "framework": "JavaScript",
       "snippet": "document.body.innerHTML = userInput;",
-      "confidence": "MEDIUM",
-      "description": "Detects assignments to innerHTML, which can enable DOM XSS if the assigned value is user-controlled."
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/rule_coverage.js",
+      "line": 32,
+      "column": 1,
+      "rule_id": "DOM-XSS-INSERT-ADJACENT-HTML",
+      "severity": "HIGH",
+      "framework": "JavaScript",
+      "snippet": "document.body.insertAdjacentHTML('beforeend', userInput);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.rs",
+      "line": 8,
+      "column": 13,
+      "rule_id": "RUST-REQWEST-INVALID-CERTS",
+      "severity": "HIGH",
+      "framework": "Rust",
+      "snippet": "let _ = reqwest::Client::builder().danger_accept_invalid_certs(true).build();",
+      "confidence": "MEDIUM"
     },
     {
       "kind": "code",
@@ -135,34 +419,16 @@
       "description": "Detects cookie/session configs with httpOnly:false inside Express session middleware."
     },
     {
-      "kind": "code",
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 55,
-      "column": 17,
-      "rule_id": "ANGULAR-BYPASS-SECURITY-TRUST-URL",
-      "severity": "HIGH",
-      "framework": "Angular",
-      "snippet": "const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);",
-      "confidence": "MEDIUM",
-      "description": "Detects Angular bypassSecurityTrustUrl usage, which can disable URL sanitization.",
-      "category": "Open Redirect",
-      "taxonomy": [
-        "code-pattern/framework"
-      ],
-      "cwe": [
-        "CWE-601"
-      ],
-      "owasp": [
-        "A01:2021"
-      ],
-      "references": [
-        "https://angular.dev/best-practices/security/"
-      ],
-      "remediation": "Use trusted, allowlisted URLs and avoid bypassSecurityTrustUrl for attacker-controlled destinations.",
-      "confidence_rationale": "This call explicitly disables Angular's URL safety checks and is a strong sink indicator."
+      "file": "tests/sample-site/app.js",
+      "line": 13,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "code",
       "file": "tests/rule_coverage.js",
       "line": 6,
       "column": 1,
@@ -186,13 +452,12 @@
       "description": "Detects session configurations with saveUninitialized:true in express-session middleware."
     },
     {
-      "kind": "code",
-      "file": "tests/rule_coverage.js",
-      "line": 6,
+      "file": "tests/sample-site/app.js",
+      "line": 13,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
       "severity": "MEDIUM",
-      "framework": "Node.js",
+      "framework": "Express",
       "snippet": "session({",
       "confidence": "MEDIUM",
       "description": "Detects cookie/session configs with secure:false inside Express session middleware."
@@ -200,7 +465,7 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 100,
+      "line": 95,
       "column": 1,
       "rule_id": "COOKIE-SECURE-FALSE",
       "severity": "MEDIUM",
@@ -210,9 +475,28 @@
       "description": "Detects res.cookie() options with secure:false, which allows cookies over non-TLS channels."
     },
     {
-      "kind": "code",
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 52,
+      "file": "tests/rule_coverage.js",
+      "line": 6,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/multilang_rule_coverage.rb",
+      "line": 4,
+      "column": 1,
+      "rule_id": "RUBY-OPENSSL-VERIFY-NONE",
+      "severity": "HIGH",
+      "framework": "Ruby",
+      "snippet": "OpenSSL::SSL::VERIFY_NONE",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-vue/main.js",
+      "line": 4,
       "column": 1,
       "rule_id": "CORS-WILDCARD-CREDENTIALS",
       "severity": "HIGH",
@@ -222,13 +506,12 @@
       "description": "Detects CORS configs that combine wildcard origins with credentials enabled."
     },
     {
-      "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
+      "line": 95,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-HTTPONLY-FALSE",
-      "severity": "MEDIUM",
-      "framework": "Node.js",
+      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
+      "severity": "LOW",
+      "framework": "Express",
       "snippet": "session({",
       "confidence": "MEDIUM",
       "description": "Detects cookie/session configs with httpOnly:false inside Express session middleware."
@@ -238,17 +521,17 @@
       "file": "tests/framework_rule_coverage.js",
       "line": 4,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
+      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
+      "severity": "MEDIUM",
+      "framework": "Node.js",
       "snippet": "session({",
       "confidence": "MEDIUM",
       "description": "Detects session configurations with resave:true in express-session middleware."
     },
     {
-      "kind": "code",
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
+
+     "file": "tests/framework_rule_coverage.js",
+      "line": 4,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
       "severity": "LOW",
@@ -258,8 +541,7 @@
       "description": "Detects session configurations with resave:true in express-session middleware."
     },
     {
-      "kind": "code",
-      "file": "tests/framework_rule_coverage.js",
+      "file": "tests/sample-vue/main.js",
       "line": 4,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
@@ -270,21 +552,29 @@
       "description": "Detects session configurations with saveUninitialized:true in express-session middleware."
     },
     {
-      "kind": "code",
-      "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
+      "file": "tests/framework_rule_coverage.js",
+      "line": 4,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
       "severity": "MEDIUM",
       "framework": "Express",
       "snippet": "session({",
-      "confidence": "MEDIUM",
-      "description": "Detects session configurations with saveUninitialized:true in express-session middleware."
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 95,
+      "column": 1,
+      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
+      "severity": "MEDIUM",
+      "framework": "Express",
+      "snippet": "session({",
+      "confidence": "MEDIUM"
     },
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 91,
+      "line": 95,
       "column": 1,
       "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
       "severity": "MEDIUM",
@@ -318,43 +608,16 @@
       "description": "Detects hardcoded secrets, passwords, API keys, and tokens assigned directly in code."
     },
     {
-      "kind": "code",
-      "file": "tests/sample-site/app.js",
-      "line": 13,
+      "file": "tests/multilang_rule_coverage.rb",
+      "line": 1,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM",
-      "description": "Detects session configurations with resave:true in express-session middleware."
+      "rule_id": "RUBY-SYSTEM-CALL",
+      "severity": "HIGH",
+      "framework": "Ruby",
+      "snippet": "system(user_input)",
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "code",
-      "file": "tests/sample-vue/main.js",
-      "line": 4,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-RESAVE-TRUE",
-      "severity": "LOW",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM",
-      "description": "Detects session configurations with resave:true in express-session middleware."
-    },
-    {
-      "kind": "code",
-      "file": "tests/sample-site/app.js",
-      "line": 13,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM",
-      "description": "Detects session configurations with saveUninitialized:true in express-session middleware."
-    },
-    {
-      "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
       "line": 40,
       "column": 1,
@@ -366,31 +629,16 @@
       "description": "Detects weak hashing algorithms such as MD5 and SHA1."
     },
     {
-      "kind": "code",
-      "file": "tests/sample-vue/main.js",
-      "line": 4,
+      "file": "tests/multilang_rule_coverage.rb",
+      "line": 3,
       "column": 1,
-      "rule_id": "EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE",
-      "severity": "MEDIUM",
-      "framework": "Express",
-      "snippet": "session({",
-      "confidence": "MEDIUM",
-      "description": "Detects session configurations with saveUninitialized:true in express-session middleware."
+      "rule_id": "RUBY-YAML-LOAD",
+      "severity": "HIGH",
+      "framework": "Ruby",
+      "snippet": "YAML.load(data)",
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "code",
-      "file": "tests/sample-site/app.js",
-      "line": 13,
-      "column": 1,
-      "rule_id": "EXPRESS-SESSION-SECURE-FALSE",
-      "severity": "MEDIUM",
-      "framework": "Node.js",
-      "snippet": "session({",
-      "confidence": "MEDIUM",
-      "description": "Detects cookie/session configs with secure:false inside Express session middleware."
-    },
-    {
-      "kind": "code",
       "file": "tests/framework_rule_coverage.js",
       "line": 27,
       "column": 5,
@@ -398,8 +646,7 @@
       "severity": "MEDIUM",
       "framework": "Next.js",
       "snippet": "dangerouslyAllowSVG: true",
-      "confidence": "MEDIUM",
-      "description": "Detects Next.js image config dangerouslyAllowSVG: true, which can increase XSS and content-security risk if untrusted SVG is served."
+      "confidence": "MEDIUM"
     },
     {
       "kind": "code",
@@ -470,13 +717,11 @@
       "severity": "CRITICAL",
       "framework": "Node.js",
       "snippet": "jwt.verify(token, secret, { algorithms: ['none'] });",
-      "confidence": "MEDIUM",
-      "description": "Detects JWT verification options that allow the 'none' algorithm."
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 98,
+      "line": 102,
       "column": 1,
       "rule_id": "JWT-VERIFY-IGNORE-EXPIRATION",
       "severity": "MEDIUM",
@@ -500,7 +745,7 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 62,
+      "line": 64,
       "column": 9,
       "rule_id": "NEXTJS-REMOTE-PATTERN-WILDCARD",
       "severity": "MEDIUM",
@@ -524,6 +769,16 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
+      "line": 80,
+      "column": 1,
+      "rule_id": "NODE-TLS-REJECT-UNAUTHORIZED-ENV-ZERO",
+      "severity": "HIGH",
+      "framework": "Node.js",
+      "snippet": "process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
       "line": 48,
       "column": 14,
       "rule_id": "NOSQL-OPERATOR-INJECTION",
@@ -542,8 +797,17 @@
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "users.find({ '$where': userInput, username: { '$regex': userInput } });",
-      "confidence": "MEDIUM",
-      "description": "Detects dangerous NoSQL operators such as $where, $regex, and comparison operators that often appear in injection payloads."
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/test.js",
+      "line": 16,
+      "column": 19,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const profile = { ...payload, role: 'reader' };",
+      "confidence": "MEDIUM"
     },
     {
       "kind": "code",
@@ -615,17 +879,15 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 99,
+      "line": 103,
       "column": 1,
       "rule_id": "OPEN-REDIRECT-WINDOW-OPEN",
       "severity": "MEDIUM",
       "framework": "JavaScript",
       "snippet": "window.open(userInput, '_blank');",
-      "confidence": "MEDIUM",
-      "description": "Detects window.open() usage, which can enable open redirect or phishing flows when URL input is untrusted."
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
       "line": 34,
       "column": 1,
@@ -661,9 +923,28 @@
       "description": "Detects setTimeout/setInterval with string code, which behaves like eval and can lead to script injection."
     },
     {
-      "kind": "code",
+      "file": "tests/framework_rule_coverage.js",
+      "line": 21,
+      "column": 26,
+      "rule_id": "VUE-RENDER-INNERHTML",
+      "severity": "HIGH",
+      "framework": "Vue",
+      "snippet": "const vnode = h('div', { innerHTML: html });",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/test.js",
+      "line": 9,
+      "column": 18,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
+      "framework": "React",
+      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: rawHTMLContent }} /\u003e",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
-      "line": 112,
+      "line": 116,
       "column": 13,
       "rule_id": "REACT-UNSAFE-URL-PROP",
       "severity": "MEDIUM",
@@ -702,7 +983,7 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 53,
+      "line": 55,
       "column": 1,
       "rule_id": "SHELL-WRAPPER-EXEC",
       "severity": "CRITICAL",
@@ -714,7 +995,7 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 54,
+      "line": 56,
       "column": 1,
       "rule_id": "SHELL-WRAPPER-EXEC",
       "severity": "CRITICAL",
@@ -738,7 +1019,7 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 101,
+      "line": 105,
       "column": 1,
       "rule_id": "SQL-RAW-QUERY",
       "severity": "HIGH",
@@ -750,7 +1031,7 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 101,
+      "line": 105,
       "column": 1,
       "rule_id": "SQL-TEMPLATE-LITERAL-QUERY",
       "severity": "HIGH",
@@ -760,7 +1041,16 @@
       "description": "Detects SQL helper calls that pass template literals directly, which can interpolate untrusted input."
     },
     {
-      "kind": "code",
+      "file": "tests/rule_coverage.js",
+      "line": 35,
+      "column": 12,
+      "rule_id": "JS-STRING-TIMER-EXEC",
+      "severity": "MEDIUM",
+      "framework": "JavaScript",
+      "snippet": "setTimeout(\"console.log('timer string')\", 1000);",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 31,
       "column": 1,
@@ -772,7 +1062,16 @@
       "description": "Detects axios network requests that should be reviewed for SSRF when the request target is user-controlled."
     },
     {
-      "kind": "code",
+      "file": "tests/sample-vue/main.js",
+      "line": 11,
+      "column": 17,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const state = { ...payload, active: true };",
+      "confidence": "MEDIUM"
+    },
+    {
       "file": "tests/advanced_rule_coverage.js",
       "line": 30,
       "column": 1,
@@ -836,34 +1135,6 @@
       "description": "Detects http/https request helpers that can become SSRF sinks when URLs come from untrusted input."
     },
     {
-      "kind": "code",
-      "file": "tests/framework_rule_coverage.js",
-      "line": 21,
-      "column": 26,
-      "rule_id": "VUE-RENDER-INNERHTML",
-      "severity": "HIGH",
-      "framework": "Vue",
-      "snippet": "const vnode = h('div', { innerHTML: html });",
-      "confidence": "MEDIUM",
-      "description": "Detects Vue render-function patterns using innerHTML, which can introduce XSS when content is attacker-controlled.",
-      "category": "Cross-Site Scripting",
-      "taxonomy": [
-        "code-pattern/framework"
-      ],
-      "cwe": [
-        "CWE-79"
-      ],
-      "owasp": [
-        "A03:2021"
-      ],
-      "references": [
-        "https://vuejs.org/guide/best-practices/security.html"
-      ],
-      "remediation": "Prefer escaped text bindings or sanitize HTML before assigning it to render-function props such as innerHTML.",
-      "confidence_rationale": "Vue render-function innerHTML usage bypasses normal template escaping and is typically intentional sink usage."
-    },
-    {
-      "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
       "line": 49,
       "column": 1,
@@ -877,19 +1148,28 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 75,
+      "line": 77,
       "column": 3,
       "rule_id": "TLS-REJECT-UNAUTHORIZED-FALSE",
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "rejectUnauthorized: false",
-      "confidence": "MEDIUM",
-      "description": "Detects TLS options that disable certificate validation by setting rejectUnauthorized to false."
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/sample-site/app.js",
+      "line": 21,
+      "column": 18,
+      "rule_id": "POTENTIAL-POLLUTION-OBJECT-SPREAD",
+      "severity": "LOW",
+      "framework": "React",
+      "snippet": "const merged = { ...payload, active: true };",
+      "confidence": "MEDIUM"
     },
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 102,
+      "line": 106,
       "column": 1,
       "rule_id": "UNSAFE-DESERIALIZATION-CALL",
       "severity": "HIGH",
@@ -901,17 +1181,15 @@
     {
       "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
-      "line": 103,
+      "line": 107,
       "column": 1,
       "rule_id": "UNSAFE-DESERIALIZATION-CALL",
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "serialize.deserialize(userInput);",
-      "confidence": "MEDIUM",
-      "description": "Detects library deserialization calls (deserialize/unserialize) that can be dangerous with attacker-controlled input."
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "code",
       "file": "tests/advanced_rule_coverage.js",
       "line": 51,
       "column": 1,
@@ -919,8 +1197,28 @@
       "severity": "CRITICAL",
       "framework": "Node.js",
       "snippet": "vm.runInNewContext(userInput);",
-      "confidence": "MEDIUM",
-      "description": "Detects vm execution APIs that can execute attacker-controlled code."
+      "confidence": "MEDIUM"
+    },
+    {
+      "kind": "code",
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 52,
+      "column": 1,
+      "rule_id": "UNSAFE-VM-EXECUTION",
+      "severity": "CRITICAL",
+      "framework": "Node.js",
+      "snippet": "vm.compileFunction(userInput, []);",
+      "confidence": "MEDIUM"
+    },
+    {
+      "file": "tests/advanced_rule_coverage.js",
+      "line": 53,
+      "column": 5,
+      "rule_id": "UNSAFE-VM-EXECUTION",
+      "severity": "CRITICAL",
+      "framework": "Node.js",
+      "snippet": "new vm.Script(userInput);",
+      "confidence": "MEDIUM"
     },
     {
       "kind": "code",
@@ -943,80 +1241,17 @@
       "severity": "HIGH",
       "framework": "Node.js",
       "snippet": "const secret = process.env.JWT_SECRET || 'changeme';",
-      "confidence": "MEDIUM",
-      "description": "Detects env-based secret configuration that falls back to a hardcoded default value."
+      "confidence": "MEDIUM"
     },
     {
-      "kind": "dependency",
-      "rule_id": "CVE-2025-55182",
-      "severity": "CRITICAL",
-      "framework": "Next.js",
-      "snippet": "React Server Components remote code execution",
-      "confidence": "HIGH",
-      "description": "Certain React Server Components package versions are vulnerable to remote code execution until patched releases are installed.",
-      "category": "Dependency Advisory",
-      "references": [
-        "https://github.com/facebook/react/security",
-        "https://nextjs.org/docs"
-      ],
-      "remediation": "Upgrade to a fixed version such as 19.2.1, 15.6.0.",
-      "package_name": "next",
-      "declared_version": "15.5.15",
-      "resolved_version": "15.5.15",
-      "version_source": "package-lock.json",
-      "fixed_versions": [
-        "19.2.1",
-        "15.6.0"
-      ],
-      "project_path": "tests/sample-site"
-    },
-    {
-      "kind": "dependency",
-      "rule_id": "CVE-2025-55182",
-      "severity": "CRITICAL",
+      "file": "tests/sample-site/app.js",
+      "line": 7,
+      "column": 12,
+      "rule_id": "XSS-01",
+      "severity": "HIGH",
       "framework": "React",
-      "snippet": "React Server Components remote code execution",
-      "confidence": "HIGH",
-      "description": "Certain React Server Components package versions are vulnerable to remote code execution until patched releases are installed.",
-      "category": "Dependency Advisory",
-      "references": [
-        "https://github.com/facebook/react/security",
-        "https://nextjs.org/docs"
-      ],
-      "remediation": "Upgrade to a fixed version such as 19.2.1, 15.6.0.",
-      "package_name": "react",
-      "declared_version": "19.1.0",
-      "resolved_version": "19.1.0",
-      "version_source": "package-lock.json",
-      "fixed_versions": [
-        "19.2.1",
-        "15.6.0"
-      ],
-      "project_path": "tests/sample-site"
-    },
-    {
-      "kind": "dependency",
-      "rule_id": "CVE-2025-55182",
-      "severity": "CRITICAL",
-      "framework": "React",
-      "snippet": "React Server Components remote code execution",
-      "confidence": "HIGH",
-      "description": "Certain React Server Components package versions are vulnerable to remote code execution until patched releases are installed.",
-      "category": "Dependency Advisory",
-      "references": [
-        "https://github.com/facebook/react/security",
-        "https://nextjs.org/docs"
-      ],
-      "remediation": "Upgrade to a fixed version such as 19.2.1, 15.6.0.",
-      "package_name": "react-dom",
-      "declared_version": "19.1.1",
-      "resolved_version": "19.1.1",
-      "version_source": "package-lock.json",
-      "fixed_versions": [
-        "19.2.1",
-        "15.6.0"
-      ],
-      "project_path": "tests/sample-site"
+      "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: html }} /\u003e",
+      "confidence": "MEDIUM"
     }
   ]
 }
