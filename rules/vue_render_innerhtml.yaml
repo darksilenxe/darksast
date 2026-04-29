@@ -5,6 +5,18 @@ requires_dependency:
   - "vue"
   - "nuxt"
 description: "Detects Vue render-function patterns using innerHTML, which can introduce XSS when content is attacker-controlled."
+metadata:
+  category: "Cross-Site Scripting"
+  taxonomy:
+    - "code-pattern/framework"
+  cwe:
+    - "CWE-79"
+  owasp:
+    - "A03:2021"
+  references:
+    - "https://vuejs.org/guide/best-practices/security.html"
+  remediation: "Prefer escaped text bindings or sanitize HTML before assigning it to render-function props such as innerHTML."
+  confidence_rationale: "Vue render-function innerHTML usage bypasses normal template escaping and is typically intentional sink usage."
 query: |
   (call_expression
     function: (identifier) @render_fn

@@ -4,6 +4,18 @@ framework: "Angular"
 requires_dependency:
   - "@angular/core"
 description: "Detects Angular bypassSecurityTrustUrl usage, which can disable URL sanitization."
+metadata:
+  category: "Open Redirect"
+  taxonomy:
+    - "code-pattern/framework"
+  cwe:
+    - "CWE-601"
+  owasp:
+    - "A01:2021"
+  references:
+    - "https://angular.dev/best-practices/security/"
+  remediation: "Use trusted, allowlisted URLs and avoid bypassSecurityTrustUrl for attacker-controlled destinations."
+  confidence_rationale: "This call explicitly disables Angular's URL safety checks and is a strong sink indicator."
 query: |
   (call_expression
     function: (member_expression

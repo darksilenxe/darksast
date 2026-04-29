@@ -2,7 +2,21 @@ id: "OPEN-REDIRECT-RESPONSE"
 severity: "MEDIUM"
 confidence: "MEDIUM"
 framework: "Node.js"
+requires_dependency:
+  - "express"
 description: "Detects response redirect helpers that can become open redirect sinks with untrusted destinations."
+metadata:
+  category: "Open Redirect"
+  taxonomy:
+    - "code-pattern/framework"
+  cwe:
+    - "CWE-601"
+  owasp:
+    - "A01:2021"
+  references:
+    - "https://expressjs.com/en/api.html#res.redirect"
+  remediation: "Restrict redirects to an allowlist of internal destinations or normalize user-provided URLs against a trusted base."
+  confidence_rationale: "Express response redirect helpers are high-signal sinks when destinations can be influenced by a request."
 query: |
   (call_expression
     function: (member_expression

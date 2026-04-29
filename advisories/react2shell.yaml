@@ -1,0 +1,22 @@
+id: "CVE-2025-55182"
+title: "React Server Components remote code execution"
+severity: "CRITICAL"
+packages:
+  - react
+  - react-dom
+  - next
+  - react-server-dom-webpack
+  - react-server-dom-turbopack
+  - react-server-dom-parcel
+affected_ranges:
+  - introduced: "19.0.0"
+    fixed: "19.2.1"
+  - introduced: "15.0.0"
+    fixed: "15.6.0"
+description: "Certain React Server Components package versions are vulnerable to remote code execution until patched releases are installed."
+fixed_versions:
+  - "19.2.1"
+  - "15.6.0"
+references:
+  - "https://github.com/facebook/react/security"
+  - "https://nextjs.org/docs"

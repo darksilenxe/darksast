@@ -60,3 +60,23 @@ func TestCollectReferencedIdentifiersFromComplexExpression(t *testing.T) {
 	ids := collectReferencedIdentifiers(args.NamedChild(0), source)
 	assert.ElementsMatch(t, []string{"foo", "bar", "qux", "zap"}, ids)
 }
+
+func TestClassifyCallTreatsStorageReadsAsTainted(t *testing.T) {
+	tree, source := parseTree(t, `const value = localStorage.getItem("token");`)
+	defer tree.Close()
+
+	call := findFirstNodeByType(tree.RootNode(), "call_expression")
+	require.NotNil(t, call)
+
+	assert.Equal(t, taintTainted, classifyCall(call, source))
+}
+
+func TestClassifyCallTreatsSanitizeHtmlAsSanitized(t *testing.T) {
+	tree, source := parseTree(t, `const safe = sanitizeHtml.sanitize(input);`)
+	defer tree.Close()
+
+	call := findFirstNodeByType(tree.RootNode(), "call_expression")
+	require.NotNil(t, call)
+
+	assert.Equal(t, taintSanitized, classifyCall(call, source))
+}

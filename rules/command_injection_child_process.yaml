@@ -7,7 +7,20 @@ ignore_if_literal:
   - "cmd"
 taint:
   sink_capture: "cmd"
-  require_tainted: false
+  require_tainted: true
+metadata:
+  category: "Command Injection"
+  taxonomy:
+    - "code-pattern/framework"
+  cwe:
+    - "CWE-78"
+  owasp:
+    - "A03:2021"
+  references:
+    - "https://nodejs.org/api/child_process.html"
+    - "https://owasp.org/www-community/attacks/Command_Injection"
+  remediation: "Prefer execFile or spawn with fixed arguments, and never concatenate attacker-controlled input into shell commands."
+  confidence_rationale: "The rule targets direct child_process execution APIs and uses sink-aware filtering to reduce literal-only noise."
 query: |
   (call_expression
     function: (member_expression

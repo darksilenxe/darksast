@@ -15,14 +15,29 @@ import (
 
 // Finding represents a discovered vulnerability
 type Finding struct {
-	File       string `json:"file"`
-	Line       uint32 `json:"line"`
-	Column     uint32 `json:"column"`
-	RuleID     string `json:"rule_id"`
-	Severity   string `json:"severity"`
-	Framework  string `json:"framework"`
-	Snippet    string `json:"snippet"`
-	Confidence string `json:"confidence,omitempty"`
+	Kind                string   `json:"kind,omitempty"`
+	File                string   `json:"file,omitempty"`
+	Line                uint32   `json:"line,omitempty"`
+	Column              uint32   `json:"column,omitempty"`
+	RuleID              string   `json:"rule_id"`
+	Severity            string   `json:"severity"`
+	Framework           string   `json:"framework"`
+	Snippet             string   `json:"snippet,omitempty"`
+	Confidence          string   `json:"confidence,omitempty"`
+	Description         string   `json:"description,omitempty"`
+	Category            string   `json:"category,omitempty"`
+	Taxonomy            []string `json:"taxonomy,omitempty"`
+	CWE                 []string `json:"cwe,omitempty"`
+	OWASP               []string `json:"owasp,omitempty"`
+	References          []string `json:"references,omitempty"`
+	Remediation         string   `json:"remediation,omitempty"`
+	ConfidenceRationale string   `json:"confidence_rationale,omitempty"`
+	PackageName         string   `json:"package_name,omitempty"`
+	DeclaredVersion     string   `json:"declared_version,omitempty"`
+	ResolvedVersion     string   `json:"resolved_version,omitempty"`
+	VersionSource       string   `json:"version_source,omitempty"`
+	FixedVersions       []string `json:"fixed_versions,omitempty"`
+	ProjectPath         string   `json:"project_path,omitempty"`
 }
 
 // extractSnippet returns the trimmed text of the source line at the given
@@ -330,14 +345,23 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, f
 			}
 
 			findings <- Finding{
-				File:       path,
-				Line:       line,
-				Column:     uint32(col + 1),
-				RuleID:     rule.ID,
-				Severity:   rule.Severity,
-				Framework:  normalizeFramework(rule.Framework),
-				Snippet:    extractSnippet(sourceCode, uint32(row)),
-				Confidence: rule.EffectiveConfidence(),
+				Kind:                "code",
+				File:                path,
+				Line:                line,
+				Column:              uint32(col + 1),
+				RuleID:              rule.ID,
+				Severity:            rule.Severity,
+				Framework:           normalizeFramework(rule.Framework),
+				Snippet:             extractSnippet(sourceCode, uint32(row)),
+				Confidence:          rule.EffectiveConfidence(),
+				Description:         rule.Description,
+				Category:            rule.Metadata.Category,
+				Taxonomy:            append([]string(nil), rule.Metadata.Taxonomy...),
+				CWE:                 append([]string(nil), rule.Metadata.CWE...),
+				OWASP:               append([]string(nil), rule.Metadata.OWASP...),
+				References:          append([]string(nil), rule.Metadata.References...),
+				Remediation:         rule.Metadata.Remediation,
+				ConfidenceRationale: rule.Metadata.ConfidenceRationale,
 			}
 		}
 
@@ -490,14 +514,20 @@ func (e *Engine) walkNode(node *sitter.Node, sourceCode []byte, symTable *Symbol
 						line := uint32(row + 1)
 						if !suppress.isSuppressed(line, "proto-assignment") {
 							findings <- Finding{
-								File:       path,
-								Line:       line,
-								Column:     uint32(node.StartPoint().Column + 1),
-								RuleID:     "proto-assignment",
-								Severity:   "HIGH",
-								Framework:  "JavaScript",
-								Snippet:    extractSnippet(sourceCode, uint32(row)),
-								Confidence: "HIGH",
+								Kind:        "code",
+								File:        path,
+								Line:        line,
+								Column:      uint32(node.StartPoint().Column + 1),
+								RuleID:      "proto-assignment",
+								Severity:    "HIGH",
+								Framework:   "JavaScript",
+								Snippet:     extractSnippet(sourceCode, uint32(row)),
+								Confidence:  "HIGH",
+								Description: "Detects tainted prototype key assignment that can enable prototype pollution.",
+								Category:    "Prototype Pollution",
+								CWE:         []string{"CWE-1321"},
+								OWASP:       []string{"A03:2021"},
+								Remediation: "Reject special keys like __proto__, constructor, and prototype before merging attacker-controlled input.",
 							}
 						}
 					}

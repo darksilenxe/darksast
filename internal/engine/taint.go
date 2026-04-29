@@ -22,6 +22,9 @@ var vettedSanitizerMemberCalls = map[string]map[string]struct{}{
 	"DOMPurify": {
 		"sanitize": {},
 	},
+	"sanitizeHtml": {
+		"sanitize": {},
+	},
 	"validator": {
 		"escape": {},
 	},
@@ -37,31 +40,52 @@ var vettedSanitizerMemberCalls = map[string]map[string]struct{}{
 	"he": {
 		"encode": {},
 	},
+	"xss": {
+		"filterXSS": {},
+	},
+	"CSS": {
+		"escape": {},
+	},
 }
 
 // commonSanitizerIdentifiers covers bare-identifier sanitizer calls.
 var commonSanitizerIdentifiers = map[string]struct{}{
 	"encodeURIComponent": {},
 	"encodeURI":          {},
+	"escape":             {},
+	"sanitize":           {},
+	"sanitizeHtml":       {},
 }
 
 // sanitizerPassthroughMethods preserve sanitized status when called on
 // an already-sanitized receiver.
 var sanitizerPassthroughMethods = map[string]struct{}{
-	"trim": {},
+	"trim":     {},
+	"toString": {},
 }
 
 // commonTaintSourceObjects is the set of root identifiers whose member
 // access is treated as untrusted input (e.g. `req.body`, `process.env`).
 var commonTaintSourceObjects = map[string]struct{}{
-	"req":      {},
-	"request":  {},
-	"ctx":      {},
-	"context":  {},
-	"location": {},
-	"document": {}, // document.location, document.URL, document.referrer
-	"window":   {}, // window.name, window.location
-	"process":  {}, // process.argv, process.env
+	"req":            {},
+	"request":        {},
+	"ctx":            {},
+	"context":        {},
+	"location":       {},
+	"document":       {}, // document.location, document.URL, document.referrer
+	"window":         {}, // window.name, window.location
+	"process":        {}, // process.argv, process.env
+	"params":         {},
+	"query":          {},
+	"body":           {},
+	"headers":        {},
+	"cookies":        {},
+	"router":         {},
+	"route":          {},
+	"props":          {},
+	"searchParams":   {},
+	"localStorage":   {},
+	"sessionStorage": {},
 }
 
 // fileTaintModel captures lightweight per-file constant tracking. We
@@ -212,6 +236,9 @@ func classifyCall(node *sitter.Node, source []byte) taintFlavor {
 					return taintSanitized
 				}
 			}
+			if isKnownSourceAccessor(root, method) {
+				return taintTainted
+			}
 
 			// e.g. req.query.id() — treat root-tainted member chains as
 			// tainted even when wrapped in an unknown call.
@@ -235,6 +262,22 @@ func isVettedSanitizerMemberCall(root, method string) bool {
 	return ok
 }
 
+func isKnownSourceAccessor(root, method string) bool {
+	if root == "" || method == "" {
+		return false
+	}
+	if (root == "localStorage" || root == "sessionStorage" || root == "headers" || root == "searchParams") && method == "get" {
+		return true
+	}
+	if (root == "localStorage" || root == "sessionStorage") && method == "getItem" {
+		return true
+	}
+	if (root == "params" || root == "query" || root == "body" || root == "cookies") && (method == "get" || method == "param") {
+		return true
+	}
+	return false
+}
+
 // rootsTainted walks down the receiver chain of a member expression
 // and returns true when its root identifier is a known taint source.
 func rootsTainted(node *sitter.Node, source []byte) bool {
@@ -255,7 +298,9 @@ func rootsTainted(node *sitter.Node, source []byte) bool {
 }
 
 // mergeFlavor combines two taintFlavors using the precedence:
-//   tainted > sanitized > unknown > constant.
+//
+//	tainted > sanitized > unknown > constant.
+//
 // In other words, any tainted operand makes the result tainted; otherwise
 // the most "interesting" non-constant flavor wins.
 func mergeFlavor(a, b taintFlavor) taintFlavor {

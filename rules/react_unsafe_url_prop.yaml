@@ -1,7 +1,21 @@
 id: "REACT-UNSAFE-URL-PROP"
 severity: "MEDIUM"
 framework: "React"
+requires_dependency:
+  - "react"
 description: "Detects dangerous javascript: or HTML data URL usage in URL-bearing JSX props."
+metadata:
+  category: "Cross-Site Scripting"
+  taxonomy:
+    - "code-pattern/framework"
+  cwe:
+    - "CWE-79"
+  owasp:
+    - "A03:2021"
+  references:
+    - "https://react.dev/reference/react-dom/components/common#common-props"
+  remediation: "Reject javascript: URLs and only allow trusted URL schemes for href, src, and similar JSX props."
+  confidence_rationale: "javascript: and HTML data URLs in JSX props are direct, framework-visible client-side XSS indicators."
 query: |
   (jsx_attribute
     (property_identifier)

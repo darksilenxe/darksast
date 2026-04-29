@@ -29,6 +29,16 @@ type TaintConfig struct {
 	SinkArgIndex *int `yaml:"sink_arg_index"`
 }
 
+type RuleMetadata struct {
+	Category            string   `yaml:"category"`
+	Taxonomy            []string `yaml:"taxonomy"`
+	CWE                 []string `yaml:"cwe"`
+	OWASP               []string `yaml:"owasp"`
+	References          []string `yaml:"references"`
+	Remediation         string   `yaml:"remediation"`
+	ConfidenceRationale string   `yaml:"confidence_rationale"`
+}
+
 // Rule represents the structure of our YAML signature files.
 // The tags (yaml:"...") tell the parser how to map the YAML keys to the struct fields.
 //
@@ -73,6 +83,8 @@ type Rule struct {
 	// Taint opts the rule into intra-file taint analysis.
 	Taint *TaintConfig `yaml:"taint"`
 
+	Metadata RuleMetadata `yaml:"metadata"`
+
 	compiled         *sitter.Query
 	ignoreMatchers   map[string]*regexp.Regexp
 	requireMatchers  map[string]*regexp.Regexp
@@ -81,11 +93,18 @@ type Rule struct {
 }
 
 type semgrepMetadata struct {
-	Framework          string   `yaml:"framework"`
-	Description        string   `yaml:"description"`
-	Confidence         string   `yaml:"confidence"`
-	Query              string   `yaml:"query"`
-	RequiresDependency []string `yaml:"requires_dependency"`
+	Framework           string   `yaml:"framework"`
+	Description         string   `yaml:"description"`
+	Confidence          string   `yaml:"confidence"`
+	Query               string   `yaml:"query"`
+	RequiresDependency  []string `yaml:"requires_dependency"`
+	Category            string   `yaml:"category"`
+	Taxonomy            []string `yaml:"taxonomy"`
+	CWE                 []string `yaml:"cwe"`
+	OWASP               []string `yaml:"owasp"`
+	References          []string `yaml:"references"`
+	Remediation         string   `yaml:"remediation"`
+	ConfidenceRationale string   `yaml:"confidence_rationale"`
 }
 
 type semgrepRule struct {
@@ -234,6 +253,15 @@ func semgrepToRule(in semgrepRule) (Rule, bool) {
 		Query:              query,
 		Confidence:         strings.TrimSpace(in.Metadata.Confidence),
 		RequiresDependency: in.Metadata.RequiresDependency,
+		Metadata: RuleMetadata{
+			Category:            strings.TrimSpace(in.Metadata.Category),
+			Taxonomy:            append([]string(nil), in.Metadata.Taxonomy...),
+			CWE:                 append([]string(nil), in.Metadata.CWE...),
+			OWASP:               append([]string(nil), in.Metadata.OWASP...),
+			References:          append([]string(nil), in.Metadata.References...),
+			Remediation:         strings.TrimSpace(in.Metadata.Remediation),
+			ConfidenceRationale: strings.TrimSpace(in.Metadata.ConfidenceRationale),
+		},
 	}
 	return out, true
 }

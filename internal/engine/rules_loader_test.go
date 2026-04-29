@@ -49,6 +49,17 @@ func TestLoadRulesMetadataFields(t *testing.T) {
       confidence: HIGH
       requires_dependency:
         - react
+      category: Cross-Site Scripting
+      taxonomy:
+        - code-pattern/framework
+      cwe:
+        - CWE-79
+      owasp:
+        - A03:2021
+      references:
+        - https://example.com/react-xss
+      remediation: Sanitize before rendering.
+      confidence_rationale: React sink.
       # query is intentionally in metadata to validate OpenGrep/Semgrep bundle mapping.
       query: |
         (assignment_expression
@@ -68,6 +79,13 @@ func TestLoadRulesMetadataFields(t *testing.T) {
 	assert.Equal(t, "React", rules[0].Framework)
 	assert.Equal(t, "HIGH", rules[0].Confidence)
 	assert.Equal(t, []string{"react"}, rules[0].RequiresDependency)
+	assert.Equal(t, "Cross-Site Scripting", rules[0].Metadata.Category)
+	assert.Equal(t, []string{"code-pattern/framework"}, rules[0].Metadata.Taxonomy)
+	assert.Equal(t, []string{"CWE-79"}, rules[0].Metadata.CWE)
+	assert.Equal(t, []string{"A03:2021"}, rules[0].Metadata.OWASP)
+	assert.Equal(t, []string{"https://example.com/react-xss"}, rules[0].Metadata.References)
+	assert.Equal(t, "Sanitize before rendering.", rules[0].Metadata.Remediation)
+	assert.Equal(t, "React sink.", rules[0].Metadata.ConfidenceRationale)
 	assert.Contains(t, rules[0].Query, "innerHTML")
 }
 

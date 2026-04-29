@@ -9,6 +9,8 @@ JavaScript-Security-Scanner is a lightweight Go-based static scanner for JavaScr
 - Supports native rule files plus Semgrep/OpenGrep bundle files (`rules: [...]`) when each imported rule provides a Tree-sitter-compatible `query` (or `metadata.query`).
 - Produces findings in JSON and CSV formats.
 - Produces package inventory outputs (table text + CSV + summary CSV).
+- Loads dependency advisories from YAML and reports dependency findings alongside code findings.
+- Resolves installed package versions from common lockfiles such as `package-lock.json`, `pnpm-lock.yaml`, and `yarn.lock`.
 - Supports Windows-first scripts and cross-platform shell scripts.
 
 ## Requirements
@@ -61,6 +63,7 @@ npm run scan:sample-vue
 CC=gcc go run ./cmd/scanner/main.go \
   -dir ./tests \
   -rules ./rules \
+  -advisories ./advisories \
   -packages-out ./tests/package_versions.txt \
   -packages-csv-out ./tests/package_versions.csv \
   -packages-summary-csv-out ./tests/package_summary.csv \
@@ -90,6 +93,7 @@ Relevant flags:
 | `-fetch-user-agent`   | scanner UA       | `User-Agent` header sent on each request.                                   |
 | `-fetch-max-bytes`    | `5242880` (5 MiB)| Maximum bytes accepted per response; larger responses are skipped.          |
 | `-fetch-same-origin`  | `true`           | When `true`, skip external scripts whose host differs from the page URL.    |
+| `-advisories`         | `./advisories`   | Directory containing dependency advisory YAML files used for version checks. |
 
 Notes and limitations:
 
@@ -107,6 +111,12 @@ Notes and limitations:
 - Findings CSV: `findings.csv`
 - Findings framework summary CSV: `findings_framework_summary.csv`
 - Fetched JavaScript manifest (only when `-url` is set): `<fetch-out>/manifest.json`
+
+### Dependency-aware inventory and findings
+
+- Package inventory now records declared versions, resolved versions, and the lockfile source when available.
+- Findings output distinguishes `code` findings from `dependency` findings.
+- Enriched rule metadata such as category, taxonomy, CWE, OWASP, references, remediation, and confidence rationale is surfaced in JSON and CSV findings output when present.
 
 ### Finding location fields
 
