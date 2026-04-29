@@ -303,6 +303,34 @@ func TestTaintAliasChainStaysProvablyTainted(t *testing.T) {
 	assert.Len(t, findings, 1, "alias chains should stay provably tainted")
 }
 
+func TestTaintConstantBinaryAliasSuppresses(t *testing.T) {
+	rule := testRule("REDIR-CONSTANT-BINARY", "MEDIUM",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const base = "/dashboard"; const next = base + "?tab=1"; a.href = next;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 0, "identifier backed by a constant binary expression should be suppressed")
+}
+
+func TestTaintBinaryAliasWithSourceRemainsProvablyTainted(t *testing.T) {
+	rule := testRule("REDIR-BINARY-TAINTED", "MEDIUM",
+		`(assignment_expression
+            left: (member_expression property: (property_identifier) @p (#eq? @p "href"))
+            right: (_) @value
+        ) @finding`)
+	rule.Taint = &TaintConfig{SinkCapture: "value", RequireTainted: true, RequireProvenTainted: true}
+	require.NoError(t, rule.compile())
+
+	src := `const next = "/go?next=" + req.body.next; a.href = next;` + "\n"
+	findings := scanContent(t, src, []Rule{rule}, nil)
+	assert.Len(t, findings, 1, "binary expressions with tainted operands should remain provably tainted")
+}
+
 func TestTaintDestructuredBindingStaysProvablyTainted(t *testing.T) {
 	rule := testRule("REDIR-DESTRUCTURED", "MEDIUM",
 		`(assignment_expression
