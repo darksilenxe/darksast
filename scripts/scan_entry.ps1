@@ -41,6 +41,8 @@ switch ($TargetKey) {
             FindingsJSONOut = "./findings_report.json"
             FindingsFrameworkCSVOut = "./findings_framework_summary.csv"
             FindingsCSVOut = "./findings.csv"
+            CompromisedJSONOut = "./compromised_packages.json"
+            CompromisedCSVOut = "./compromised_packages.csv"
         }
     }
     "tests" {
@@ -53,6 +55,8 @@ switch ($TargetKey) {
             FindingsJSONOut = "./tests/findings_report.json"
             FindingsFrameworkCSVOut = "./tests/findings_framework_summary.csv"
             FindingsCSVOut = "./tests/findings.csv"
+            CompromisedJSONOut = "./tests/compromised_packages.json"
+            CompromisedCSVOut = "./tests/compromised_packages.csv"
         }
     }
     "sample-site" {
@@ -65,6 +69,8 @@ switch ($TargetKey) {
             FindingsJSONOut = "./tests/sample-site/findings_report.json"
             FindingsFrameworkCSVOut = "./tests/sample-site/findings_framework_summary.csv"
             FindingsCSVOut = "./tests/sample-site/findings.csv"
+            CompromisedJSONOut = "./tests/sample-site/compromised_packages.json"
+            CompromisedCSVOut = "./tests/sample-site/compromised_packages.csv"
         }
     }
     "sample-vue" {
@@ -77,6 +83,8 @@ switch ($TargetKey) {
             FindingsJSONOut = "./tests/sample-vue/findings_report.json"
             FindingsFrameworkCSVOut = "./tests/sample-vue/findings_framework_summary.csv"
             FindingsCSVOut = "./tests/sample-vue/findings.csv"
+            CompromisedJSONOut = "./tests/sample-vue/compromised_packages.json"
+            CompromisedCSVOut = "./tests/sample-vue/compromised_packages.csv"
         }
     }
 }
@@ -105,6 +113,8 @@ $runner = Join-Path $scriptDir "run_scanner.ps1"
     -PackagesSummaryCSVOut $targetArgs.PackagesSummaryCSVOut `
     -FindingsJSONOut $targetArgs.FindingsJSONOut `
     -FindingsFrameworkCSVOut $targetArgs.FindingsFrameworkCSVOut `
-    -FindingsCSVOut $targetArgs.FindingsCSVOut
+    -FindingsCSVOut $targetArgs.FindingsCSVOut `
+    -CompromisedJSONOut $targetArgs.CompromisedJSONOut `
+    -CompromisedCSVOut $targetArgs.CompromisedCSVOut
 
 exit $LASTEXITCODE

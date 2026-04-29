@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	sitter "github.com/smacker/go-tree-sitter"
-	"github.com/smacker/go-tree-sitter/javascript"
 )
 
 // Finding represents a discovered vulnerability
@@ -286,9 +285,12 @@ func argumentCountFromCaptures(captures map[string]*sitter.Node) (int, bool) {
 	return 0, false
 }
 
-func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, findings chan<- Finding, suppress suppressionMap, taint *fileTaintModel) {
+func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, languageKey string, findings chan<- Finding, suppress suppressionMap, taint *fileTaintModel) {
 	for _, rule := range e.Rules {
 		if !e.ruleAppliesToProject(rule) {
+			continue
+		}
+		if normalizeLanguageName(rule.EffectiveLanguage()) != languageKey {
 			continue
 		}
 
@@ -374,8 +376,7 @@ func (e *Engine) ScanDirectory(targetDir string, findings chan<- Finding) error 
 			return nil
 		}
 
-		ext := filepath.Ext(path)
-		if ext != ".js" && ext != ".jsx" && ext != ".ts" && ext != ".tsx" && ext != ".mjs" && ext != ".cjs" {
+		if _, ok := languageSpecForPath(path); !ok {
 			return nil
 		}
 		if !e.shouldScanFile(path) {
@@ -404,8 +405,13 @@ func (e *Engine) scanFile(path string, wg *sync.WaitGroup, findings chan<- Findi
 		return
 	}
 
+	spec, ok := languageSpecForPath(path)
+	if !ok {
+		return
+	}
+
 	parser := sitter.NewParser()
-	parser.SetLanguage(javascript.GetLanguage())
+	parser.SetLanguage(spec.language)
 
 	tree, _ := parser.ParseCtx(context.Background(), nil, content)
 	if tree == nil {
@@ -413,9 +419,12 @@ func (e *Engine) scanFile(path string, wg *sync.WaitGroup, findings chan<- Findi
 	}
 
 	suppress := buildSuppressionMap(content)
-	taint := buildFileTaintModel(tree.RootNode(), content)
+	var taint *fileTaintModel
+	if spec.supportsTaint {
+		taint = buildFileTaintModel(tree.RootNode(), content)
+	}
 
-	e.matchRules(tree, content, path, findings, suppress, taint)
+	e.matchRules(tree, content, path, spec.key, findings, suppress, taint)
 
 	// Initialize our state tracker for this specific file
 	symTable := &SymbolTable{

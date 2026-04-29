@@ -6,7 +6,9 @@ param(
     [string]$PackagesSummaryCSVOut = "./package_summary.csv",
     [string]$FindingsJSONOut = "./findings_report.json",
     [string]$FindingsFrameworkCSVOut = "./findings_framework_summary.csv",
-    [string]$FindingsCSVOut = "./findings.csv"
+    [string]$FindingsCSVOut = "./findings.csv",
+    [string]$CompromisedJSONOut = "./compromised_packages.json",
+    [string]$CompromisedCSVOut = "./compromised_packages.csv"
 )
 
 $ErrorActionPreference = "Stop"

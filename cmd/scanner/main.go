@@ -37,6 +37,14 @@ func main() {
 	packagesOut := flag.String("packages-out", "./package_versions.txt", "Output text file for package/version table")
 	packagesCSVOut := flag.String("packages-csv-out", "./package_versions.csv", "Output CSV file for package/version table")
 	packagesSummaryCSVOut := flag.String("packages-summary-csv-out", "./package_summary.csv", "Output summary CSV file for CI dashboards")
+	compromisedRules := flag.String("compromised-rules", "./intel/compromised_packages.yaml", "YAML file containing compromised package rules")
+	compromisedFeedURL := flag.String("compromised-feed-url", "", "Optional JSON API URL that returns compromised package rules and IoCs")
+	compromisedFeedTimeout := flag.Duration("compromised-feed-timeout", 15*time.Second, "HTTP timeout used when fetching compromised package intelligence")
+	compromisedFeedUserAgent := flag.String("compromised-feed-user-agent", "", "User-Agent header used when fetching compromised package intelligence")
+	compromisedFeedMaxBytes := flag.Int64("compromised-feed-max-bytes", 2*1024*1024, "Maximum bytes accepted from the compromised package intelligence feed")
+	compromisedGeneratedRulesOut := flag.String("compromised-generated-rules-out", "", "Optional path to write the merged compromised package rule set as YAML before the SAST scan")
+	compromisedJSONOut := flag.String("compromised-json-out", "./compromised_packages.json", "Output JSON file for compromised package matches")
+	compromisedCSVOut := flag.String("compromised-csv-out", "./compromised_packages.csv", "Output CSV file for compromised package matches")
 	findingsJSONOut := flag.String("findings-json-out", "./findings_report.json", "Output JSON file for SAST findings")
 	findingsFrameworkCSVOut := flag.String("findings-framework-csv-out", "./findings_framework_summary.csv", "Output CSV file for framework/severity finding counts")
 	findingsCSVOut := flag.String("findings-csv-out", "./findings.csv", "Output CSV file with one row per finding")
@@ -82,10 +90,7 @@ func main() {
 
 	fmt.Printf("[*] Target Directory: %s\n", *targetDir)
 
-	// 1. Run the dependency check
-	deps.CheckDependencies(*targetDir)
-
-	// 1b. Build a package/version inventory table across discovered JS projects
+	// 1. Build a package/version inventory table across discovered manifests.
 	packageRecords, err := deps.CollectPackageRecords(*targetDir)
 	if err != nil {
 		log.Printf("[!] Failed to collect package inventory: %v\n", err)
@@ -111,6 +116,47 @@ func main() {
 			} else {
 				fmt.Println("[*] Detected frameworks: none")
 			}
+		}
+		fmt.Println()
+	}
+
+	compromisedFindings := make([]deps.CompromisedFinding, 0)
+	if len(packageRecords) > 0 {
+		seedRules, ruleErr := deps.LoadCompromisedRules(*compromisedRules)
+		if ruleErr != nil {
+			log.Printf("[!] Failed to load compromised package rules: %v\n", ruleErr)
+		}
+		feedRules, feedErr := deps.FetchCompromisedRules(*compromisedFeedURL, deps.CompromisedFeedOptions{
+			Timeout:   *compromisedFeedTimeout,
+			UserAgent: *compromisedFeedUserAgent,
+			MaxBytes:  *compromisedFeedMaxBytes,
+		})
+		if feedErr != nil {
+			log.Printf("[!] Failed to fetch compromised package feed: %v\n", feedErr)
+		}
+		mergedCompromisedRules := deps.MergeCompromisedRules(seedRules, feedRules)
+		if out := strings.TrimSpace(*compromisedGeneratedRulesOut); out != "" {
+			if writeErr := deps.WriteCompromisedRulesYAML(out, mergedCompromisedRules); writeErr != nil {
+				log.Printf("[!] Failed to write merged compromised package rules: %v\n", writeErr)
+			} else {
+				fmt.Printf("[+] Merged compromised package rules written to %s.\n", out)
+			}
+		}
+
+		compromisedFindings = deps.MatchCompromisedPackages(packageRecords, mergedCompromisedRules)
+		if len(compromisedFindings) == 0 {
+			fmt.Println("[*] No compromised package matches detected.")
+		} else {
+			fmt.Println("[*] Compromised package matches:")
+			for _, finding := range compromisedFindings {
+				fmt.Printf("[!] %-8s | %-6s | %-30s | %s\n    %s\n", finding.Severity, finding.Ecosystem, finding.RuleID, finding.ManifestPath, deps.FormatIOCs(finding.IOCs))
+			}
+		}
+		if jsonErr := reporter.WriteCompromisedJSON(compromisedFindings, *targetDir, *compromisedJSONOut); jsonErr != nil {
+			log.Printf("[!] Failed to write compromised package JSON: %v\n", jsonErr)
+		}
+		if csvErr := reporter.WriteCompromisedCSV(compromisedFindings, *compromisedCSVOut); csvErr != nil {
+			log.Printf("[!] Failed to write compromised package CSV: %v\n", csvErr)
 		}
 		fmt.Println()
 	}

@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	sitter "github.com/smacker/go-tree-sitter"
-	"github.com/smacker/go-tree-sitter/javascript"
 	"gopkg.in/yaml.v3"
 )
 
@@ -42,6 +41,7 @@ type Rule struct {
 	Framework   string `yaml:"framework"`
 	Description string `yaml:"description"`
 	Query       string `yaml:"query"`
+	Language    string `yaml:"language"`
 
 	// Confidence is reported alongside severity. Defaults to "MEDIUM".
 	Confidence string `yaml:"confidence"`
@@ -74,6 +74,7 @@ type Rule struct {
 	Taint *TaintConfig `yaml:"taint"`
 
 	compiled         *sitter.Query
+	compiledLanguage string
 	ignoreMatchers   map[string]*regexp.Regexp
 	requireMatchers  map[string]*regexp.Regexp
 	literalCaptures  map[string]struct{}
@@ -113,12 +114,18 @@ func (r *Rule) compile() error {
 		return fmt.Errorf("rule %s has an empty query", r.ID)
 	}
 
-	if r.compiled == nil {
-		compiled, err := sitter.NewQuery([]byte(r.Query), javascript.GetLanguage())
+	spec, err := languageSpecForName(r.EffectiveLanguage())
+	if err != nil {
+		return fmt.Errorf("rule %s: %w", r.ID, err)
+	}
+
+	if r.compiled == nil || r.compiledLanguage != spec.key {
+		compiled, err := sitter.NewQuery([]byte(r.Query), spec.language)
 		if err != nil {
 			return fmt.Errorf("failed to compile query for rule %s: %w", r.ID, err)
 		}
 		r.compiled = compiled
+		r.compiledLanguage = spec.key
 	}
 
 	// Rebuild the post-match filter caches every call. Compilation is
@@ -149,6 +156,14 @@ func (r *Rule) compile() error {
 
 	r.captureNamesInit = true
 	return nil
+}
+
+// EffectiveLanguage returns the rule's normalized parser language.
+func (r *Rule) EffectiveLanguage() string {
+	if strings.TrimSpace(r.Language) == "" {
+		return "javascript"
+	}
+	return normalizeLanguageName(r.Language)
 }
 
 // EffectiveConfidence returns the rule's confidence, defaulting to
@@ -213,10 +228,7 @@ func LoadRules(rulesDir string) ([]Rule, error) {
 
 func semgrepToRule(in semgrepRule) (Rule, bool) {
 	id := strings.TrimSpace(in.ID)
-	query := strings.TrimSpace(resolveSemgrepQuery(in))
-	if id == "" || query == "" {
-		return Rule{}, false
-	}
+	query := ""
 
 	description := strings.TrimSpace(in.Message)
 	if description == "" {
@@ -226,19 +238,26 @@ func semgrepToRule(in semgrepRule) (Rule, bool) {
 		description = fmt.Sprintf("Imported from Semgrep/OpenGrep rule %s", id)
 	}
 
+	language := normalizeSemgrepLanguage(in.Metadata.Framework, in.Languages)
+	query = strings.TrimSpace(resolveSemgrepQuery(in, language))
+	if id == "" || query == "" {
+		return Rule{}, false
+	}
+
 	out := Rule{
 		ID:                 id,
 		Severity:           normalizeSemgrepSeverity(in.Severity),
 		Framework:          normalizeSemgrepFramework(in.Metadata.Framework, in.Languages),
 		Description:        description,
 		Query:              query,
+		Language:           language,
 		Confidence:         strings.TrimSpace(in.Metadata.Confidence),
 		RequiresDependency: in.Metadata.RequiresDependency,
 	}
 	return out, true
 }
 
-func resolveSemgrepQuery(in semgrepRule) string {
+func resolveSemgrepQuery(in semgrepRule, language string) string {
 	candidates := []string{
 		strings.TrimSpace(in.Query),
 		strings.TrimSpace(in.Metadata.Query),
@@ -251,13 +270,15 @@ func resolveSemgrepQuery(in semgrepRule) string {
 		candidates = append(candidates, strings.TrimSpace(p.Pattern))
 	}
 
+	spec, err := languageSpecForName(language)
+	if err != nil {
+		return ""
+	}
 	for _, candidate := range candidates {
 		if candidate == "" {
 			continue
 		}
-		// Scanner queries are JavaScript Tree-sitter queries because this
-		// engine currently scans JavaScript/TypeScript syntax only.
-		if _, err := sitter.NewQuery([]byte(candidate), javascript.GetLanguage()); err == nil {
+		if _, err := sitter.NewQuery([]byte(candidate), spec.language); err == nil {
 			return candidate
 		}
 	}
@@ -309,6 +330,23 @@ func normalizeSemgrepFramework(explicit string, languages []string) string {
 			return "Express"
 		case "next", "nextjs", "next.js":
 			return "Next.js"
+		}
+	}
+
+	return "JavaScript"
+}
+
+func normalizeSemgrepLanguage(explicit string, languages []string) string {
+	if language := normalizeLanguageName(explicit); language != "javascript" || strings.TrimSpace(explicit) != "" {
+		if _, ok := languageSpecs[language]; ok {
+			return languageSpecs[language].displayName
+		}
+	}
+
+	for _, language := range languages {
+		normalized := normalizeLanguageName(language)
+		if spec, ok := languageSpecs[normalized]; ok {
+			return spec.displayName
 		}
 	}
 

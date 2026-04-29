@@ -9,6 +9,8 @@ PACKAGES_SUMMARY_CSV_OUT="./package_summary.csv"
 FINDINGS_JSON_OUT="./findings_report.json"
 FINDINGS_FRAMEWORK_CSV_OUT="./findings_framework_summary.csv"
 FINDINGS_CSV_OUT="./findings.csv"
+COMPROMISED_JSON_OUT="./compromised_packages.json"
+COMPROMISED_CSV_OUT="./compromised_packages.csv"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -81,4 +83,6 @@ go run ./cmd/scanner/main.go \
   -packages-summary-csv-out "${PACKAGES_SUMMARY_CSV_OUT}" \
   -findings-json-out "${FINDINGS_JSON_OUT}" \
   -findings-framework-csv-out "${FINDINGS_FRAMEWORK_CSV_OUT}" \
-  -findings-csv-out "${FINDINGS_CSV_OUT}"
+  -findings-csv-out "${FINDINGS_CSV_OUT}" \
+  -compromised-json-out "${COMPROMISED_JSON_OUT}" \
+  -compromised-csv-out "${COMPROMISED_CSV_OUT}"
