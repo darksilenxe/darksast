@@ -64,6 +64,16 @@ type TaintConfig struct {
 	SinkArgIndex *int `yaml:"sink_arg_index"`
 }
 
+type RuleMetadata struct {
+	Category            string   `yaml:"category"`
+	Taxonomy            []string `yaml:"taxonomy"`
+	CWE                 []string `yaml:"cwe"`
+	OWASP               []string `yaml:"owasp"`
+	References          []string `yaml:"references"`
+	Remediation         string   `yaml:"remediation"`
+	ConfidenceRationale string   `yaml:"confidence_rationale"`
+}
+
 // Rule represents the structure of our YAML signature files.
 // The tags (yaml:"...") tell the parser how to map the YAML keys to the struct fields.
 //
@@ -114,6 +124,8 @@ type Rule struct {
 
 	// Taint opts the rule into intra-file taint analysis.
 	Taint *TaintConfig `yaml:"taint"`
+
+	Metadata RuleMetadata `yaml:"metadata"`
 
 	compiled         *sitter.Query
 	compiledLanguage string

@@ -35,6 +35,7 @@ var confidenceRank = map[string]int{
 func main() {
 	targetDir := flag.String("dir", ".", "Directory to scan")
 	rulesDir := flag.String("rules", "./rules", "Directory containing YAML rule files")
+	advisoriesDir := flag.String("advisories", "./advisories", "Directory containing dependency advisory YAML files")
 	packagesOut := flag.String("packages-out", "./package_versions.txt", "Output text file for package/version table")
 	packagesCSVOut := flag.String("packages-csv-out", "./package_versions.csv", "Output CSV file for package/version table")
 	packagesSummaryCSVOut := flag.String("packages-summary-csv-out", "./package_summary.csv", "Output summary CSV file for CI dashboards")
@@ -105,10 +106,17 @@ func main() {
 
 	// 1. Build a package/version inventory table across discovered manifests.
 	packageRecords, err := deps.CollectPackageRecords(*targetDir)
+	advisoryMatches := make([]deps.AdvisoryMatch, 0)
 	if err != nil {
 		log.Printf("[!] Failed to collect package inventory: %v\n", err)
 	} else {
 		frameworks := deps.DetectFrameworks(packageRecords)
+		advisoryDB, advisoryErr := deps.LoadAdvisories(*advisoriesDir)
+		if advisoryErr != nil {
+			log.Printf("[!] Failed to load dependency advisories: %v\n", advisoryErr)
+		} else {
+			advisoryMatches = advisoryDB.Match(packageRecords)
+		}
 		if writeErr := deps.WritePackageTable(packageRecords, frameworks, *packagesOut); writeErr != nil {
 			log.Printf("[!] Failed to write package inventory table: %v\n", writeErr)
 		} else {
@@ -118,7 +126,7 @@ func main() {
 			} else {
 				fmt.Printf("[+] Package CSV written to %s (%d packages).\n", *packagesCSVOut, len(packageRecords))
 			}
-			summary := deps.BuildSummaryStats(packageRecords, frameworks)
+			summary := deps.BuildSummaryStats(packageRecords, frameworks, advisoryMatches)
 			if summaryErr := deps.WriteSummaryCSV(summary, *packagesSummaryCSVOut); summaryErr != nil {
 				log.Printf("[!] Failed to write package summary CSV: %v\n", summaryErr)
 			} else {
@@ -128,6 +136,14 @@ func main() {
 				fmt.Printf("[*] Detected frameworks: %v\n", frameworks)
 			} else {
 				fmt.Println("[*] Detected frameworks: none")
+			}
+			if len(advisoryMatches) == 0 {
+				fmt.Println("[*] Matched advisories: none")
+			} else {
+				fmt.Printf("[*] Matched advisories: %d\n", len(advisoryMatches))
+				for _, match := range advisoryMatches {
+					fmt.Printf("   🚨 %-8s | %-18s | %s@%s | %s\n", match.Severity, match.AdvisoryID, match.PackageName, match.MatchedVersion, match.ProjectPath)
+				}
 			}
 		}
 		fmt.Println()
@@ -286,12 +302,24 @@ func main() {
 			continue
 		}
 		findings = append(findings, f)
-		fmt.Printf("[!] %-8s | %-7s | %-12s | %-28s | %s:%d:%d\n    %s\n", f.Severity, f.Confidence, f.Framework, f.RuleID, f.File, f.Line, f.Column, f.Snippet)
+		printFinding(f)
 	}
 
 	err = <-scanErrChan
 	if err != nil {
 		log.Printf("Scan encountered an error: %v\n", err)
+	}
+
+	for _, match := range advisoryMatches {
+		f := advisoryMatchToFinding(match)
+		if minSevRank > 0 && severityRank[strings.ToUpper(f.Severity)] < minSevRank {
+			continue
+		}
+		if minConfRank > 0 && confidenceRank[strings.ToUpper(f.Confidence)] < minConfRank {
+			continue
+		}
+		findings = append(findings, f)
+		printFinding(f)
 	}
 
 	if jsonErr := reporter.WriteJSON(findings, *targetDir, *findingsJSONOut); jsonErr != nil {

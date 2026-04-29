@@ -4,6 +4,18 @@ framework: "Angular"
 requires_dependency:
   - "@angular/core"
 description: "Detects Angular DomSanitizer bypassSecurityTrustHtml usage, which can bypass built-in sanitization when fed untrusted HTML."
+metadata:
+  category: "Cross-Site Scripting"
+  taxonomy:
+    - "code-pattern/framework"
+  cwe:
+    - "CWE-79"
+  owasp:
+    - "A03:2021"
+  references:
+    - "https://angular.dev/best-practices/security/"
+  remediation: "Prefer Angular's default sanitization flow and reserve bypassSecurityTrustHtml for reviewed, trusted content only."
+  confidence_rationale: "The rule targets Angular's explicit sanitizer bypass API, which is a precise framework-specific signal."
 query: |
   (call_expression
     function: (member_expression

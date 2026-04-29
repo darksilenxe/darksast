@@ -64,6 +64,7 @@ npm run scan:sample-vue
 CC=gcc go run ./cmd/scanner/main.go \
   -dir ./tests \
   -rules ./rules \
+  -advisories ./advisories \
   -packages-out ./tests/package_versions.txt \
   -packages-csv-out ./tests/package_versions.csv \
   -packages-summary-csv-out ./tests/package_summary.csv \
@@ -132,6 +133,12 @@ Notes and limitations:
 - Findings CSV: `findings.csv`
 - Findings framework summary CSV: `findings_framework_summary.csv`
 - Fetched JavaScript manifest (only when `-url` is set): `<fetch-out>/manifest.json`
+
+### Dependency-aware inventory and findings
+
+- Package inventory now records declared versions, resolved versions, and the lockfile source when available.
+- Findings output distinguishes `code` findings from `dependency` findings.
+- Enriched rule metadata such as category, taxonomy, CWE, OWASP, references, remediation, and confidence rationale is surfaced in JSON and CSV findings output when present.
 
 ### Finding location fields
 

@@ -4,6 +4,18 @@ framework: "Angular"
 requires_dependency:
   - "@angular/core"
 description: "Detects Angular bypassSecurityTrustResourceUrl usage, which can disable resource URL sanitization."
+metadata:
+  category: "Cross-Site Scripting"
+  taxonomy:
+    - "code-pattern/framework"
+  cwe:
+    - "CWE-79"
+  owasp:
+    - "A03:2021"
+  references:
+    - "https://angular.dev/best-practices/security/"
+  remediation: "Review resource URLs against a strict allowlist before calling bypassSecurityTrustResourceUrl."
+  confidence_rationale: "The API intentionally opts out of Angular resource URL protection and is highly specific."
 query: |
   (call_expression
     function: (member_expression
