@@ -1,0 +1,18 @@
+id: "YAML-INSECURE-SKIP-TLS-VERIFY"
+severity: "HIGH"
+framework: "YAML"
+language: "YAML"
+description: "Detects YAML settings that explicitly skip TLS verification."
+query: |
+  (block_mapping_pair
+    key: (flow_node
+      (plain_scalar
+        (string_scalar) @key (#eq? @key "insecureSkipTlsVerify")
+      )
+    )
+    value: (flow_node
+      (plain_scalar
+        (boolean_scalar) @value (#eq? @value "true")
+      )
+    )
+  ) @finding

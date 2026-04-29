@@ -7,7 +7,7 @@ query: |
   (block_mapping_pair
     key: (flow_node
       (plain_scalar
-        (string_scalar) @key (#match? @key "^(verify|insecureSkipTlsVerify)$")
+        (string_scalar) @key (#eq? @key "verify")
       )
     )
     value: (flow_node
