@@ -6,6 +6,13 @@ query: |
   (call_expression
     function: (member_expression
       object: (identifier) @obj (#eq? @obj "vm")
-      property: (property_identifier) @method (#match? @method "^(runInNewContext|runInContext|runInThisContext)$")
+      property: (property_identifier) @method (#match? @method "^(runInNewContext|runInContext|runInThisContext|compileFunction)$")
+    ) @vm_sink
+  )
+
+  (new_expression
+    constructor: (member_expression
+      object: (identifier) @obj (#eq? @obj "vm")
+      property: (property_identifier) @method (#eq? @method "Script")
     ) @vm_sink
   )
