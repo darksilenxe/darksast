@@ -475,3 +475,51 @@ func defaultConfidence(confidence string) string {
 	}
 	return strings.ToUpper(strings.TrimSpace(confidence))
 }
+
+func normalizeKind(kind string) string {
+	kind = strings.TrimSpace(kind)
+	if kind == "" {
+		return "code"
+	}
+	return strings.ToLower(kind)
+}
+
+func countFindingsByKind(findings []engine.Finding, kind string) int {
+	count := 0
+	for _, finding := range findings {
+		if normalizeKind(finding.Kind) == kind {
+			count++
+		}
+	}
+	return count
+}
+
+func summarizeByFramework(findings []engine.Finding) map[string]int {
+	summary := make(map[string]int)
+	for _, finding := range findings {
+		framework := finding.Framework
+		if framework == "" {
+			framework = "JavaScript"
+		}
+		summary[framework]++
+	}
+	if len(summary) == 0 {
+		return nil
+	}
+	return summary
+}
+
+func summarizeByCategory(findings []engine.Finding) map[string]int {
+	summary := make(map[string]int)
+	for _, finding := range findings {
+		category := strings.TrimSpace(finding.Category)
+		if category == "" {
+			continue
+		}
+		summary[category]++
+	}
+	if len(summary) == 0 {
+		return nil
+	}
+	return summary
+}

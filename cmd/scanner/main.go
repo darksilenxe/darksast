@@ -106,7 +106,7 @@ func main() {
 
 	// 1. Build a package/version inventory table across discovered manifests.
 	packageRecords, err := deps.CollectPackageRecords(*targetDir)
-	advisoryMatches := make([]deps.AdvisoryMatch, 0)
+	advisoryMatches := make([]deps.AdvisoryFinding, 0)
 	if err != nil {
 		log.Printf("[!] Failed to collect package inventory: %v\n", err)
 	} else {
@@ -115,7 +115,7 @@ func main() {
 		if advisoryErr != nil {
 			log.Printf("[!] Failed to load dependency advisories: %v\n", advisoryErr)
 		} else {
-			advisoryMatches = advisoryDB.Match(packageRecords)
+			advisoryMatches = deps.MatchAdvisories(packageRecords, advisoryDB)
 		}
 		if writeErr := deps.WritePackageTable(packageRecords, frameworks, *packagesOut); writeErr != nil {
 			log.Printf("[!] Failed to write package inventory table: %v\n", writeErr)
@@ -142,7 +142,7 @@ func main() {
 			} else {
 				fmt.Printf("[*] Matched advisories: %d\n", len(advisoryMatches))
 				for _, match := range advisoryMatches {
-					fmt.Printf("   🚨 %-8s | %-18s | %s@%s | %s\n", match.Severity, match.AdvisoryID, match.PackageName, match.MatchedVersion, match.ProjectPath)
+					fmt.Printf("   🚨 %-8s | %-18s | %s@%s | %s\n", match.Severity, match.AdvisoryID, match.Package, match.Version, match.ProjectPath)
 				}
 			}
 		}
@@ -341,5 +341,33 @@ func main() {
 	if shouldFailForOSSVulns {
 		log.Printf("[!] Failing because OSS dependency vulnerabilities met the -fail-on-oss-vuln-severity threshold.\n")
 		os.Exit(1)
+	}
+}
+
+func printFinding(f engine.Finding) {
+	fmt.Printf("[!] %-8s | %-6s | %-30s | %s:%d\n    %s\n",
+		f.Severity, f.Framework, f.RuleID, f.File, f.Line, f.Description)
+}
+
+func advisoryMatchToFinding(match deps.AdvisoryFinding) engine.Finding {
+	fixedVersions := make([]string, 0)
+	if match.FixedVersion != "" {
+		fixedVersions = append(fixedVersions, match.FixedVersion)
+	}
+	return engine.Finding{
+		Kind:            "dependency",
+		File:            match.ManifestPath,
+		RuleID:          match.AdvisoryID,
+		Severity:        match.Severity,
+		Framework:       match.Ecosystem,
+		Description:     match.Description,
+		Confidence:      "HIGH",
+		PackageName:     match.Package,
+		DeclaredVersion: match.Version,
+		FixedVersions:   fixedVersions,
+		References:      match.References,
+		CWE:             match.CWE,
+		Remediation:     match.Remediation,
+		ProjectPath:     match.ProjectPath,
 	}
 }
