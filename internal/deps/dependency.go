@@ -41,7 +41,8 @@ func (p PackageRecord) EffectiveVersion() string {
 	return normalizeVersion(p.Version)
 }
 
-// AdvisoryMatch summarises a single advisory hit used in aggregate statistics.
+// AdvisoryMatch summarizes a single advisory hit used in aggregate statistics.
+// Kept for potential future use; current pipeline uses AdvisoryFinding directly.
 type AdvisoryMatch struct {
 	AdvisoryID     string
 	PackageName    string
@@ -593,7 +594,6 @@ func BuildSummaryStats(records []PackageRecord, frameworks []string, advisoryMat
 	frameworkPackageCounts := make(map[string]int)
 	advisoryCounts := make(map[string]int)
 	advisorySeverities := make(map[string]int)
-	vulnerableEntries := make([]string, 0)
 
 	for _, record := range records {
 		projectSet[record.ProjectPath] = struct{}{}
@@ -612,9 +612,6 @@ func BuildSummaryStats(records []PackageRecord, frameworks []string, advisoryMat
 		if record.Ecosystem == "npm" {
 			if frameworkName, ok := frameworkIndicators[record.Name]; ok {
 				frameworkPackageCounts[frameworkName]++
-			}
-			if _, tracked := react2ShellTargetPackages[record.Name]; tracked && isVulnerableVersion(record.Version) {
-				vulnerableEntries = append(vulnerableEntries, fmt.Sprintf("%s@%s (%s)", record.Name, record.Version, record.ProjectPath))
 			}
 		}
 	}
