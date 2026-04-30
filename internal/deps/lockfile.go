@@ -18,6 +18,15 @@ type lockfileInventory struct {
 	AllVersions    map[string][]string
 }
 
+func normalizeVersion(version string) string {
+	version = strings.TrimSpace(version)
+	version = strings.Trim(version, `"'`)
+	if strings.HasPrefix(version, "v") || strings.HasPrefix(version, "V") {
+		version = version[1:]
+	}
+	return strings.TrimSpace(version)
+}
+
 func loadProjectLockfile(projectPath string) (*lockfileInventory, error) {
 	candidates := []struct {
 		name   string

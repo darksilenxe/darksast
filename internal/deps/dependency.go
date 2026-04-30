@@ -21,15 +21,17 @@ type PackageJSON struct {
 
 // PackageRecord represents one dependency entry from a discovered manifest.
 type PackageRecord struct {
-	ProjectPath    string
-	ManifestPath   string
-	Scope          string
-	Ecosystem      string
-	Name           string
-	Version        string
-	Relationship   string
-	DependencyPath string
-	Resolved       bool
+	ProjectPath     string
+	ManifestPath    string
+	Scope           string
+	Ecosystem       string
+	Name            string
+	Version         string
+	ResolvedVersion string
+	VersionSource   string
+	Relationship    string
+	DependencyPath  string
+	Resolved        bool
 }
 
 func (p PackageRecord) EffectiveVersion() string {
@@ -37,6 +39,15 @@ func (p PackageRecord) EffectiveVersion() string {
 		return p.ResolvedVersion
 	}
 	return normalizeVersion(p.Version)
+}
+
+// AdvisoryMatch summarises a single advisory hit used in aggregate statistics.
+type AdvisoryMatch struct {
+	AdvisoryID     string
+	PackageName    string
+	MatchedVersion string
+	ProjectPath    string
+	Severity       string
 }
 
 // SummaryStats captures high-level metrics for CI-friendly reporting.
@@ -49,9 +60,17 @@ type SummaryStats struct {
 	ResolvedVersionCount   int
 	DetectedFrameworks     []string
 	FrameworkPackageCounts map[string]int
-	AdvisoryMatches        []AdvisoryMatch
+	AdvisoryMatches        []AdvisoryFinding
 	AdvisoryCounts         map[string]int
 	AdvisorySeverities     map[string]int
+}
+
+// react2ShellTargetPackages lists npm packages known to be affected by React2Shell (CVE-2025-55182).
+var react2ShellTargetPackages = map[string]struct{}{
+	"react":                      {},
+	"react-dom":                  {},
+	"react-server-dom-webpack":   {},
+	"react-server-dom-turbopack": {},
 }
 
 var frameworkIndicators = map[string]string{
@@ -150,77 +169,58 @@ func CollectPackageRecords(targetDir string) ([]PackageRecord, error) {
 			return nil
 		}
 
-		var parsed []PackageRecord
 		switch d.Name() {
 		case "package.json":
-			parsed = parseNPMManifest(path)
+			data, readErr := os.ReadFile(path)
+			if readErr != nil {
+				return nil
+			}
+			var pkg PackageJSON
+			if unmarshalErr := json.Unmarshal(data, &pkg); unmarshalErr != nil {
+				return nil
+			}
+			projectPath := filepath.Dir(path)
+			lockfileInventory, lockfileErr := loadProjectLockfile(projectPath)
+			if lockfileErr != nil {
+				fmt.Printf("[-] Warning: failed to parse lockfile in %s: %v\n", projectPath, lockfileErr)
+			}
+			appendRec := func(scope string, deps map[string]string) {
+				for name, version := range deps {
+					record := PackageRecord{
+						ProjectPath:    projectPath,
+						ManifestPath:   path,
+						Scope:          scope,
+						Ecosystem:      "npm",
+						Name:           name,
+						Version:        version,
+						Relationship:   "direct",
+						DependencyPath: name,
+					}
+					if lockfileInventory != nil {
+						if resolved := lockfileInventory.DirectVersions[name]; resolved != "" {
+							record.ResolvedVersion = resolved
+							record.VersionSource = lockfileInventory.Source
+						} else if versions := lockfileInventory.AllVersions[name]; len(versions) == 1 {
+							record.ResolvedVersion = versions[0]
+							record.VersionSource = lockfileInventory.Source
+						}
+					}
+					records = append(records, record)
+				}
+			}
+			appendRec("dependencies", pkg.Dependencies)
+			appendRec("devDependencies", pkg.DevDependencies)
 		case "package-lock.json", "npm-shrinkwrap.json":
-			parsed = parseNPMPackageLock(path)
+			records = append(records, parseNPMPackageLock(path)...)
 		case "requirements.txt":
-			parsed = parseRequirementsManifest(path)
+			records = append(records, parseRequirementsManifest(path)...)
 		case "go.mod":
-			parsed = parseGoModManifest(path)
+			records = append(records, parseGoModManifest(path)...)
 		case "Cargo.toml":
-			parsed = parseCargoManifest(path)
+			records = append(records, parseCargoManifest(path)...)
 		default:
 			return nil
 		}
-
-		var pkg PackageJSON
-		if unmarshalErr := json.Unmarshal(data, &pkg); unmarshalErr != nil {
-			return nil
-		}
-
-		projectPath := filepath.Dir(path)
-		lockfileInventory, lockfileErr := loadProjectLockfile(projectPath)
-		if lockfileErr != nil {
-			fmt.Printf("[-] Warning: failed to parse lockfile in %s: %v\n", projectPath, lockfileErr)
-		}
-
-		directNames := make(map[string]struct{})
-		appendRecords := func(scope string, deps map[string]string) {
-			for name, version := range deps {
-				record := PackageRecord{
-					ProjectPath: projectPath,
-					Scope:       scope,
-					Name:        name,
-					Version:     version,
-				}
-				if lockfileInventory != nil {
-					if resolved := lockfileInventory.DirectVersions[name]; resolved != "" {
-						record.ResolvedVersion = resolved
-						record.VersionSource = lockfileInventory.Source
-					} else if versions := lockfileInventory.AllVersions[name]; len(versions) == 1 {
-						record.ResolvedVersion = versions[0]
-						record.VersionSource = lockfileInventory.Source
-					}
-				}
-				records = append(records, record)
-				directNames[name] = struct{}{}
-			}
-		}
-
-		appendRecords("dependencies", pkg.Dependencies)
-		appendRecords("devDependencies", pkg.DevDependencies)
-
-		if lockfileInventory != nil {
-			for name, versions := range lockfileInventory.AllVersions {
-				if _, ok := directNames[name]; ok {
-					continue
-				}
-				for _, version := range versions {
-					records = append(records, PackageRecord{
-						ProjectPath:     projectPath,
-						Scope:           "transitiveDependencies",
-						Name:            name,
-						ResolvedVersion: version,
-						VersionSource:   lockfileInventory.Source,
-					})
-				}
-			}
-		}
-
-		records = append(records, parsed...)
 		return nil
 	})
 	if err != nil {
@@ -571,7 +571,7 @@ func WritePackageCSV(records []PackageRecord, outputPath string) error {
 		if record.Ecosystem != "npm" {
 			scope = record.Ecosystem + ":" + scope
 		}
-		if err := writer.Write([]string{record.ProjectPath, scope, record.Name, record.Version}); err != nil {
+		if err := writer.Write([]string{record.ProjectPath, scope, record.Name, record.Version, record.ResolvedVersion, record.VersionSource}); err != nil {
 			return fmt.Errorf("failed to write CSV row: %w", err)
 		}
 	}
@@ -584,7 +584,7 @@ func WritePackageCSV(records []PackageRecord, outputPath string) error {
 }
 
 // BuildSummaryStats derives aggregate metrics from discovered packages.
-func BuildSummaryStats(records []PackageRecord, frameworks []string, advisoryMatches []AdvisoryMatch) SummaryStats {
+func BuildSummaryStats(records []PackageRecord, frameworks []string, advisoryMatches []AdvisoryFinding) SummaryStats {
 	projectSet := make(map[string]struct{})
 	dependencyCount := 0
 	devDependencyCount := 0
@@ -593,6 +593,7 @@ func BuildSummaryStats(records []PackageRecord, frameworks []string, advisoryMat
 	frameworkPackageCounts := make(map[string]int)
 	advisoryCounts := make(map[string]int)
 	advisorySeverities := make(map[string]int)
+	vulnerableEntries := make([]string, 0)
 
 	for _, record := range records {
 		projectSet[record.ProjectPath] = struct{}{}
@@ -603,6 +604,9 @@ func BuildSummaryStats(records []PackageRecord, frameworks []string, advisoryMat
 			devDependencyCount++
 		case "transitiveDependencies":
 			transitiveCount++
+		}
+		if record.ResolvedVersion != "" {
+			resolvedCount++
 		}
 
 		if record.Ecosystem == "npm" {
@@ -678,7 +682,7 @@ func WriteSummaryCSV(summary SummaryStats, outputPath string) error {
 	if len(summary.AdvisoryMatches) > 0 {
 		entries := make([]string, 0, len(summary.AdvisoryMatches))
 		for _, match := range summary.AdvisoryMatches {
-			entries = append(entries, fmt.Sprintf("%s:%s@%s (%s)", match.AdvisoryID, match.PackageName, match.MatchedVersion, match.ProjectPath))
+			entries = append(entries, fmt.Sprintf("%s:%s@%s (%s)", match.AdvisoryID, match.Package, match.Version, match.ProjectPath))
 		}
 		rows = append(rows, []string{"advisories", "entries", strings.Join(entries, ";")})
 	}
@@ -727,4 +731,8 @@ func isVulnerableVersion(version string) bool {
 		return true
 	}
 	return false
+}
+
+func normalizeSeverity(severity string) string {
+	return strings.ToUpper(strings.TrimSpace(severity))
 }
