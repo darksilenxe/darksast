@@ -77,7 +77,7 @@ const insecureTlsOptions = {
   rejectUnauthorized: false
 };
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
 
 const serialize = {
   unserialize(value) { return value; },
