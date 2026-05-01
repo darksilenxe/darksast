@@ -5,7 +5,7 @@ tests/sample-site,dependencies,react,19.1.0,19.1.0,package-lock.json
 tests/sample-site,dependencies,react-dom,19.1.1,19.1.1,package-lock.json
 tests/sample-site,devDependencies,eslint,9.12.0,9.12.0,package-lock.json
 tests/sample-site,devDependencies,vite,6.4.2,6.4.2,package-lock.json
-tests/sample-site,transitiveDependencies,glob,,10.4.5,package-lock.json
+tests/sample-site,transitiveDependencies,glob,,10.5.0,package-lock.json
 tests/sample-vue,dependencies,nuxt,3.19.0,3.19.0,pnpm-lock.yaml
 tests/sample-vue,dependencies,pinia,2.2.4,2.2.4,pnpm-lock.yaml
 tests/sample-vue,dependencies,vue,3.5.12,3.5.12,pnpm-lock.yaml
