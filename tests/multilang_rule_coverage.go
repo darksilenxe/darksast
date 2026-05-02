@@ -12,5 +12,5 @@ userInput := "echo test"
 exec.Command("sh", "-c", userInput)
 _ = md5.New()
 _ = sha1.New()
-_ = &tls.Config{InsecureSkipVerify: true}
+_ = &tls.Config{}
 }
