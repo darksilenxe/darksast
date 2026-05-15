@@ -7,7 +7,7 @@ ignore_if_literal:
   - "html"
 taint:
   sink_capture: "html"
-  require_tainted: false
+  require_tainted: true
 query: |
   (call_expression
     function: (member_expression

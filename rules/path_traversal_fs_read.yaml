@@ -1,11 +1,17 @@
 id: "PATH-TRAVERSAL-FS-READ"
 severity: "HIGH"
 framework: "Node.js"
+confidence: "MEDIUM"
 description: "Detects filesystem read APIs that are common path traversal sinks when filenames come from user input."
+taint:
+  sink_capture: "args"
+  sink_arg_index: 0
+  require_tainted: true
 query: |
   (call_expression
     function: (member_expression
       object: (identifier) @obj (#eq? @obj "fs")
       property: (property_identifier) @method (#match? @method "^(readFile|readFileSync|createReadStream|stat|statSync)$")
-    ) @path_sink
+    )
+    arguments: (arguments) @args
   ) @finding

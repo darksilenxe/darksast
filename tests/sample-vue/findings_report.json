@@ -1,9 +1,16 @@
 {
-  "timestamp": "2026-04-18T14:17:22Z",
+  "timestamp": "2026-05-15T17:07:19Z",
   "target_directory": "./tests/sample-vue",
   "total_findings": 3,
+  "code_findings": 3,
+  "dependency_findings": 0,
+  "framework_summary": {
+    "Express": 2,
+    "React": 1
+  },
   "findings": [
     {
+      "kind": "code",
       "file": "tests/sample-vue/main.js",
       "line": 4,
       "column": 1,
@@ -11,9 +18,11 @@
       "severity": "LOW",
       "framework": "Express",
       "snippet": "session({",
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "description": "Detects session configurations with resave:true in express-session middleware."
     },
     {
+      "kind": "code",
       "file": "tests/sample-vue/main.js",
       "line": 4,
       "column": 1,
@@ -21,9 +30,11 @@
       "severity": "MEDIUM",
       "framework": "Express",
       "snippet": "session({",
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "description": "Detects session configurations with saveUninitialized:true in express-session middleware."
     },
     {
+      "kind": "code",
       "file": "tests/sample-vue/main.js",
       "line": 11,
       "column": 17,
@@ -31,7 +42,8 @@
       "severity": "LOW",
       "framework": "React",
       "snippet": "const state = { ...payload, active: true };",
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "description": "Flags object spread from common untrusted sources in React code."
     }
   ]
 }

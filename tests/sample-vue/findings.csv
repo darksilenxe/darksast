@@ -1,4 +1,4 @@
-file,line,column,rule_id,severity,framework,snippet,confidence
-tests/sample-vue/main.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/sample-vue/main.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/sample-vue/main.js,11,17,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const state = { ...payload, active: true };",MEDIUM
+kind,file,line,column,rule_id,severity,framework,snippet,confidence,description,category,taxonomy,cwe,owasp,package_name,declared_version,resolved_version,version_source,fixed_versions,references,remediation,confidence_rationale,project_path
+code,tests/sample-vue/main.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM,Detects session configurations with resave:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/sample-vue/main.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM,Detects session configurations with saveUninitialized:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/sample-vue/main.js,11,17,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const state = { ...payload, active: true };",MEDIUM,Flags object spread from common untrusted sources in React code.,,,,,,,,,,,,,

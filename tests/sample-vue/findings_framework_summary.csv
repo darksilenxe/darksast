@@ -1,4 +1,4 @@
-framework,severity,count,confidence
-Express,LOW,1,MEDIUM
-Express,MEDIUM,1,MEDIUM
-React,LOW,1,MEDIUM
+kind,framework,severity,count,confidence
+code,Express,LOW,1,MEDIUM
+code,Express,MEDIUM,1,MEDIUM
+code,React,LOW,1,MEDIUM

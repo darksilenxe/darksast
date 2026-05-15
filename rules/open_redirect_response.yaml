@@ -5,6 +5,11 @@ framework: "Node.js"
 requires_dependency:
   - "express"
 description: "Detects response redirect helpers that can become open redirect sinks with untrusted destinations."
+ignore_if_literal:
+  - "destination"
+taint:
+  sink_capture: "destination"
+  require_tainted: true
 metadata:
   category: "Open Redirect"
   taxonomy:
@@ -21,5 +26,8 @@ query: |
   (call_expression
     function: (member_expression
       property: (property_identifier) @method (#eq? @method "redirect")
-    ) @redirect_sink
+    )
+    arguments: (arguments
+      (_) @destination
+    )
   ) @finding
