@@ -1,10 +1,16 @@
 id: "SQL-RAW-QUERY"
 severity: "HIGH"
 framework: "Node.js"
+confidence: "MEDIUM"
 description: "Detects raw query execution helpers that should be reviewed for SQL injection."
+taint:
+  sink_capture: "args"
+  sink_arg_index: 0
+  require_tainted: true
 query: |
   (call_expression
     function: (member_expression
       property: (property_identifier) @method (#match? @method "^(query|execute|raw)$")
     ) @sql_sink
-  )
+    arguments: (arguments) @args
+  ) @finding

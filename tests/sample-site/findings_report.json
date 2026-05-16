@@ -1,9 +1,20 @@
 {
-  "timestamp": "2026-04-18T14:17:22Z",
+  "timestamp": "2026-05-15T17:07:14Z",
   "target_directory": "./tests/sample-site",
   "total_findings": 5,
+  "code_findings": 5,
+  "dependency_findings": 0,
+  "framework_summary": {
+    "Express": 2,
+    "Node.js": 1,
+    "React": 2
+  },
+  "finding_category_summary": {
+    "Cross-Site Scripting": 1
+  },
   "findings": [
     {
+      "kind": "code",
       "file": "tests/sample-site/app.js",
       "line": 13,
       "column": 1,
@@ -11,9 +22,11 @@
       "severity": "LOW",
       "framework": "Express",
       "snippet": "session({",
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "description": "Detects session configurations with resave:true in express-session middleware."
     },
     {
+      "kind": "code",
       "file": "tests/sample-site/app.js",
       "line": 13,
       "column": 1,
@@ -21,9 +34,11 @@
       "severity": "MEDIUM",
       "framework": "Express",
       "snippet": "session({",
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "description": "Detects session configurations with saveUninitialized:true in express-session middleware."
     },
     {
+      "kind": "code",
       "file": "tests/sample-site/app.js",
       "line": 13,
       "column": 1,
@@ -31,9 +46,11 @@
       "severity": "MEDIUM",
       "framework": "Node.js",
       "snippet": "session({",
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "description": "Detects cookie/session configs with secure:false inside Express session middleware."
     },
     {
+      "kind": "code",
       "file": "tests/sample-site/app.js",
       "line": 21,
       "column": 18,
@@ -41,9 +58,11 @@
       "severity": "LOW",
       "framework": "React",
       "snippet": "const merged = { ...payload, active: true };",
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "description": "Flags object spread from common untrusted sources in React code."
     },
     {
+      "kind": "code",
       "file": "tests/sample-site/app.js",
       "line": 7,
       "column": 12,
@@ -51,7 +70,24 @@
       "severity": "HIGH",
       "framework": "React",
       "snippet": "\u003cdiv dangerouslySetInnerHTML={{ __html: html }} /\u003e",
-      "confidence": "MEDIUM"
+      "confidence": "HIGH",
+      "description": "Identifies potentially unsafe use of dangerouslySetInnerHTML.",
+      "category": "Cross-Site Scripting",
+      "taxonomy": [
+        "code-pattern/framework"
+      ],
+      "cwe": [
+        "CWE-79"
+      ],
+      "owasp": [
+        "A03:2021"
+      ],
+      "references": [
+        "https://react.dev/reference/dom-elements/common#dangerously-setting-the-inner-html",
+        "https://owasp.org/www-community/attacks/xss/"
+      ],
+      "remediation": "Avoid dangerouslySetInnerHTML for untrusted content or sanitize HTML with a vetted library such as DOMPurify before rendering.",
+      "confidence_rationale": "dangerouslySetInnerHTML is a high-signal React sink that bypasses React's default escaping guarantees."
     }
   ]
 }

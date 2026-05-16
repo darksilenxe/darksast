@@ -3,11 +3,58 @@ JavaScript Framework and Package Inventory
 
 Detected frameworks: Next.js, React
 
-| Project Path | Scope | Package | Version |
-|---|---|---|---|
-| tests/sample-site | devDependencies | eslint | 9.12.0 |
-| tests/sample-site | dependencies | lodash | 4.17.21 |
-| tests/sample-site | dependencies | next | 15.3.0 |
-| tests/sample-site | dependencies | react | 19.1.0 |
-| tests/sample-site | dependencies | react-dom | 19.1.1 |
-| tests/sample-site | devDependencies | vite | 5.4.0 |
+| Project Path | Scope | Package | Declared Version | Resolved Version | Version Source |
+|---|---|---|---|---|---|
+| tests/sample-site | dependencies | @emnapi/runtime | 1.10.0 |  |  |
+| tests/sample-site | dependencies | @img/colour | 1.1.0 |  |  |
+| tests/sample-site | dependencies | @img/sharp-darwin-arm64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-darwin-x64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-darwin-arm64 | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-darwin-x64 | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-linux-arm | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-linux-arm64 | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-linux-ppc64 | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-linux-riscv64 | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-linux-s390x | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-linux-x64 | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-linuxmusl-arm64 | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-libvips-linuxmusl-x64 | 1.2.4 |  |  |
+| tests/sample-site | dependencies | @img/sharp-linux-arm | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-linux-arm64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-linux-ppc64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-linux-riscv64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-linux-s390x | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-linux-x64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-linuxmusl-arm64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-linuxmusl-x64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-wasm32 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-win32-arm64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-win32-ia32 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @img/sharp-win32-x64 | 0.34.5 |  |  |
+| tests/sample-site | dependencies | @next/env | 15.5.18 |  |  |
+| tests/sample-site | dependencies | @next/swc-darwin-arm64 | 15.5.18 |  |  |
+| tests/sample-site | dependencies | @next/swc-darwin-x64 | 15.5.18 |  |  |
+| tests/sample-site | dependencies | @next/swc-linux-arm64-gnu | 15.5.18 |  |  |
+| tests/sample-site | dependencies | @next/swc-linux-arm64-musl | 15.5.18 |  |  |
+| tests/sample-site | dependencies | @next/swc-linux-x64-gnu | 15.5.18 |  |  |
+| tests/sample-site | dependencies | @next/swc-linux-x64-musl | 15.5.18 |  |  |
+| tests/sample-site | dependencies | @next/swc-win32-arm64-msvc | 15.5.18 |  |  |
+| tests/sample-site | dependencies | @next/swc-win32-x64-msvc | 15.5.18 |  |  |
+| tests/sample-site | dependencies | @swc/helpers | 0.5.15 |  |  |
+| tests/sample-site | dependencies | caniuse-lite | 1.0.30001792 |  |  |
+| tests/sample-site | dependencies | client-only | 0.0.1 |  |  |
+| tests/sample-site | dependencies | detect-libc | 2.1.2 |  |  |
+| tests/sample-site | devDependencies | eslint | 9.12.0 |  |  |
+| tests/sample-site | dependencies | lodash | 4.18.1 |  |  |
+| tests/sample-site | dependencies | nanoid | 3.3.12 |  |  |
+| tests/sample-site | dependencies | next | 15.5.18 |  |  |
+| tests/sample-site | dependencies | picocolors | 1.1.1 |  |  |
+| tests/sample-site | dependencies | postcss | 8.4.31 |  |  |
+| tests/sample-site | dependencies | react | 19.1.0 |  |  |
+| tests/sample-site | dependencies | react-dom | 19.1.1 |  |  |
+| tests/sample-site | dependencies | semver | 7.8.0 |  |  |
+| tests/sample-site | dependencies | sharp | 0.34.5 |  |  |
+| tests/sample-site | dependencies | source-map-js | 1.2.1 |  |  |
+| tests/sample-site | dependencies | styled-jsx | 5.1.6 |  |  |
+| tests/sample-site | dependencies | tslib | 2.8.1 |  |  |
+| tests/sample-site | devDependencies | vite | 6.4.2 |  |  |

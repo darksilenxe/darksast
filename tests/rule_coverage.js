@@ -1,6 +1,6 @@
 import child_process from 'child_process';
 
-const userInput = "alert('xss')";
+const userInput = document.location.search;
 
 // Express session misconfiguration
 session({

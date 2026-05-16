@@ -1,11 +1,17 @@
 id: "SSRF-AXIOS"
 severity: "HIGH"
 framework: "JavaScript"
+confidence: "MEDIUM"
 description: "Detects axios network requests that should be reviewed for SSRF when the request target is user-controlled."
+taint:
+  sink_capture: "args"
+  sink_arg_index: 0
+  require_tainted: true
 query: |
   (call_expression
     function: (member_expression
       object: (identifier) @obj (#eq? @obj "axios")
       property: (property_identifier) @method (#match? @method "^(get|post|put|patch|delete|request)$")
-    ) @ssrf_sink
-  )
+    )
+    arguments: (arguments) @args
+  ) @finding

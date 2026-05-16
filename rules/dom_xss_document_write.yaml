@@ -1,11 +1,17 @@
 id: "DOM-XSS-DOCUMENT-WRITE"
 severity: "HIGH"
 framework: "JavaScript"
+confidence: "MEDIUM"
 description: "Detects document.write(), a common DOM XSS sink when input content is not strictly sanitized."
+taint:
+  sink_capture: "args"
+  sink_arg_index: 0
+  require_tainted: true
 query: |
   (call_expression
     function: (member_expression
       object: (identifier) @obj (#eq? @obj "document")
       property: (property_identifier) @prop (#eq? @prop "write")
-    ) @dom_sink
-  )
+    )
+    arguments: (arguments) @args
+  ) @finding

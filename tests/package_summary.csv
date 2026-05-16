@@ -1,8 +1,6 @@
 category,metric,value
-advisories,count_cve_2025_55182,3
-advisories,entries,CVE-2025-55182:next@15.5.15 (tests/sample-site);CVE-2025-55182:react@19.1.0 (tests/sample-site);CVE-2025-55182:react-dom@19.1.1 (tests/sample-site)
-advisories,match_count,3
-advisories,severity_critical,3
+advisories,match_count,0
+advisories,severity_critical,0
 advisories,severity_high,0
 advisories,severity_low,0
 advisories,severity_medium,0
@@ -12,9 +10,9 @@ frameworks,package_count_nextjs,1
 frameworks,package_count_nuxt,1
 frameworks,package_count_react,2
 frameworks,package_count_vue,2
-inventory,dependencies,7
+inventory,dependencies,54
 inventory,dev_dependencies,4
-inventory,resolved_versions,13
-inventory,total_packages,13
+inventory,resolved_versions,5
+inventory,total_packages,58
 inventory,total_projects,2
-inventory,transitive_dependencies,2
+inventory,transitive_dependencies,0

@@ -1,105 +1,103 @@
-file,line,column,rule_id,severity,framework,snippet,confidence
-tests/multilang_rule_coverage.py,13,1,PYTHON-EVAL-EXEC,HIGH,Python,eval(user_input),MEDIUM
-tests/multilang_rule_coverage.go,13,5,GO-INSECURE-HASH,MEDIUM,Go,_ = md5.New(),MEDIUM
-tests/multilang_rule_coverage.go,14,5,GO-INSECURE-HASH,MEDIUM,Go,_ = sha1.New(),MEDIUM
-tests/multilang_rule_coverage.php,4,1,PHP-CURL-SSL-VERIFY-FALSE,HIGH,PHP,"curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);",MEDIUM
-tests/multilang_rule_coverage.yaml,9,1,YAML-INSECURE-SKIP-TLS-VERIFY,HIGH,YAML,insecureSkipTlsVerify: true,MEDIUM
-tests/multilang_rule_coverage.java,9,9,JAVA-INSECURE-HOSTNAME-VERIFIER,HIGH,Java,"conn.setHostnameVerifier((host, session) -> true);",MEDIUM
-tests/multilang_rule_coverage.go,12,1,GO-OS-EXEC-SHELL,HIGH,Go,"exec.Command(""sh"", ""-c"", userInput)",MEDIUM
-tests/multilang_rule_coverage.py,17,1,PYTHON-INSECURE-HASHLIB,MEDIUM,Python,hashlib.md5(data).hexdigest(),MEDIUM
-tests/multilang_rule_coverage.php,5,1,PHP-EVAL-EXEC,HIGH,PHP,eval($input);,MEDIUM
-tests/advanced_rule_coverage.js,58,21,ANGULAR-BYPASS-SECURITY-RESOURCE-URL,HIGH,Angular,const resourceUrl = sanitizer.bypassSecurityTrustResourceUrl(userInput);,MEDIUM
-tests/multilang_rule_coverage.cs,7,9,CSHARP-INSECURE-HASH,MEDIUM,C#,MD5.Create();,MEDIUM
-tests/multilang_rule_coverage.go,15,6,GO-TLS-INSECURE-SKIP-VERIFY,HIGH,Go,_ = &tls.Config{InsecureSkipVerify: true},MEDIUM
-tests/multilang_rule_coverage.php,6,1,PHP-INSECURE-HASH,MEDIUM,PHP,md5($data);,MEDIUM
-tests/multilang_rule_coverage.py,15,1,PYTHON-PICKLE-LOADS,HIGH,Python,pickle.loads(blob),MEDIUM
-tests/framework_rule_coverage.js,17,17,ANGULAR-BYPASS-SECURITY-TRUST-HTML,HIGH,Angular,const trusted = sanitizer.bypassSecurityTrustHtml(html);,MEDIUM
-tests/multilang_rule_coverage.java,7,9,JAVA-INSECURE-MESSAGE-DIGEST,MEDIUM,Java,"MessageDigest.getInstance(""MD5"");",MEDIUM
-tests/multilang_rule_coverage.yaml,7,9,YAML-PRIVILEGED-CONTAINER,HIGH,YAML,privileged: true,MEDIUM
-tests/multilang_rule_coverage.py,16,1,PYTHON-REQUESTS-VERIFY-FALSE,HIGH,Python,"requests.get(url, verify=False)",MEDIUM
-tests/multilang_rule_coverage.java,6,9,JAVA-RUNTIME-EXEC,HIGH,Java,Runtime.getRuntime().exec(cmd);,MEDIUM
-tests/multilang_rule_coverage.py,12,1,PYTHON-SUBPROCESS-SHELL-TRUE,HIGH,Python,"subprocess.run(user_input, shell=True)",MEDIUM
-tests/multilang_rule_coverage.yaml,8,1,YAML-VERIFY-FALSE,HIGH,YAML,verify: false,MEDIUM
-tests/multilang_rule_coverage.sh,3,1,BASH-WEAK-HASH-COMMAND,MEDIUM,Bash,md5sum file.txt,MEDIUM
-tests/multilang_rule_coverage.sh,4,1,BASH-WEAK-HASH-COMMAND,MEDIUM,Bash,sha1sum file.txt,MEDIUM
-tests/advanced_rule_coverage.js,57,17,ANGULAR-BYPASS-SECURITY-TRUST-URL,HIGH,Angular,const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);,MEDIUM
-tests/multilang_rule_coverage.py,14,1,PYTHON-UNSAFE-YAML-LOAD,HIGH,Python,yaml.load(data),MEDIUM
-tests/rule_coverage.js,21,1,NODE-CHILD-PROCESS-EXEC,CRITICAL,Node.js,"child_process.exec(""dir "" + userInput);",MEDIUM
-tests/rule_coverage.js,22,1,NODE-CHILD-PROCESS-EXEC,CRITICAL,Node.js,child_process.execFile(userInput);,MEDIUM
-tests/rule_coverage.js,23,1,NODE-CHILD-PROCESS-EXEC,CRITICAL,Node.js,child_process.execFileSync(userInput);,MEDIUM
-tests/multilang_rule_coverage.rs,6,13,RUST-COMMAND-SHELL,HIGH,Rust,"let _ = Command::new(""sh"").arg(""-c"").arg(user_input).status();",MEDIUM
-tests/multilang_rule_coverage.cs,6,9,CSHARP-PROCESS-START,HIGH,C#,Process.Start(cmd);,MEDIUM
-tests/multilang_rule_coverage.rb,2,1,RUBY-DIGEST-MD5,MEDIUM,Ruby,Digest::MD5.hexdigest(data),MEDIUM
-tests/multilang_rule_coverage.rs,7,13,RUST-MD5-COMPUTE,MEDIUM,Rust,let _ = md5::compute(data);,MEDIUM
-tests/advanced_rule_coverage.js,104,1,COOKIE-SECURE-FALSE,MEDIUM,Express,"res.cookie('sid', token, { secure: false, httpOnly: true });",MEDIUM
-tests/rule_coverage.js,14,1,JS-EVAL-EXEC,HIGH,JavaScript,eval(userInput);,HIGH
-tests/rule_coverage.js,17,16,JS-FUNCTION-CONSTRUCTOR,HIGH,JavaScript,"const fn = new Function(""a"", ""b"", ""return a + b;"");",MEDIUM
-tests/advanced_rule_coverage.js,54,1,CORS-WILDCARD-CREDENTIALS,HIGH,Node.js,"cors({ origin: '*', credentials: true });",MEDIUM
-tests/rule_coverage.js,26,1,DOM-XSS-DOCUMENT-WRITE,HIGH,JavaScript,document.write(userInput);,MEDIUM
-tests/rule_coverage.js,29,1,DOM-XSS-INNERHTML-ASSIGN,HIGH,JavaScript,document.body.innerHTML = userInput;,MEDIUM
-tests/rule_coverage.js,32,1,DOM-XSS-INSERT-ADJACENT-HTML,HIGH,JavaScript,"document.body.insertAdjacentHTML('beforeend', userInput);",MEDIUM
-tests/multilang_rule_coverage.rs,8,13,RUST-REQWEST-INVALID-CERTS,HIGH,Rust,let _ = reqwest::Client::builder().danger_accept_invalid_certs(true).build();,MEDIUM
-tests/rule_coverage.js,6,1,EXPRESS-SESSION-HTTPONLY-FALSE,MEDIUM,Node.js,session({,MEDIUM
-tests/sample-site/app.js,13,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/rule_coverage.js,6,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/rule_coverage.js,6,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/sample-site/app.js,13,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/advanced_rule_coverage.js,95,1,EXPRESS-SESSION-HTTPONLY-FALSE,MEDIUM,Node.js,session({,MEDIUM
-tests/rule_coverage.js,6,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM
-tests/multilang_rule_coverage.rb,4,1,RUBY-OPENSSL-VERIFY-NONE,HIGH,Ruby,OpenSSL::SSL::VERIFY_NONE,MEDIUM
-tests/sample-vue/main.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/advanced_rule_coverage.js,95,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/sample-site/app.js,13,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM
-tests/framework_rule_coverage.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM
-tests/sample-vue/main.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/framework_rule_coverage.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/advanced_rule_coverage.js,95,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM
-tests/advanced_rule_coverage.js,95,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM
-tests/advanced_rule_coverage.js,22,7,HARDCODED-SECRET,HIGH,JavaScript,const token = 'header.payload.signature';,MEDIUM
-tests/advanced_rule_coverage.js,24,7,HARDCODED-SECRET,HIGH,JavaScript,const apiKey = 'AKIA_TEST_SECRET';,MEDIUM
-tests/multilang_rule_coverage.rb,1,1,RUBY-SYSTEM-CALL,HIGH,Ruby,system(user_input),MEDIUM
-tests/advanced_rule_coverage.js,40,1,INSECURE-CRYPTO-HASH,MEDIUM,Node.js,crypto.createHash('md5');,HIGH
-tests/multilang_rule_coverage.rb,3,1,RUBY-YAML-LOAD,HIGH,Ruby,YAML.load(data),MEDIUM
-tests/framework_rule_coverage.js,27,5,NEXTJS-DANGEROUSLY-ALLOW-SVG,MEDIUM,Next.js,dangerouslyAllowSVG: true,MEDIUM
-tests/advanced_rule_coverage.js,41,7,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,const sessionId = Math.random().toString(36);,MEDIUM
-tests/advanced_rule_coverage.js,42,7,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,const resetToken = Math.random().toString(36).slice(2);,MEDIUM
-tests/advanced_rule_coverage.js,43,7,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,const csrfToken = 'csrf_' + Math.random().toString(36);,MEDIUM
-tests/advanced_rule_coverage.js,45,1,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,accessToken = 'bearer_' + Math.random().toString(36);,MEDIUM
-tests/advanced_rule_coverage.js,38,1,JWT-DECODE-ONLY,HIGH,Node.js,jwt.decode(token);,MEDIUM
-tests/advanced_rule_coverage.js,39,29,JWT-ALG-NONE,CRITICAL,Node.js,"jwt.verify(token, secret, { algorithms: ['none'] });",MEDIUM
-tests/advanced_rule_coverage.js,102,1,JWT-VERIFY-IGNORE-EXPIRATION,MEDIUM,Node.js,"jwt.verify(token, secret, { ignoreExpiration: true });",MEDIUM
-tests/advanced_rule_coverage.js,64,9,NEXTJS-REMOTE-PATTERN-WILDCARD,MEDIUM,Next.js,{ hostname: '*' },MEDIUM
-tests/advanced_rule_coverage.js,80,1,NODE-TLS-REJECT-UNAUTHORIZED-ENV-ZERO,HIGH,Node.js,process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';,MEDIUM
-tests/advanced_rule_coverage.js,48,14,NOSQL-OPERATOR-INJECTION,HIGH,Node.js,"users.find({ '$where': userInput, username: { '$regex': userInput } });",MEDIUM
-tests/advanced_rule_coverage.js,48,47,NOSQL-OPERATOR-INJECTION,HIGH,Node.js,"users.find({ '$where': userInput, username: { '$regex': userInput } });",MEDIUM
-tests/test.js,16,19,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const profile = { ...payload, role: 'reader' };",MEDIUM
-tests/advanced_rule_coverage.js,37,1,OPEN-REDIRECT-LOCATION-ASSIGN,MEDIUM,JavaScript,window.location.href = userInput;,MEDIUM
-tests/advanced_rule_coverage.js,36,1,OPEN-REDIRECT-RESPONSE,MEDIUM,Node.js,res.redirect(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,103,1,OPEN-REDIRECT-WINDOW-OPEN,MEDIUM,JavaScript,"window.open(userInput, '_blank');",MEDIUM
-tests/advanced_rule_coverage.js,34,1,PATH-TRAVERSAL-FS-READ,HIGH,Node.js,fs.readFileSync(req.body.path);,MEDIUM
-tests/advanced_rule_coverage.js,35,1,PATH-TRAVERSAL-SEND-FILE,HIGH,Node.js,res.sendFile(req.body.path);,MEDIUM
-tests/framework_rule_coverage.js,21,26,VUE-RENDER-INNERHTML,HIGH,Vue,"const vnode = h('div', { innerHTML: html });",MEDIUM
-tests/test.js,9,18,XSS-01,HIGH,React,<div dangerouslySetInnerHTML={{ __html: rawHTMLContent }} />,MEDIUM
-tests/advanced_rule_coverage.js,116,13,REACT-UNSAFE-URL-PROP,MEDIUM,React,"return <a href=""javascript:alert('xss')"">Click me</a>;",MEDIUM
-tests/advanced_rule_coverage.js,55,1,SHELL-WRAPPER-EXEC,CRITICAL,Node.js,shelljs.exec(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,56,1,SHELL-WRAPPER-EXEC,CRITICAL,Node.js,execa(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,47,1,SQL-RAW-QUERY,HIGH,Node.js,db.query('SELECT * FROM users WHERE id = ' + userInput);,MEDIUM
-tests/advanced_rule_coverage.js,105,1,SQL-RAW-QUERY,HIGH,Node.js,db.query(`SELECT * FROM users WHERE id = '${userInput}'`);,MEDIUM
-tests/advanced_rule_coverage.js,105,1,SQL-TEMPLATE-LITERAL-QUERY,HIGH,Node.js,db.query(`SELECT * FROM users WHERE id = '${userInput}'`);,MEDIUM
-tests/rule_coverage.js,35,12,JS-STRING-TIMER-EXEC,MEDIUM,JavaScript,"setTimeout(""console.log('timer string')"", 1000);",MEDIUM
-tests/advanced_rule_coverage.js,31,1,SSRF-AXIOS,HIGH,JavaScript,axios.get(userInput);,MEDIUM
-tests/sample-vue/main.js,11,17,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const state = { ...payload, active: true };",MEDIUM
-tests/advanced_rule_coverage.js,30,1,SSRF-FETCH,HIGH,JavaScript,fetch(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,32,1,SSRF-HTTP-REQUEST,HIGH,Node.js,http.request(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,33,1,SSRF-HTTP-REQUEST,HIGH,Node.js,https.get(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,49,1,TEMPLATE-INJECTION-COMPILE,HIGH,Node.js,Handlebars.compile(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,77,3,TLS-REJECT-UNAUTHORIZED-FALSE,HIGH,Node.js,rejectUnauthorized: false,MEDIUM
-tests/sample-site/app.js,21,18,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const merged = { ...payload, active: true };",MEDIUM
-tests/advanced_rule_coverage.js,106,1,UNSAFE-DESERIALIZATION-CALL,HIGH,Node.js,serialize.unserialize(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,107,1,UNSAFE-DESERIALIZATION-CALL,HIGH,Node.js,serialize.deserialize(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,51,1,UNSAFE-VM-EXECUTION,CRITICAL,Node.js,vm.runInNewContext(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,52,1,UNSAFE-VM-EXECUTION,CRITICAL,Node.js,"vm.compileFunction(userInput, []);",MEDIUM
-tests/advanced_rule_coverage.js,53,5,UNSAFE-VM-EXECUTION,CRITICAL,Node.js,new vm.Script(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,50,1,UNSAFE-YAML-LOAD,HIGH,Node.js,yaml.load(userInput);,MEDIUM
-tests/advanced_rule_coverage.js,23,7,WEAK-SECRET-FALLBACK,HIGH,Node.js,const secret = process.env.JWT_SECRET || 'changeme';,MEDIUM
-tests/sample-site/app.js,7,12,XSS-01,HIGH,React,<div dangerouslySetInnerHTML={{ __html: html }} />,MEDIUM
+kind,file,line,column,rule_id,severity,framework,snippet,confidence,description,category,taxonomy,cwe,owasp,package_name,declared_version,resolved_version,version_source,fixed_versions,references,remediation,confidence_rationale,project_path
+code,tests/multilang_rule_coverage.go,13,5,GO-INSECURE-HASH,MEDIUM,Go,_ = md5.New(),MEDIUM,Detects Go md5.New() and sha1.New() usage.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.go,14,5,GO-INSECURE-HASH,MEDIUM,Go,_ = sha1.New(),MEDIUM,Detects Go md5.New() and sha1.New() usage.,,,,,,,,,,,,,
+code,tests/framework_rule_coverage.js,17,17,ANGULAR-BYPASS-SECURITY-TRUST-HTML,HIGH,Angular,const trusted = sanitizer.bypassSecurityTrustHtml(html);,MEDIUM,"Detects Angular DomSanitizer bypassSecurityTrustHtml usage, which can bypass built-in sanitization when fed untrusted HTML.",Cross-Site Scripting,code-pattern/framework,CWE-79,A03:2021,,,,,,https://angular.dev/best-practices/security/,"Prefer Angular's default sanitization flow and reserve bypassSecurityTrustHtml for reviewed, trusted content only.","The rule targets Angular's explicit sanitizer bypass API, which is a precise framework-specific signal.",
+code,tests/multilang_rule_coverage.go,12,1,GO-OS-EXEC-SHELL,HIGH,Go,"exec.Command(""sh"", ""-c"", userInput)",MEDIUM,Detects Go os/exec shell invocations that pass sh -c or cmd /c.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.java,9,9,JAVA-INSECURE-HOSTNAME-VERIFIER,HIGH,Java,"conn.setHostnameVerifier((host, session) -> true);",MEDIUM,Detects Java setHostnameVerifier lambdas that always return true.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.php,4,1,PHP-CURL-SSL-VERIFY-FALSE,HIGH,PHP,"curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);",MEDIUM,Detects PHP curl_setopt() calls that disable certificate verification.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.yaml,9,1,YAML-INSECURE-SKIP-TLS-VERIFY,HIGH,YAML,insecureSkipTlsVerify: true,MEDIUM,Detects YAML settings that explicitly skip TLS verification.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.cs,7,9,CSHARP-INSECURE-HASH,MEDIUM,C#,MD5.Create();,MEDIUM,Detects C# MD5.Create() and SHA1.Create() usage.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.java,7,9,JAVA-INSECURE-MESSAGE-DIGEST,MEDIUM,Java,"MessageDigest.getInstance(""MD5"");",MEDIUM,Detects Java MessageDigest.getInstance() calls for MD5 and SHA-1.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.py,13,1,PYTHON-EVAL-EXEC,HIGH,Python,eval(user_input),MEDIUM,Detects Python eval() usage.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.rs,6,13,RUST-COMMAND-SHELL,HIGH,Rust,"let _ = Command::new(""sh"").arg(""-c"").arg(user_input).status();",MEDIUM,Detects Rust Command::new shell execution chains.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,58,21,ANGULAR-BYPASS-SECURITY-RESOURCE-URL,HIGH,Angular,const resourceUrl = sanitizer.bypassSecurityTrustResourceUrl(userInput);,MEDIUM,"Detects Angular bypassSecurityTrustResourceUrl usage, which can disable resource URL sanitization.",Cross-Site Scripting,code-pattern/framework,CWE-79,A03:2021,,,,,,https://angular.dev/best-practices/security/,Review resource URLs against a strict allowlist before calling bypassSecurityTrustResourceUrl.,The API intentionally opts out of Angular resource URL protection and is highly specific.,
+code,tests/multilang_rule_coverage.cs,6,9,CSHARP-PROCESS-START,HIGH,C#,Process.Start(cmd);,MEDIUM,Detects C# Process.Start() usage.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.php,5,1,PHP-EVAL-EXEC,HIGH,PHP,eval($input);,MEDIUM,Detects PHP eval() usage.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.java,6,9,JAVA-RUNTIME-EXEC,HIGH,Java,Runtime.getRuntime().exec(cmd);,MEDIUM,Detects Java Runtime.getRuntime().exec() usage.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.yaml,7,9,YAML-PRIVILEGED-CONTAINER,HIGH,YAML,privileged: true,MEDIUM,Detects YAML manifests that enable privileged containers.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.rs,7,13,RUST-MD5-COMPUTE,MEDIUM,Rust,let _ = md5::compute(data);,MEDIUM,Detects Rust md5::compute() usage.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.php,6,1,PHP-INSECURE-HASH,MEDIUM,PHP,md5($data);,MEDIUM,Detects PHP md5()/sha1() usage.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.sh,3,1,BASH-WEAK-HASH-COMMAND,MEDIUM,Bash,md5sum file.txt,MEDIUM,Detects shell commands that use md5sum or sha1sum.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.sh,4,1,BASH-WEAK-HASH-COMMAND,MEDIUM,Bash,sha1sum file.txt,MEDIUM,Detects shell commands that use md5sum or sha1sum.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.rs,8,13,RUST-REQWEST-INVALID-CERTS,HIGH,Rust,let _ = reqwest::Client::builder().danger_accept_invalid_certs(true).build();,MEDIUM,Detects Rust reqwest clients that disable certificate validation.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,57,17,ANGULAR-BYPASS-SECURITY-TRUST-URL,HIGH,Angular,const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);,MEDIUM,"Detects Angular bypassSecurityTrustUrl usage, which can disable URL sanitization.",Open Redirect,code-pattern/framework,CWE-601,A01:2021,,,,,,https://angular.dev/best-practices/security/,"Use trusted, allowlisted URLs and avoid bypassSecurityTrustUrl for attacker-controlled destinations.",This call explicitly disables Angular's URL safety checks and is a strong sink indicator.,
+code,tests/multilang_rule_coverage.py,17,1,PYTHON-INSECURE-HASHLIB,MEDIUM,Python,hashlib.md5(data).hexdigest(),MEDIUM,Detects Python hashlib md5/sha1 usage.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,21,1,NODE-CHILD-PROCESS-EXEC,CRITICAL,Node.js,"child_process.exec(""dir "" + userInput);",MEDIUM,Detects child_process command execution APIs that can lead to command injection when input is untrusted.,Command Injection,code-pattern/framework,CWE-78,A03:2021,,,,,,https://nodejs.org/api/child_process.html;https://owasp.org/www-community/attacks/Command_Injection,"Prefer execFile or spawn with fixed arguments, and never concatenate attacker-controlled input into shell commands.",The rule targets direct child_process execution APIs and uses sink-aware filtering to reduce literal-only noise.,
+code,tests/rule_coverage.js,22,1,NODE-CHILD-PROCESS-EXEC,CRITICAL,Node.js,child_process.execFile(userInput);,MEDIUM,Detects child_process command execution APIs that can lead to command injection when input is untrusted.,Command Injection,code-pattern/framework,CWE-78,A03:2021,,,,,,https://nodejs.org/api/child_process.html;https://owasp.org/www-community/attacks/Command_Injection,"Prefer execFile or spawn with fixed arguments, and never concatenate attacker-controlled input into shell commands.",The rule targets direct child_process execution APIs and uses sink-aware filtering to reduce literal-only noise.,
+code,tests/rule_coverage.js,23,1,NODE-CHILD-PROCESS-EXEC,CRITICAL,Node.js,child_process.execFileSync(userInput);,MEDIUM,Detects child_process command execution APIs that can lead to command injection when input is untrusted.,Command Injection,code-pattern/framework,CWE-78,A03:2021,,,,,,https://nodejs.org/api/child_process.html;https://owasp.org/www-community/attacks/Command_Injection,"Prefer execFile or spawn with fixed arguments, and never concatenate attacker-controlled input into shell commands.",The rule targets direct child_process execution APIs and uses sink-aware filtering to reduce literal-only noise.,
+code,tests/multilang_rule_coverage.yaml,8,1,YAML-VERIFY-FALSE,HIGH,YAML,verify: false,MEDIUM,Detects YAML settings that disable verification.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.py,15,1,PYTHON-PICKLE-LOADS,HIGH,Python,pickle.loads(blob),MEDIUM,Detects Python pickle load/loads deserialization usage.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.py,16,1,PYTHON-REQUESTS-VERIFY-FALSE,HIGH,Python,"requests.get(url, verify=False)",MEDIUM,Detects Python requests calls with TLS verification disabled.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,104,1,COOKIE-SECURE-FALSE,MEDIUM,Express,"res.cookie('sid', token, { secure: false, httpOnly: true });",MEDIUM,"Detects res.cookie() options with secure:false, which allows cookies over non-TLS channels.",,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.py,12,1,PYTHON-SUBPROCESS-SHELL-TRUE,HIGH,Python,"subprocess.run(user_input, shell=True)",MEDIUM,Detects Python subprocess invocations that enable shell=True.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,54,1,CORS-WILDCARD-CREDENTIALS,HIGH,Node.js,"cors({ origin: '*', credentials: true });",MEDIUM,Detects CORS configs that combine wildcard origins with credentials enabled.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.py,14,1,PYTHON-UNSAFE-YAML-LOAD,HIGH,Python,yaml.load(data),MEDIUM,Detects unsafe Python yaml.load() usage.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,14,1,JS-EVAL-EXEC,HIGH,JavaScript,eval(userInput);,HIGH,"Detects direct use of eval(), which can execute attacker-controlled JavaScript and lead to code injection.",,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.rb,2,1,RUBY-DIGEST-MD5,MEDIUM,Ruby,Digest::MD5.hexdigest(data),MEDIUM,Detects Ruby Digest::MD5 usage.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,17,16,JS-FUNCTION-CONSTRUCTOR,HIGH,JavaScript,"const fn = new Function(""a"", ""b"", ""return a + b;"");",MEDIUM,"Detects use of new Function(...), which creates executable code from strings and is equivalent to eval risk.",,,,,,,,,,,,,
+code,tests/framework_rule_coverage.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM,Detects session configurations with resave:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/framework_rule_coverage.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM,Detects session configurations with saveUninitialized:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/sample-site/app.js,13,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM,Detects session configurations with resave:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,26,1,DOM-XSS-DOCUMENT-WRITE,HIGH,JavaScript,document.write(userInput);,MEDIUM,"Detects document.write(), a common DOM XSS sink when input content is not strictly sanitized.",,,,,,,,,,,,,
+code,tests/sample-site/app.js,13,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM,Detects session configurations with saveUninitialized:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,95,1,EXPRESS-SESSION-HTTPONLY-FALSE,MEDIUM,Node.js,session({,MEDIUM,Detects cookie/session configs with httpOnly:false inside Express session middleware.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,29,1,DOM-XSS-INNERHTML-ASSIGN,HIGH,JavaScript,document.body.innerHTML = userInput;,MEDIUM,"Detects assignments to innerHTML, which can enable DOM XSS if the assigned value is user-controlled.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,95,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM,Detects session configurations with resave:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/sample-site/app.js,13,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM,Detects cookie/session configs with secure:false inside Express session middleware.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,32,1,DOM-XSS-INSERT-ADJACENT-HTML,HIGH,JavaScript,"document.body.insertAdjacentHTML('beforeend', userInput);",MEDIUM,"Detects insertAdjacentHTML() usage, which can enable DOM XSS when HTML content is user-controlled.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,95,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM,Detects session configurations with saveUninitialized:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,95,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM,Detects cookie/session configs with secure:false inside Express session middleware.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,22,7,HARDCODED-SECRET,HIGH,JavaScript,const token = 'header.payload.signature';,MEDIUM,"Detects hardcoded secrets, passwords, API keys, and tokens assigned directly in code.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,24,7,HARDCODED-SECRET,HIGH,JavaScript,const apiKey = 'AKIA_TEST_SECRET';,MEDIUM,"Detects hardcoded secrets, passwords, API keys, and tokens assigned directly in code.",,,,,,,,,,,,,
+code,tests/rule_coverage.js,6,1,EXPRESS-SESSION-HTTPONLY-FALSE,MEDIUM,Node.js,session({,MEDIUM,Detects cookie/session configs with httpOnly:false inside Express session middleware.,,,,,,,,,,,,,
+code,tests/sample-vue/main.js,4,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM,Detects session configurations with resave:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,40,1,INSECURE-CRYPTO-HASH,MEDIUM,Node.js,crypto.createHash('md5');,HIGH,Detects weak hashing algorithms such as MD5 and SHA1.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,6,1,EXPRESS-SESSION-RESAVE-TRUE,LOW,Express,session({,MEDIUM,Detects session configurations with resave:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.rb,4,1,RUBY-OPENSSL-VERIFY-NONE,HIGH,Ruby,OpenSSL::SSL::VERIFY_NONE,MEDIUM,Detects Ruby OpenSSL::SSL::VERIFY_NONE usage.,,,,,,,,,,,,,
+code,tests/sample-vue/main.js,4,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM,Detects session configurations with saveUninitialized:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,6,1,EXPRESS-SESSION-SAVEUNINITIALIZED-TRUE,MEDIUM,Express,session({,MEDIUM,Detects session configurations with saveUninitialized:true in express-session middleware.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,6,1,EXPRESS-SESSION-SECURE-FALSE,MEDIUM,Node.js,session({,MEDIUM,Detects cookie/session configs with secure:false inside Express session middleware.,,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.rb,1,1,RUBY-SYSTEM-CALL,HIGH,Ruby,system(user_input),MEDIUM,Detects Ruby system() shell invocation usage.,,,,,,,,,,,,,
+code,tests/framework_rule_coverage.js,27,5,NEXTJS-DANGEROUSLY-ALLOW-SVG,MEDIUM,Next.js,dangerouslyAllowSVG: true,MEDIUM,"Detects Next.js image config dangerouslyAllowSVG: true, which can increase XSS and content-security risk if untrusted SVG is served.",,,,,,,,,,,,,
+code,tests/multilang_rule_coverage.rb,3,1,RUBY-YAML-LOAD,HIGH,Ruby,YAML.load(data),MEDIUM,Detects Ruby YAML.load() usage.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,41,7,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,const sessionId = Math.random().toString(36);,MEDIUM,Detects Math.random() usage in code paths that may generate tokens or security-sensitive values.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,42,7,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,const resetToken = Math.random().toString(36).slice(2);,MEDIUM,Detects Math.random() usage in code paths that may generate tokens or security-sensitive values.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,43,7,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,const csrfToken = 'csrf_' + Math.random().toString(36);,MEDIUM,Detects Math.random() usage in code paths that may generate tokens or security-sensitive values.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,45,1,INSECURE-RANDOM-TOKEN,MEDIUM,JavaScript,accessToken = 'bearer_' + Math.random().toString(36);,MEDIUM,Detects Math.random() usage in code paths that may generate tokens or security-sensitive values.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,38,1,JWT-DECODE-ONLY,HIGH,Node.js,jwt.decode(token);,MEDIUM,"Detects jwt.decode() usage, which parses tokens without signature verification.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,39,29,JWT-ALG-NONE,CRITICAL,Node.js,"jwt.verify(token, secret, { algorithms: ['none'] });",MEDIUM,Detects JWT verification options that allow the 'none' algorithm.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,102,1,JWT-VERIFY-IGNORE-EXPIRATION,MEDIUM,Node.js,"jwt.verify(token, secret, { ignoreExpiration: true });",MEDIUM,"Detects jwt.verify() calls configured with ignoreExpiration: true, which can accept expired tokens.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,64,9,NEXTJS-REMOTE-PATTERN-WILDCARD,MEDIUM,Next.js,{ hostname: '*' },MEDIUM,Detects Next.js remote image hostname wildcards that can overly broaden trusted image origins.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,48,14,NOSQL-OPERATOR-INJECTION,HIGH,Node.js,"users.find({ '$where': userInput, username: { '$regex': userInput } });",MEDIUM,"Detects dangerous NoSQL operators such as $where, $regex, and comparison operators that often appear in injection payloads.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,48,47,NOSQL-OPERATOR-INJECTION,HIGH,Node.js,"users.find({ '$where': userInput, username: { '$regex': userInput } });",MEDIUM,"Detects dangerous NoSQL operators such as $where, $regex, and comparison operators that often appear in injection payloads.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,37,1,OPEN-REDIRECT-LOCATION-ASSIGN,MEDIUM,JavaScript,window.location.href = userInput;,MEDIUM,Detects direct location assignments that can produce client-side open redirects.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,36,1,OPEN-REDIRECT-RESPONSE,MEDIUM,Node.js,res.redirect(userInput);,MEDIUM,Detects response redirect helpers that can become open redirect sinks with untrusted destinations.,Open Redirect,code-pattern/framework,CWE-601,A01:2021,,,,,,https://expressjs.com/en/api.html#res.redirect,Restrict redirects to an allowlist of internal destinations or normalize user-provided URLs against a trusted base.,Express response redirect helpers are high-signal sinks when destinations can be influenced by a request.,
+code,tests/advanced_rule_coverage.js,103,1,OPEN-REDIRECT-WINDOW-OPEN,MEDIUM,JavaScript,"window.open(userInput, '_blank');",MEDIUM,"Detects window.open() usage, which can enable open redirect or phishing flows when URL input is untrusted.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,34,1,PATH-TRAVERSAL-FS-READ,HIGH,Node.js,fs.readFileSync(req.body.path);,MEDIUM,Detects filesystem read APIs that are common path traversal sinks when filenames come from user input.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,35,1,PATH-TRAVERSAL-SEND-FILE,HIGH,Node.js,res.sendFile(req.body.path);,MEDIUM,Detects sendFile() usage that can expose arbitrary files if the path is attacker-controlled.,,,,,,,,,,,,,
+code,tests/sample-site/app.js,21,18,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const merged = { ...payload, active: true };",MEDIUM,Flags object spread from common untrusted sources in React code.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,116,13,REACT-UNSAFE-URL-PROP,MEDIUM,React,"return <a href=""javascript:alert('xss')"">Click me</a>;",MEDIUM,Detects dangerous javascript: or HTML data URL usage in URL-bearing JSX props.,Cross-Site Scripting,code-pattern/framework,CWE-79,A03:2021,,,,,,https://react.dev/reference/react-dom/components/common#common-props,"Reject javascript: URLs and only allow trusted URL schemes for href, src, and similar JSX props.","javascript: and HTML data URLs in JSX props are direct, framework-visible client-side XSS indicators.",
+code,tests/advanced_rule_coverage.js,55,1,SHELL-WRAPPER-EXEC,CRITICAL,Node.js,shelljs.exec(userInput);,MEDIUM,"Detects shell execution through wrappers such as execa, shelljs.exec, or zx's $ helper.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,56,1,SHELL-WRAPPER-EXEC,CRITICAL,Node.js,execa(userInput);,MEDIUM,"Detects shell execution through wrappers such as execa, shelljs.exec, or zx's $ helper.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,47,1,SQL-RAW-QUERY,HIGH,Node.js,db.query('SELECT * FROM users WHERE id = ' + userInput);,MEDIUM,Detects raw query execution helpers that should be reviewed for SQL injection.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,105,1,SQL-RAW-QUERY,HIGH,Node.js,db.query(`SELECT * FROM users WHERE id = '${userInput}'`);,MEDIUM,Detects raw query execution helpers that should be reviewed for SQL injection.,,,,,,,,,,,,,
+code,tests/framework_rule_coverage.js,21,26,VUE-RENDER-INNERHTML,HIGH,Vue,"const vnode = h('div', { innerHTML: html });",MEDIUM,"Detects Vue render-function patterns using innerHTML, which can introduce XSS when content is attacker-controlled.",Cross-Site Scripting,code-pattern/framework,CWE-79,A03:2021,,,,,,https://vuejs.org/guide/best-practices/security.html,Prefer escaped text bindings or sanitize HTML before assigning it to render-function props such as innerHTML.,Vue render-function innerHTML usage bypasses normal template escaping and is typically intentional sink usage.,
+code,tests/test.js,16,19,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const profile = { ...payload, role: 'reader' };",MEDIUM,Flags object spread from common untrusted sources in React code.,,,,,,,,,,,,,
+code,tests/sample-site/app.js,7,12,XSS-01,HIGH,React,<div dangerouslySetInnerHTML={{ __html: html }} />,HIGH,Identifies potentially unsafe use of dangerouslySetInnerHTML.,Cross-Site Scripting,code-pattern/framework,CWE-79,A03:2021,,,,,,https://react.dev/reference/dom-elements/common#dangerously-setting-the-inner-html;https://owasp.org/www-community/attacks/xss/,Avoid dangerouslySetInnerHTML for untrusted content or sanitize HTML with a vetted library such as DOMPurify before rendering.,dangerouslySetInnerHTML is a high-signal React sink that bypasses React's default escaping guarantees.,
+code,tests/advanced_rule_coverage.js,105,1,SQL-TEMPLATE-LITERAL-QUERY,HIGH,Node.js,db.query(`SELECT * FROM users WHERE id = '${userInput}'`);,MEDIUM,"Detects SQL helper calls that pass template literals directly, which can interpolate untrusted input.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,31,1,SSRF-AXIOS,HIGH,JavaScript,axios.get(userInput);,MEDIUM,Detects axios network requests that should be reviewed for SSRF when the request target is user-controlled.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,30,1,SSRF-FETCH,HIGH,JavaScript,fetch(userInput);,MEDIUM,Detects fetch() calls that may become SSRF sinks when URLs are attacker-controlled.,,,,,,,,,,,,,
+code,tests/test.js,9,18,XSS-01,HIGH,React,<div dangerouslySetInnerHTML={{ __html: rawHTMLContent }} />,HIGH,Identifies potentially unsafe use of dangerouslySetInnerHTML.,Cross-Site Scripting,code-pattern/framework,CWE-79,A03:2021,,,,,,https://react.dev/reference/dom-elements/common#dangerously-setting-the-inner-html;https://owasp.org/www-community/attacks/xss/,Avoid dangerouslySetInnerHTML for untrusted content or sanitize HTML with a vetted library such as DOMPurify before rendering.,dangerouslySetInnerHTML is a high-signal React sink that bypasses React's default escaping guarantees.,
+code,tests/advanced_rule_coverage.js,32,1,SSRF-HTTP-REQUEST,HIGH,Node.js,http.request(userInput);,MEDIUM,Detects http/https request helpers that can become SSRF sinks when URLs come from untrusted input.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,33,1,SSRF-HTTP-REQUEST,HIGH,Node.js,https.get(userInput);,MEDIUM,Detects http/https request helpers that can become SSRF sinks when URLs come from untrusted input.,,,,,,,,,,,,,
+code,tests/rule_coverage.js,35,12,JS-STRING-TIMER-EXEC,MEDIUM,JavaScript,"setTimeout(""console.log('timer string')"", 1000);",MEDIUM,"Detects setTimeout/setInterval with string code, which behaves like eval and can lead to script injection.",,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,49,1,TEMPLATE-INJECTION-COMPILE,HIGH,Node.js,Handlebars.compile(userInput);,MEDIUM,Detects template compilation and rendering APIs that become dangerous when template content is attacker-controlled.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,77,3,TLS-REJECT-UNAUTHORIZED-FALSE,HIGH,Node.js,rejectUnauthorized: false,MEDIUM,Detects TLS options that disable certificate validation by setting rejectUnauthorized to false.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,106,1,UNSAFE-DESERIALIZATION-CALL,HIGH,Node.js,serialize.unserialize(userInput);,MEDIUM,Detects library deserialization calls (deserialize/unserialize) that can be dangerous with attacker-controlled input.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,107,1,UNSAFE-DESERIALIZATION-CALL,HIGH,Node.js,serialize.deserialize(userInput);,MEDIUM,Detects library deserialization calls (deserialize/unserialize) that can be dangerous with attacker-controlled input.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,51,1,UNSAFE-VM-EXECUTION,CRITICAL,Node.js,vm.runInNewContext(userInput);,MEDIUM,Detects vm execution APIs that can execute attacker-controlled code.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,52,1,UNSAFE-VM-EXECUTION,CRITICAL,Node.js,"vm.compileFunction(userInput, []);",MEDIUM,Detects vm execution APIs that can execute attacker-controlled code.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,53,5,UNSAFE-VM-EXECUTION,CRITICAL,Node.js,new vm.Script(userInput);,MEDIUM,Detects vm execution APIs that can execute attacker-controlled code.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,50,1,UNSAFE-YAML-LOAD,HIGH,Node.js,yaml.load(userInput);,MEDIUM,Detects yaml.load() usage that can be unsafe with untrusted YAML input.,,,,,,,,,,,,,
+code,tests/advanced_rule_coverage.js,23,7,WEAK-SECRET-FALLBACK,HIGH,Node.js,const secret = process.env.JWT_SECRET || 'changeme';,MEDIUM,Detects env-based secret configuration that falls back to a hardcoded default value.,,,,,,,,,,,,,
+code,tests/sample-vue/main.js,11,17,POTENTIAL-POLLUTION-OBJECT-SPREAD,LOW,React,"const state = { ...payload, active: true };",MEDIUM,Flags object spread from common untrusted sources in React code.,,,,,,,,,,,,,

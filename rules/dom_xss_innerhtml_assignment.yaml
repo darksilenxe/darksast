@@ -7,7 +7,7 @@ ignore_if_literal:
   - "value"
 taint:
   sink_capture: "value"
-  require_tainted: false
+  require_tainted: true
 query: |
   (assignment_expression
     left: (member_expression

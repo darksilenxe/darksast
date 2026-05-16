@@ -1,9 +1,15 @@
 id: "SSRF-FETCH"
 severity: "HIGH"
 framework: "JavaScript"
+confidence: "MEDIUM"
 description: "Detects fetch() calls that may become SSRF sinks when URLs are attacker-controlled."
+taint:
+  sink_capture: "args"
+  sink_arg_index: 0
+  require_tainted: true
 query: |
   (call_expression
     function: (identifier) @fn
     (#eq? @fn "fetch")
-  ) @ssrf_sink
+    arguments: (arguments) @args
+  ) @finding
