@@ -345,8 +345,18 @@ func main() {
 }
 
 func printFinding(f engine.Finding) {
-	fmt.Printf("[!] %-8s | %-6s | %-30s | %s:%d\n    %s\n",
-		f.Severity, f.Framework, f.RuleID, f.File, f.Line, f.Description)
+	dangerousCode := strings.TrimSpace(f.HighlightedSnippet)
+	if dangerousCode == "" {
+		dangerousCode = strings.TrimSpace(f.Snippet)
+	}
+	if dangerousCode == "" {
+		dangerousCode = strings.TrimSpace(f.MatchedCode)
+	}
+	if dangerousCode == "" {
+		dangerousCode = f.Description
+	}
+	fmt.Printf("[!] %-8s | %-6s | %-30s | %s:%d:%d\n    %s\n    %s\n",
+		f.Severity, f.Framework, f.RuleID, f.File, f.Line, f.Column, dangerousCode, f.Description)
 }
 
 func advisoryMatchToFinding(match deps.AdvisoryFinding) engine.Finding {

@@ -348,7 +348,7 @@ func WriteFindingsCSV(findings []engine.Finding, outputPath string) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	if err := writer.Write([]string{"kind", "file", "line", "column", "rule_id", "severity", "framework", "snippet", "confidence", "description", "category", "taxonomy", "cwe", "owasp", "package_name", "declared_version", "resolved_version", "version_source", "fixed_versions", "references", "remediation", "confidence_rationale", "project_path"}); err != nil {
+	if err := writer.Write([]string{"kind", "file", "line", "column", "rule_id", "severity", "framework", "snippet", "matched_code", "highlighted_snippet", "confidence", "description", "category", "taxonomy", "cwe", "owasp", "package_name", "declared_version", "resolved_version", "version_source", "fixed_versions", "references", "remediation", "confidence_rationale", "project_path"}); err != nil {
 		return fmt.Errorf("failed to write findings CSV header: %w", err)
 	}
 
@@ -372,6 +372,8 @@ func WriteFindingsCSV(findings []engine.Finding, outputPath string) error {
 			finding.Severity,
 			framework,
 			finding.Snippet,
+			finding.MatchedCode,
+			finding.HighlightedSnippet,
 			confidence,
 			finding.Description,
 			finding.Category,
