@@ -1,6 +1,6 @@
 id: "NODE-CHILD-PROCESS-EXEC"
 severity: "CRITICAL"
-confidence: "MEDIUM"
+confidence: "HIGH"
 framework: "Node.js"
 description: "Detects child_process command execution APIs that can lead to command injection when input is untrusted."
 ignore_if_literal:
@@ -28,6 +28,7 @@ query: |
       property: (property_identifier) @method (#match? @method "^(exec|execSync|execFile|execFileSync|spawn|spawnSync)$")
     ) @command_exec
     arguments: (arguments
-      (_) @cmd
+      (_) @cmd @finding
+      (_)*
     )
   )

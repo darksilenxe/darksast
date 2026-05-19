@@ -18,6 +18,8 @@ type Finding struct {
 	File                string   `json:"file,omitempty"`
 	Line                uint32   `json:"line,omitempty"`
 	Column              uint32   `json:"column,omitempty"`
+	EndLine             uint32   `json:"end_line,omitempty"`
+	EndColumn           uint32   `json:"end_column,omitempty"`
 	RuleID              string   `json:"rule_id"`
 	Severity            string   `json:"severity"`
 	Framework           string   `json:"framework"`
@@ -73,7 +75,19 @@ func extractFindingContext(sourceCode []byte, row uint32, node *sitter.Node) (sn
 	startPoint := node.StartPoint()
 	endPoint := node.EndPoint()
 	if int(startPoint.Row) >= len(lines) || int(endPoint.Row) >= len(lines) || startPoint.Row != endPoint.Row {
-		highlighted = "[[DANGEROUS]] " + truncateSnippet(matchedCode) + " [[/DANGEROUS]]"
+		firstLine := ""
+		if int(startPoint.Row) < len(lines) {
+			firstLine = strings.TrimSpace(string(lines[startPoint.Row]))
+		}
+		if firstLine == "" {
+			firstLine = truncateSnippet(matchedCode)
+		}
+		highlighted = fmt.Sprintf(
+			"[[DANGEROUS]]%s[[/DANGEROUS]] (lines %d-%d)",
+			truncateSnippet(firstLine),
+			startPoint.Row+1,
+			endPoint.Row+1,
+		)
 		return snippet, matchedCode, highlighted
 	}
 
@@ -445,10 +459,14 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, l
 			root := tree.RootNode()
 			row := root.StartPoint().Row
 			col := root.StartPoint().Column
+			endRow := row
+			endCol := col
 			findingNode := findingNodeForMatch(rule, filteredMatch)
 			if findingNode != nil {
 				row = findingNode.StartPoint().Row
 				col = findingNode.StartPoint().Column
+				endRow = findingNode.EndPoint().Row
+				endCol = findingNode.EndPoint().Column
 			}
 
 			line := uint32(row + 1)
@@ -462,6 +480,8 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, l
 				File:                path,
 				Line:                line,
 				Column:              uint32(col + 1),
+				EndLine:             uint32(endRow + 1),
+				EndColumn:           uint32(endCol + 1),
 				RuleID:              rule.ID,
 				Severity:            rule.Severity,
 				Framework:           normalizeFramework(rule.Framework),
@@ -641,6 +661,8 @@ func (e *Engine) walkNode(node *sitter.Node, sourceCode []byte, symTable *Symbol
 								File:               path,
 								Line:               line,
 								Column:             uint32(node.StartPoint().Column + 1),
+								EndLine:            uint32(node.EndPoint().Row + 1),
+								EndColumn:          uint32(node.EndPoint().Column + 1),
 								RuleID:             "proto-assignment",
 								Severity:           "HIGH",
 								Framework:          "JavaScript",

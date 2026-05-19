@@ -15,6 +15,7 @@ query: |
       property: (property_identifier) @method (#eq? @method "open")
     )
     arguments: (arguments
-      (_) @url
+      (_) @url @finding
+      (_)*
     )
-  ) @finding
+  )
