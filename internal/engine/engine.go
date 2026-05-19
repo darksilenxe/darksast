@@ -22,6 +22,8 @@ type Finding struct {
 	Severity            string   `json:"severity"`
 	Framework           string   `json:"framework"`
 	Snippet             string   `json:"snippet,omitempty"`
+	MatchedCode         string   `json:"matched_code,omitempty"`
+	HighlightedSnippet  string   `json:"highlighted_snippet,omitempty"`
 	Confidence          string   `json:"confidence,omitempty"`
 	Description         string   `json:"description,omitempty"`
 	Category            string   `json:"category,omitempty"`
@@ -39,6 +41,8 @@ type Finding struct {
 	ProjectPath         string   `json:"project_path,omitempty"`
 }
 
+const maxSnippetLen = 120
+
 // extractSnippet returns the trimmed text of the source line at the given
 // zero-based row index, capped at 120 characters.
 func extractSnippet(sourceCode []byte, row uint32) string {
@@ -47,11 +51,56 @@ func extractSnippet(sourceCode []byte, row uint32) string {
 		return ""
 	}
 	line := strings.TrimSpace(string(lines[row]))
-	const maxLen = 120
-	if len(line) > maxLen {
-		return line[:maxLen] + "..."
+	if len(line) > maxSnippetLen {
+		return line[:maxSnippetLen] + "..."
 	}
 	return line
+}
+
+func extractFindingContext(sourceCode []byte, row uint32, node *sitter.Node) (snippet string, matchedCode string, highlighted string) {
+	snippet = extractSnippet(sourceCode, row)
+	highlighted = snippet
+	if node == nil {
+		return snippet, "", highlighted
+	}
+
+	matchedCode = strings.TrimSpace(node.Content(sourceCode))
+	if matchedCode == "" {
+		return snippet, "", highlighted
+	}
+
+	lines := bytes.Split(sourceCode, []byte("\n"))
+	startPoint := node.StartPoint()
+	endPoint := node.EndPoint()
+	if int(startPoint.Row) >= len(lines) || int(endPoint.Row) >= len(lines) || startPoint.Row != endPoint.Row {
+		highlighted = "[[DANGEROUS]] " + truncateSnippet(matchedCode) + " [[/DANGEROUS]]"
+		return snippet, matchedCode, highlighted
+	}
+
+	line := string(lines[startPoint.Row])
+	startColumn := int(startPoint.Column)
+	endColumn := int(endPoint.Column)
+	if startColumn < 0 {
+		startColumn = 0
+	}
+	if endColumn > len(line) {
+		endColumn = len(line)
+	}
+	if startColumn > endColumn {
+		startColumn = endColumn
+	}
+
+	highlightedLine := line[:startColumn] + "[[DANGEROUS]]" + line[startColumn:endColumn] + "[[/DANGEROUS]]" + line[endColumn:]
+	highlighted = truncateSnippet(strings.TrimSpace(highlightedLine))
+	return snippet, matchedCode, highlighted
+}
+
+func truncateSnippet(value string) string {
+	trimmed := strings.TrimSpace(value)
+	if len(trimmed) > maxSnippetLen {
+		return trimmed[:maxSnippetLen] + "..."
+	}
+	return trimmed
 }
 
 // VariableState tracks the lifecycle of a specific variable
@@ -396,15 +445,17 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, l
 			root := tree.RootNode()
 			row := root.StartPoint().Row
 			col := root.StartPoint().Column
-			if node := findingNodeForMatch(rule, filteredMatch); node != nil {
-				row = node.StartPoint().Row
-				col = node.StartPoint().Column
+			findingNode := findingNodeForMatch(rule, filteredMatch)
+			if findingNode != nil {
+				row = findingNode.StartPoint().Row
+				col = findingNode.StartPoint().Column
 			}
 
 			line := uint32(row + 1)
 			if suppress.isSuppressed(line, rule.ID) {
 				continue
 			}
+			snippet, matchedCode, highlightedSnippet := extractFindingContext(sourceCode, uint32(row), findingNode)
 
 			findings <- Finding{
 				Kind:                "code",
@@ -414,7 +465,9 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, l
 				RuleID:              rule.ID,
 				Severity:            rule.Severity,
 				Framework:           normalizeFramework(rule.Framework),
-				Snippet:             extractSnippet(sourceCode, uint32(row)),
+				Snippet:             snippet,
+				MatchedCode:         matchedCode,
+				HighlightedSnippet:  highlightedSnippet,
 				Confidence:          rule.EffectiveConfidence(),
 				Description:         rule.Description,
 				Category:            rule.Metadata.Category,
@@ -582,21 +635,24 @@ func (e *Engine) walkNode(node *sitter.Node, sourceCode []byte, symTable *Symbol
 						row := node.StartPoint().Row
 						line := uint32(row + 1)
 						if !suppress.isSuppressed(line, "proto-assignment") {
+							snippet, matchedCode, highlightedSnippet := extractFindingContext(sourceCode, uint32(row), node)
 							findings <- Finding{
-								Kind:        "code",
-								File:        path,
-								Line:        line,
-								Column:      uint32(node.StartPoint().Column + 1),
-								RuleID:      "proto-assignment",
-								Severity:    "HIGH",
-								Framework:   "JavaScript",
-								Snippet:     extractSnippet(sourceCode, uint32(row)),
-								Confidence:  "HIGH",
-								Description: "Detects tainted prototype key assignment that can enable prototype pollution.",
-								Category:    "Prototype Pollution",
-								CWE:         []string{"CWE-1321"},
-								OWASP:       []string{"A03:2021"},
-								Remediation: "Reject special keys like __proto__, constructor, and prototype before merging attacker-controlled input.",
+								Kind:               "code",
+								File:               path,
+								Line:               line,
+								Column:             uint32(node.StartPoint().Column + 1),
+								RuleID:             "proto-assignment",
+								Severity:           "HIGH",
+								Framework:          "JavaScript",
+								Snippet:            snippet,
+								MatchedCode:        matchedCode,
+								HighlightedSnippet: highlightedSnippet,
+								Confidence:         "HIGH",
+								Description:        "Detects tainted prototype key assignment that can enable prototype pollution.",
+								Category:           "Prototype Pollution",
+								CWE:                []string{"CWE-1321"},
+								OWASP:              []string{"A03:2021"},
+								Remediation:        "Reject special keys like __proto__, constructor, and prototype before merging attacker-controlled input.",
 							}
 						}
 					}

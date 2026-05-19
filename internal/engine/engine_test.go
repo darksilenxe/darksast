@@ -79,6 +79,8 @@ func TestEvalLineColumnSnippet(t *testing.T) {
 	assert.EqualValues(t, 3, f.Line, "line number should be 3 (1-based)")
 	assert.Greater(t, f.Column, uint32(0), "column should be > 0")
 	assert.Contains(t, f.Snippet, "eval(userInput)", "snippet should contain the eval call")
+	assert.Equal(t, "eval(userInput)", f.MatchedCode, "matched code should contain exact AST content for the finding")
+	assert.Contains(t, f.HighlightedSnippet, "[[DANGEROUS]]eval(userInput)[[/DANGEROUS]]", "highlighted snippet should mark dangerous code")
 }
 
 // TestInnerHTMLLineColumnSnippet verifies that a DOM-XSS-INNERHTML-ASSIGN finding
@@ -97,6 +99,8 @@ func TestInnerHTMLLineColumnSnippet(t *testing.T) {
 	assert.EqualValues(t, 2, f.Line, "line number should be 2 (1-based)")
 	assert.Greater(t, f.Column, uint32(0), "column should be > 0")
 	assert.Contains(t, f.Snippet, "innerHTML", "snippet should contain innerHTML")
+	assert.Contains(t, f.MatchedCode, "innerHTML", "matched code should include the sink expression")
+	assert.Contains(t, f.HighlightedSnippet, "[[DANGEROUS]]", "highlighted snippet should mark dangerous code")
 }
 
 // TestExtractSnippet unit-tests the snippet extraction helper directly.

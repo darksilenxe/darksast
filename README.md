@@ -150,15 +150,17 @@ Every finding now includes precise source location information:
 | `line`     | 1-based line number within the file                        |
 | `column`   | 1-based column (character offset) on that line             |
 | `snippet`  | Trimmed text of the source line (capped at 120 characters) |
+| `matched_code` | Exact AST-matched code fragment that triggered the rule |
+| `highlighted_snippet` | Snippet with `[[DANGEROUS]]...[[/DANGEROUS]]` markers around the matched fragment |
 
-**Console output** prints `file:line:col` followed by the snippet on the next line:
+**Console output** prints `file:line:col` followed by highlighted dangerous code on the next line:
 
 ```
 [!] HIGH     | JavaScript   | JS-EVAL-EXEC                 | src/app.js:14:1
-    eval(userInput);
+    [[DANGEROUS]]eval(userInput)[[/DANGEROUS]];
 ```
 
-**JSON findings** include all four location fields per entry:
+**JSON findings** include these location/context fields per entry:
 
 ```json
 {
@@ -168,11 +170,13 @@ Every finding now includes precise source location information:
   "rule_id": "JS-EVAL-EXEC",
   "severity": "HIGH",
   "framework": "JavaScript",
-  "snippet": "eval(userInput);"
+  "snippet": "eval(userInput);",
+  "matched_code": "eval(userInput)",
+  "highlighted_snippet": "[[DANGEROUS]]eval(userInput)[[/DANGEROUS]];"
 }
 ```
 
-**CSV findings** (`findings.csv`) columns: `file`, `line`, `column`, `rule_id`, `severity`, `framework`, `snippet`.
+**CSV findings** (`findings.csv`) include `snippet`, `matched_code`, and `highlighted_snippet` columns for faster triage.
 
 ## Disclaimer
 
