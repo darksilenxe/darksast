@@ -1,59 +1,121 @@
-source: curated advisory seed
-updated_at: 2026-04-29T00:00:00Z
+source: github-advisory-database
+updated_at: 2026-05-20T00:00:00Z
 rules:
   - id: OSS-NPM-LODASH-PROTOTYPE-POLLUTION
     ecosystem: npm
     package: lodash
     severity: HIGH
     title: Prototype Pollution in lodash
-    description: lodash versions before 4.17.21 are affected by prototype pollution.
+    description: lodash versions before 4.17.20 are affected by prototype pollution.
+    affected_versions:
+      - <4.17.20
+    fixed_version: 4.17.20
+    aliases:
+      - GHSA-p6mc-m468-83gw
+      - CVE-2020-8203
+    cwe:
+      - CWE-1321
+    source: github-advisory-database
+    references:
+      - https://github.com/advisories/GHSA-p6mc-m468-83gw
+      - https://nvd.nist.gov/vuln/detail/CVE-2020-8203
+  - id: OSS-NPM-LODASH-COMMAND-INJECTION
+    ecosystem: npm
+    package: lodash
+    severity: HIGH
+    title: Command Injection in lodash
+    description: lodash versions before 4.17.21 are affected by command injection in template handling.
     affected_versions:
       - <4.17.21
     fixed_version: 4.17.21
     aliases:
+      - GHSA-35jh-r3h4-6jhm
       - CVE-2021-23337
-    cwe:
-      - CWE-1321
-    cvss: "7.4"
-    source: curated-seed
+    source: github-advisory-database
     references:
-      - https://nvd.nist.gov/vuln/detail/CVE-2021-23337
       - https://github.com/advisories/GHSA-35jh-r3h4-6jhm
-  - id: OSS-NPM-MINIMIST-PROTOTYPE-POLLUTION
+      - https://nvd.nist.gov/vuln/detail/CVE-2021-23337
+  - id: OSS-NPM-MINIMIST-PROTOTYPE-POLLUTION-0X
     ecosystem: npm
     package: minimist
-    severity: HIGH
-    title: Prototype Pollution in minimist
-    description: minimist contains prototype pollution vulnerabilities across older release lines.
+    severity: CRITICAL
+    title: Prototype Pollution in minimist (0.x)
+    description: minimist 0.x versions before 0.2.4 are affected by prototype pollution.
     affected_versions:
       - <0.2.4
-      - ">=1.0.0 <1.2.6"
-    fixed_version: 1.2.6
+    fixed_version: 0.2.4
     aliases:
+      - GHSA-xvch-5gv4-984h
       - CVE-2021-44906
-      - CVE-2020-7598
     cwe:
       - CWE-1321
-    cvss: "7.5"
-    source: curated-seed
+    source: github-advisory-database
     references:
-      - https://nvd.nist.gov/vuln/detail/CVE-2021-44906
       - https://github.com/advisories/GHSA-xvch-5gv4-984h
-  - id: OSS-NPM-SEMVER-REDOS
+      - https://nvd.nist.gov/vuln/detail/CVE-2021-44906
+  - id: OSS-NPM-MINIMIST-PROTOTYPE-POLLUTION-1X
+    ecosystem: npm
+    package: minimist
+    severity: CRITICAL
+    title: Prototype Pollution in minimist (1.x)
+    description: minimist 1.x versions from 1.0.0 up to 1.2.5 are affected by prototype pollution.
+    affected_versions:
+      - '>=1.0.0 <1.2.6'
+    fixed_version: 1.2.6
+    aliases:
+      - GHSA-xvch-5gv4-984h
+      - CVE-2021-44906
+    cwe:
+      - CWE-1321
+    source: github-advisory-database
+    references:
+      - https://github.com/advisories/GHSA-xvch-5gv4-984h
+      - https://nvd.nist.gov/vuln/detail/CVE-2021-44906
+  - id: OSS-NPM-SEMVER-REDOS-2X-5X
     ecosystem: npm
     package: semver
-    severity: MEDIUM
-    title: Regular Expression Denial of Service in semver
-    description: semver versions before 7.5.2 can be abused with crafted inputs that trigger excessive backtracking.
+    severity: HIGH
+    title: Regular Expression Denial of Service in semver (2.x-5.x)
+    description: semver versions from 2.0.0-alpha up to 5.7.1 can be abused with crafted inputs that trigger excessive backtracking.
     affected_versions:
-      - <7.5.2
-    fixed_version: 7.5.2
+      - '>=2.0.0-alpha <5.7.2'
+    fixed_version: 5.7.2
+    source: github-advisory-database
     aliases:
+      - GHSA-c2qf-rxjj-qqgw
       - CVE-2022-25883
-    cwe:
-      - CWE-1333
-    cvss: "5.3"
-    source: curated-seed
     references:
-      - https://nvd.nist.gov/vuln/detail/CVE-2022-25883
       - https://github.com/advisories/GHSA-c2qf-rxjj-qqgw
+      - https://nvd.nist.gov/vuln/detail/CVE-2022-25883
+  - id: OSS-NPM-SEMVER-REDOS-6X
+    ecosystem: npm
+    package: semver
+    severity: HIGH
+    title: Regular Expression Denial of Service in semver (6.x)
+    description: semver 6.x versions before 6.3.1 can be abused with crafted inputs that trigger excessive backtracking.
+    affected_versions:
+      - '>=6.0.0 <6.3.1'
+    fixed_version: 6.3.1
+    source: github-advisory-database
+    aliases:
+      - GHSA-c2qf-rxjj-qqgw
+      - CVE-2022-25883
+    references:
+      - https://github.com/advisories/GHSA-c2qf-rxjj-qqgw
+      - https://nvd.nist.gov/vuln/detail/CVE-2022-25883
+  - id: OSS-NPM-SEMVER-REDOS-7X
+    ecosystem: npm
+    package: semver
+    severity: HIGH
+    title: Regular Expression Denial of Service in semver (7.x)
+    description: semver 7.x versions before 7.5.2 can be abused with crafted inputs that trigger excessive backtracking.
+    affected_versions:
+      - '>=7.0.0 <7.5.2'
+    fixed_version: 7.5.2
+    source: github-advisory-database
+    aliases:
+      - GHSA-c2qf-rxjj-qqgw
+      - CVE-2022-25883
+    references:
+      - https://github.com/advisories/GHSA-c2qf-rxjj-qqgw
+      - https://nvd.nist.gov/vuln/detail/CVE-2022-25883

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -16,6 +17,7 @@ import (
 )
 
 const defaultAdvisoryFeedUserAgent = "JavaScript-Security-Scanner/1.0 advisory client"
+const githubNPMAdvisoryFeedAlias = "github://npm"
 
 type Advisory struct {
 	ID               string   `json:"id" yaml:"id"`
@@ -109,6 +111,9 @@ func FetchAdvisories(feedURL string, opts AdvisoryFeedOptions) ([]Advisory, erro
 	if opts.MaxBytes <= 0 {
 		opts.MaxBytes = 2 * 1024 * 1024
 	}
+	if strings.EqualFold(feedURL, githubNPMAdvisoryFeedAlias) {
+		return fetchGitHubNPMAdvisories(opts)
+	}
 
 	client := &http.Client{Timeout: opts.Timeout}
 	req, err := http.NewRequest(http.MethodGet, feedURL, nil)
@@ -137,6 +142,203 @@ func FetchAdvisories(feedURL string, opts AdvisoryFeedOptions) ([]Advisory, erro
 	}
 
 	return parseAdvisoryBytes(feedURL, body)
+}
+
+type githubAdvisoryIdentifier struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+type githubAdvisoryReference struct {
+	URL string `json:"url"`
+}
+
+type githubAdvisoryCWE struct {
+	CWEID string `json:"cwe_id"`
+}
+
+type githubAdvisoryCVSS struct {
+	Score float64 `json:"score"`
+}
+
+type githubAdvisoryVulnerability struct {
+	Package struct {
+		Ecosystem string `json:"ecosystem"`
+		Name      string `json:"name"`
+	} `json:"package"`
+	VulnerableVersionRange string `json:"vulnerable_version_range"`
+	FirstPatchedVersion    struct {
+		Identifier string `json:"identifier"`
+	} `json:"first_patched_version"`
+}
+
+type githubSecurityAdvisory struct {
+	GHSAID          string                        `json:"ghsa_id"`
+	Summary         string                        `json:"summary"`
+	Description     string                        `json:"description"`
+	Severity        string                        `json:"severity"`
+	Identifiers     []githubAdvisoryIdentifier    `json:"identifiers"`
+	References      []githubAdvisoryReference     `json:"references"`
+	CWEs            []githubAdvisoryCWE           `json:"cwes"`
+	CVSS            githubAdvisoryCVSS            `json:"cvss"`
+	Vulnerabilities []githubAdvisoryVulnerability `json:"vulnerabilities"`
+}
+
+func fetchGitHubNPMAdvisories(opts AdvisoryFeedOptions) ([]Advisory, error) {
+	client := &http.Client{Timeout: opts.Timeout}
+	page := 1
+	out := make([]Advisory, 0)
+	for {
+		pageURL := fmt.Sprintf("https://api.github.com/advisories?ecosystem=npm&per_page=100&page=%d", page)
+		req, err := http.NewRequest(http.MethodGet, pageURL, nil)
+		if err != nil {
+			return nil, fmt.Errorf("fetch advisories: %w", err)
+		}
+		req.Header.Set("User-Agent", opts.UserAgent)
+		req.Header.Set("Accept", "application/vnd.github+json")
+		if token := strings.TrimSpace(githubAdvisoryToken()); token != "" {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("fetch advisories: %w", err)
+		}
+		body, bodyErr := io.ReadAll(io.LimitReader(resp.Body, opts.MaxBytes+1))
+		resp.Body.Close()
+		if bodyErr != nil {
+			return nil, fmt.Errorf("fetch advisories: %w", bodyErr)
+		}
+		if int64(len(body)) > opts.MaxBytes {
+			return nil, fmt.Errorf("fetch advisories: response exceeded max bytes (%d)", opts.MaxBytes)
+		}
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			return nil, fmt.Errorf("fetch advisories: HTTP %d", resp.StatusCode)
+		}
+		var payload []githubSecurityAdvisory
+		if err := json.Unmarshal(body, &payload); err != nil {
+			return nil, fmt.Errorf("fetch advisories: %w", err)
+		}
+		out = append(out, convertGitHubNPMAdvisories(payload)...)
+		if !hasNextPageLink(resp.Header.Get("Link")) {
+			break
+		}
+		page++
+	}
+	return normalizeAdvisories(out), nil
+}
+
+func githubAdvisoryToken() string {
+	if token := strings.TrimSpace(os.Getenv("GITHUB_TOKEN")); token != "" {
+		return token
+	}
+	return strings.TrimSpace(os.Getenv("GH_TOKEN"))
+}
+
+var advisoryIDSanitizerRE = regexp.MustCompile(`[^A-Za-z0-9]+`)
+
+func advisoryIDSegment(value string) string {
+	value = strings.TrimSpace(value)
+	value = advisoryIDSanitizerRE.ReplaceAllString(value, "-")
+	value = strings.Trim(value, "-")
+	if value == "" {
+		return "UNKNOWN"
+	}
+	return strings.ToUpper(value)
+}
+
+func splitGitHubVersionRange(raw string) []string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	raw = strings.ReplaceAll(raw, ",", " ")
+	parts := strings.Split(raw, "||")
+	out := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		out = append(out, part)
+	}
+	return out
+}
+
+func convertGitHubNPMAdvisories(payload []githubSecurityAdvisory) []Advisory {
+	out := make([]Advisory, 0)
+	for _, entry := range payload {
+		aliases := make([]string, 0, len(entry.Identifiers)+1)
+		if ghsa := strings.TrimSpace(entry.GHSAID); ghsa != "" {
+			aliases = append(aliases, ghsa)
+		}
+		for _, ident := range entry.Identifiers {
+			if strings.EqualFold(strings.TrimSpace(ident.Type), "GHSA") {
+				continue
+			}
+			if v := strings.TrimSpace(ident.Value); v != "" {
+				aliases = append(aliases, v)
+			}
+		}
+		refs := make([]string, 0, len(entry.References))
+		for _, ref := range entry.References {
+			if url := strings.TrimSpace(ref.URL); url != "" {
+				refs = append(refs, url)
+			}
+		}
+		cwes := make([]string, 0, len(entry.CWEs))
+		for _, cwe := range entry.CWEs {
+			if id := strings.TrimSpace(cwe.CWEID); id != "" {
+				cwes = append(cwes, id)
+			}
+		}
+		cvss := ""
+		if entry.CVSS.Score > 0 {
+			cvss = fmt.Sprintf("%.1f", entry.CVSS.Score)
+		}
+		for _, vuln := range entry.Vulnerabilities {
+			if !strings.EqualFold(vuln.Package.Ecosystem, "npm") {
+				continue
+			}
+			pkg := strings.TrimSpace(vuln.Package.Name)
+			if pkg == "" {
+				continue
+			}
+			title := strings.TrimSpace(entry.Summary)
+			if title == "" {
+				title = strings.TrimSpace(entry.GHSAID)
+			}
+			description := strings.TrimSpace(entry.Description)
+			if description == "" {
+				description = title
+			}
+			ranges := splitGitHubVersionRange(vuln.VulnerableVersionRange)
+			out = append(out, Advisory{
+				ID:               "OSS-NPM-" + advisoryIDSegment(pkg) + "-" + advisoryIDSegment(entry.GHSAID),
+				Ecosystem:        "npm",
+				Package:          pkg,
+				Severity:         strings.ToUpper(strings.TrimSpace(entry.Severity)),
+				Title:            title,
+				Description:      description,
+				AffectedVersions: ranges,
+				FixedVersion:     strings.TrimSpace(vuln.FirstPatchedVersion.Identifier),
+				Aliases:          append([]string(nil), aliases...),
+				References:       append([]string(nil), refs...),
+				CWE:              append([]string(nil), cwes...),
+				CVSS:             cvss,
+				Source:           "github-advisory-database",
+			})
+		}
+	}
+	return out
+}
+
+func hasNextPageLink(linkHeader string) bool {
+	for _, part := range strings.Split(linkHeader, ",") {
+		if strings.Contains(part, `rel="next"`) {
+			return true
+		}
+	}
+	return false
 }
 
 func MergeAdvisories(groups ...[]Advisory) []Advisory {

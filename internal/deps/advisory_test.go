@@ -127,3 +127,53 @@ func TestMatchesVersionConstraintSupportsCommonRangeSyntax(t *testing.T) {
 	assert.False(t, matchesVersionConstraint("^1.2.3", "2.0.0"))
 	assert.True(t, matchesVersionConstraint("1.2.x", "1.2.9"))
 }
+
+func TestConvertGitHubNPMAdvisories(t *testing.T) {
+	payload := []githubSecurityAdvisory{
+		{
+			GHSAID:      "GHSA-35jh-r3h4-6jhm",
+			Summary:     "Command Injection in lodash",
+			Description: "lodash command injection advisory",
+			Severity:    "high",
+			Identifiers: []githubAdvisoryIdentifier{
+				{Type: "GHSA", Value: "GHSA-35jh-r3h4-6jhm"},
+				{Type: "CVE", Value: "CVE-2021-23337"},
+			},
+			References: []githubAdvisoryReference{
+				{URL: "https://github.com/advisories/GHSA-35jh-r3h4-6jhm"},
+			},
+			CWEs: []githubAdvisoryCWE{{CWEID: "CWE-77"}},
+			CVSS: githubAdvisoryCVSS{Score: 7.2},
+			Vulnerabilities: []githubAdvisoryVulnerability{
+				{
+					Package: struct {
+						Ecosystem string `json:"ecosystem"`
+						Name      string `json:"name"`
+					}{Ecosystem: "npm", Name: "lodash"},
+					VulnerableVersionRange: "< 4.17.21 || >=5.0.0 <5.0.3",
+					FirstPatchedVersion: struct {
+						Identifier string `json:"identifier"`
+					}{Identifier: "4.17.21"},
+				},
+			},
+		},
+	}
+
+	advisories := convertGitHubNPMAdvisories(payload)
+	require.Len(t, advisories, 1)
+	assert.Equal(t, "OSS-NPM-LODASH-GHSA-35JH-R3H4-6JHM", advisories[0].ID)
+	assert.Equal(t, "npm", advisories[0].Ecosystem)
+	assert.Equal(t, "lodash", advisories[0].Package)
+	assert.Equal(t, "HIGH", advisories[0].Severity)
+	assert.Equal(t, "4.17.21", advisories[0].FixedVersion)
+	assert.Equal(t, []string{"< 4.17.21", ">=5.0.0 <5.0.3"}, advisories[0].AffectedVersions)
+	assert.Equal(t, []string{"GHSA-35jh-r3h4-6jhm", "CVE-2021-23337"}, advisories[0].Aliases)
+	assert.Equal(t, []string{"CWE-77"}, advisories[0].CWE)
+	assert.Equal(t, "7.2", advisories[0].CVSS)
+	assert.Equal(t, "github-advisory-database", advisories[0].Source)
+}
+
+func TestHasNextPageLink(t *testing.T) {
+	assert.True(t, hasNextPageLink(`<https://api.github.com/advisories?ecosystem=npm&page=2>; rel="next", <https://api.github.com/advisories?ecosystem=npm&page=20>; rel="last"`))
+	assert.False(t, hasNextPageLink(`<https://api.github.com/advisories?ecosystem=npm&page=1>; rel="first", <https://api.github.com/advisories?ecosystem=npm&page=20>; rel="last"`))
+}

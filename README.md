@@ -102,7 +102,7 @@ Relevant flags:
 | `-compromised-json-out` | `./compromised_packages.json` | JSON report for compromised package matches. |
 | `-compromised-csv-out` | `./compromised_packages.csv` | CSV report for compromised package matches. |
 | `-advisory-rules` | `./intel/advisories.yaml` | Local YAML/JSON advisory bundle for OSS dependency vulnerability matching. |
-| `-advisory-feed-url` | (empty) | Optional remote JSON feed for OSS dependency advisories. |
+| `-advisory-feed-url` | (empty) | Optional remote JSON feed for OSS dependency advisories. Use `github://npm` to ingest all npm advisories from GitHub Advisory Database. |
 | `-advisory-generated-rules-out` | (empty) | Optional YAML path to write the merged advisory ruleset. |
 | `-advisory-policy` | (empty) | Optional YAML policy file with `ignores:` entries keyed by advisory ID, package, and optional expiry. |
 | `-oss-vulns-json-out` | `./oss_vulnerabilities.json` | JSON report for OSS dependency vulnerability matches. |
@@ -117,6 +117,7 @@ Notes and limitations:
 - JavaScript injected at runtime by other scripts (for example via `document.write` or SPA hydration) is not captured because no headless browser is used.
 - Same-origin filtering is on by default to avoid persisting third-party CDN code; pass `-fetch-same-origin=false` to include it.
 - The default User-Agent identifies the scanner so site operators can see what is hitting them.
+- For full JavaScript (npm) advisory coverage from GitHub Advisory Database, set `-advisory-feed-url github://npm`. For higher API limits on large pulls, set `GITHUB_TOKEN` (or `GH_TOKEN`) in the environment.
 
 ## Outputs
 
