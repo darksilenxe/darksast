@@ -24,6 +24,8 @@ func TestWriteSARIFIncludesRuleMetadataAndRelativeLocations(t *testing.T) {
 			File:       sourceFile,
 			Line:       1,
 			Column:     1,
+			EndLine:    1,
+			EndColumn:  16,
 			RuleID:     "JS-EVAL-EXEC",
 			Severity:   "HIGH",
 			Framework:  "JavaScript",
@@ -80,6 +82,8 @@ func TestWriteSARIFIncludesRuleMetadataAndRelativeLocations(t *testing.T) {
 	assert.Equal(t, "src/app.js", result.Locations[0].PhysicalLocation.ArtifactLocation.URI)
 	assert.Equal(t, uint32(1), result.Locations[0].PhysicalLocation.Region.StartLine)
 	assert.Equal(t, uint32(1), result.Locations[0].PhysicalLocation.Region.StartColumn)
+	assert.Equal(t, uint32(1), result.Locations[0].PhysicalLocation.Region.EndLine)
+	assert.Equal(t, uint32(16), result.Locations[0].PhysicalLocation.Region.EndColumn)
 	require.NotNil(t, result.Locations[0].PhysicalLocation.Region.Snippet)
 	assert.Equal(t, "eval(userInput);", result.Locations[0].PhysicalLocation.Region.Snippet.Text)
 	require.NotNil(t, result.Properties)

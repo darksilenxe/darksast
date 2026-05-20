@@ -1,7 +1,7 @@
 id: "DOM-XSS-INSERT-ADJACENT-HTML"
 severity: "HIGH"
 framework: "JavaScript"
-confidence: "MEDIUM"
+confidence: "HIGH"
 description: "Detects insertAdjacentHTML() usage, which can enable DOM XSS when HTML content is user-controlled."
 ignore_if_literal:
   - "html"
@@ -15,6 +15,7 @@ query: |
     )
     arguments: (arguments
       (_)
-      (_) @html
+      (_) @html @finding
+      (_)*
     )
-  ) @finding
+  )

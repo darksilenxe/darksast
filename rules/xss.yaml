@@ -3,6 +3,9 @@ id: "XSS-01"
 severity: "HIGH"
 framework: "React"
 confidence: "HIGH"
+taint:
+  sink_capture: "html_value"
+  require_tainted: true
 requires_dependency:
   - "react"
 description: "Identifies potentially unsafe use of dangerouslySetInnerHTML."
@@ -20,6 +23,15 @@ metadata:
   remediation: "Avoid dangerouslySetInnerHTML for untrusted content or sanitize HTML with a vetted library such as DOMPurify before rendering."
   confidence_rationale: "dangerouslySetInnerHTML is a high-signal React sink that bypasses React's default escaping guarantees."
 query: |
-  (jsx_attribute 
-    (property_identifier) @attr_name 
-    (#eq? @attr_name "dangerouslySetInnerHTML"))
+  (jsx_attribute
+    (property_identifier) @attr_name
+    (#eq? @attr_name "dangerouslySetInnerHTML")
+    (jsx_expression
+      (object
+        (pair
+          key: (property_identifier) @html_key (#eq? @html_key "__html")
+          value: (_) @html_value @finding
+        )
+      )
+    )
+  )

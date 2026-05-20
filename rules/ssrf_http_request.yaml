@@ -1,11 +1,10 @@
 id: "SSRF-HTTP-REQUEST"
 severity: "HIGH"
 framework: "Node.js"
-confidence: "MEDIUM"
+confidence: "HIGH"
 description: "Detects http/https request helpers that can become SSRF sinks when URLs come from untrusted input."
 taint:
-  sink_capture: "args"
-  sink_arg_index: 0
+  sink_capture: "url"
   require_tainted: true
 query: |
   (call_expression
@@ -13,5 +12,8 @@ query: |
       object: (identifier) @obj (#match? @obj "^(http|https)$")
       property: (property_identifier) @method (#match? @method "^(request|get)$")
     )
-    arguments: (arguments) @args
-  ) @finding
+    arguments: (arguments
+      (_) @url @finding
+      (_)*
+    )
+  )

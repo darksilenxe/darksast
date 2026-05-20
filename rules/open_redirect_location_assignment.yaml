@@ -16,5 +16,5 @@ query: |
     left: (member_expression
       property: (property_identifier) @prop (#match? @prop "^(href|location)$")
     ) @redirect_sink
-    right: (_) @value
-  ) @finding
+    right: (_) @value @finding
+  )

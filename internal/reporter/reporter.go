@@ -101,6 +101,8 @@ type sarifArtifactLocation struct {
 type sarifRegion struct {
 	StartLine   uint32        `json:"startLine"`
 	StartColumn uint32        `json:"startColumn,omitempty"`
+	EndLine     uint32        `json:"endLine,omitempty"`
+	EndColumn   uint32        `json:"endColumn,omitempty"`
 	Snippet     *sarifMessage `json:"snippet,omitempty"`
 }
 
@@ -195,6 +197,8 @@ func WriteSARIF(findings []engine.Finding, rules []engine.Rule, targetDir string
 				Region: sarifRegion{
 					StartLine:   finding.Line,
 					StartColumn: finding.Column,
+					EndLine:     finding.EndLine,
+					EndColumn:   finding.EndColumn,
 				},
 			},
 		}
@@ -348,7 +352,7 @@ func WriteFindingsCSV(findings []engine.Finding, outputPath string) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	if err := writer.Write([]string{"kind", "file", "line", "column", "rule_id", "severity", "framework", "snippet", "matched_code", "highlighted_snippet", "confidence", "description", "category", "taxonomy", "cwe", "owasp", "package_name", "declared_version", "resolved_version", "version_source", "fixed_versions", "references", "remediation", "confidence_rationale", "project_path"}); err != nil {
+	if err := writer.Write([]string{"kind", "file", "line", "column", "end_line", "end_column", "rule_id", "severity", "framework", "snippet", "matched_code", "highlighted_snippet", "confidence", "description", "category", "taxonomy", "cwe", "owasp", "package_name", "declared_version", "resolved_version", "version_source", "fixed_versions", "references", "remediation", "confidence_rationale", "project_path"}); err != nil {
 		return fmt.Errorf("failed to write findings CSV header: %w", err)
 	}
 
@@ -368,6 +372,8 @@ func WriteFindingsCSV(findings []engine.Finding, outputPath string) error {
 			finding.File,
 			fmt.Sprintf("%d", finding.Line),
 			fmt.Sprintf("%d", finding.Column),
+			fmt.Sprintf("%d", finding.EndLine),
+			fmt.Sprintf("%d", finding.EndColumn),
 			finding.RuleID,
 			finding.Severity,
 			framework,
