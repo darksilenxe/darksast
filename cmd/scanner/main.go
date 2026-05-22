@@ -49,7 +49,7 @@ func main() {
 	compromisedJSONOut := flag.String("compromised-json-out", "./compromised_packages.json", "Output JSON file for compromised package matches")
 	compromisedCSVOut := flag.String("compromised-csv-out", "./compromised_packages.csv", "Output CSV file for compromised package matches")
 	advisoryRules := flag.String("advisory-rules", "./intel/advisories.yaml", "YAML or JSON file containing package vulnerability advisories")
-	advisoryFeedURL := flag.String("advisory-feed-url", "", "Optional JSON API URL that returns package vulnerability advisories, or github://npm for GitHub Advisory Database npm ingestion")
+	advisoryFeedURL := flag.String("advisory-feed-url", "", "Optional JSON API URL that returns package vulnerability advisories, or github://<ecosystem> (npm|pip|go|cargo|all) for GitHub Advisory Database ingestion")
 	advisoryFeedTimeout := flag.Duration("advisory-feed-timeout", 15*time.Second, "HTTP timeout used when fetching package vulnerability advisories")
 	advisoryFeedUserAgent := flag.String("advisory-feed-user-agent", "", "User-Agent header used when fetching package vulnerability advisories")
 	advisoryFeedMaxBytes := flag.Int64("advisory-feed-max-bytes", 2*1024*1024, "Maximum bytes accepted from the package vulnerability advisory feed")
