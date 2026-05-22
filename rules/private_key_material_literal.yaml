@@ -1,0 +1,23 @@
+id: "PRIVATE-KEY-MATERIAL-LITERAL"
+severity: "CRITICAL"
+confidence: "HIGH"
+framework: "JavaScript"
+description: "Detects private key PEM material embedded directly in source code strings."
+tags:
+  - "secrets"
+  - "sensitive-data"
+metadata:
+  category: "Secrets Exposure"
+  taxonomy:
+    - "data/sensitive"
+  cwe:
+    - "CWE-798"
+  owasp:
+    - "A07:2021"
+  references:
+    - "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/"
+  remediation: "Store private keys in a dedicated secret manager or secure key vault."
+query: |
+  (variable_declarator
+    value: (string) @secret_value (#match? @secret_value "BEGIN\\s+(RSA\\s+)?PRIVATE\\s+KEY")
+  ) @private_key_literal

@@ -12,6 +12,8 @@ import cors from 'cors';
 import React from 'react';
 
 const req = { query: { url: 'http://evil.local' }, body: { path: '../../etc/passwd' } };
+const apiHeaders = { Authorization: "Bearer super-secret-static-token" };
+const embeddedPrivateKey = "-----BEGIN PRIVATE KEY-----MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...-----END PRIVATE KEY-----";
 const res = {
   redirect(value) { return value; },
   sendFile(value) { return value; }
@@ -56,7 +58,7 @@ shelljs.exec(userInput);
 execa(userInput);
 const safeUrl = sanitizer.bypassSecurityTrustUrl(userInput);
 const resourceUrl = sanitizer.bypassSecurityTrustResourceUrl(userInput);
-console.log(safeUrl, resourceUrl, apiKey, sessionId);
+console.log(safeUrl, resourceUrl, apiKey, sessionId, apiHeaders, embeddedPrivateKey);
 
 const nextConfig = {
   images: {

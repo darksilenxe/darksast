@@ -1,6 +1,7 @@
 package reporter
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -90,4 +91,36 @@ func TestWriteSARIFIncludesRuleMetadataAndRelativeLocations(t *testing.T) {
 	assert.Equal(t, "JavaScript", result.Properties.Framework)
 	assert.Equal(t, "HIGH", result.Properties.Confidence)
 	assert.Equal(t, []string{"injection", "javascript"}, result.Properties.Tags)
+}
+
+func TestWriteFindingsCSVIncludesTagsColumn(t *testing.T) {
+	targetDir := t.TempDir()
+	outputPath := filepath.Join(targetDir, "findings.csv")
+	findings := []engine.Finding{
+		{
+			Kind:        "code",
+			File:        "tests/advanced_rule_coverage.js",
+			Line:        12,
+			Column:      1,
+			EndLine:     12,
+			EndColumn:   15,
+			RuleID:      "HARDCODED-BEARER-AUTH",
+			Severity:    "HIGH",
+			Framework:   "Node.js",
+			Confidence:  "HIGH",
+			Tags:        []string{"secrets", "sensitive-data"},
+			Description: "Detects hardcoded Authorization Bearer headers.",
+		},
+	}
+
+	require.NoError(t, WriteFindingsCSV(findings, outputPath))
+
+	f, err := os.Open(outputPath)
+	require.NoError(t, err)
+	defer f.Close()
+	rows, err := csv.NewReader(f).ReadAll()
+	require.NoError(t, err)
+	require.Len(t, rows, 2)
+	assert.Equal(t, "tags", rows[0][13])
+	assert.Equal(t, "secrets;sensitive-data", rows[1][13])
 }

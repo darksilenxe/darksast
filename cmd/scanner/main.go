@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -58,6 +59,7 @@ func main() {
 	advisoryCSVOut := flag.String("oss-vulns-csv-out", "./oss_vulnerabilities.csv", "Output CSV file for OSS dependency vulnerability matches")
 	advisorySummaryCSVOut := flag.String("oss-vulns-summary-csv-out", "./oss_vulnerabilities_summary.csv", "Output summary CSV file for OSS dependency vulnerability matches")
 	failOnOSSVulnSeverity := flag.String("fail-on-oss-vuln-severity", "", "Exit with code 1 when OSS dependency findings at or above this severity remain after policy filtering: LOW, MEDIUM, HIGH, CRITICAL")
+	failOnCategories := flag.String("fail-on-categories", "", "Comma-separated finding categories that should fail CI when present (case-insensitive, for example: \"Secrets Exposure,Injection\")")
 	findingsJSONOut := flag.String("findings-json-out", "./findings_report.json", "Output JSON file for SAST findings")
 	findingsSARIFOut := flag.String("findings-sarif-out", "", "Optional SARIF file for SAST findings")
 	findingsFrameworkCSVOut := flag.String("findings-framework-csv-out", "./findings_framework_summary.csv", "Output CSV file for framework/severity finding counts")
@@ -283,6 +285,7 @@ func main() {
 
 	findingsChan := make(chan engine.Finding, 100)
 	findings := make([]engine.Finding, 0)
+	failCategorySet := parseCategoryGate(*failOnCategories)
 
 	// Resolve the minimum severity/confidence gates once.
 	minSevRank := severityRank[strings.ToUpper(*minSeverity)]
@@ -338,6 +341,10 @@ func main() {
 	}
 
 	fmt.Println("[*] Scan complete.")
+	if shouldFailForCategories(findings, failCategorySet) {
+		log.Printf("[!] Failing because findings matched -fail-on-categories: %s.\n", strings.Join(sortedKeys(failCategorySet), ", "))
+		os.Exit(1)
+	}
 	if shouldFailForOSSVulns {
 		log.Printf("[!] Failing because OSS dependency vulnerabilities met the -fail-on-oss-vuln-severity threshold.\n")
 		os.Exit(1)
@@ -380,4 +387,47 @@ func advisoryMatchToFinding(match deps.AdvisoryFinding) engine.Finding {
 		Remediation:     match.Remediation,
 		ProjectPath:     match.ProjectPath,
 	}
+}
+
+func parseCategoryGate(raw string) map[string]struct{} {
+	out := make(map[string]struct{})
+	for _, entry := range strings.Split(raw, ",") {
+		normalized := strings.ToUpper(strings.TrimSpace(entry))
+		if normalized == "" {
+			continue
+		}
+		out[normalized] = struct{}{}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+func shouldFailForCategories(findings []engine.Finding, blocked map[string]struct{}) bool {
+	if len(blocked) == 0 {
+		return false
+	}
+	for _, finding := range findings {
+		category := strings.ToUpper(strings.TrimSpace(finding.Category))
+		if category == "" {
+			continue
+		}
+		if _, blockedCategory := blocked[category]; blockedCategory {
+			return true
+		}
+	}
+	return false
+}
+
+func sortedKeys(values map[string]struct{}) []string {
+	if len(values) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(values))
+	for value := range values {
+		out = append(out, value)
+	}
+	sort.Strings(out)
+	return out
 }

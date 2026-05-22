@@ -13,8 +13,10 @@ JavaScript-Security-Scanner is a lightweight Go-based static scanner for applica
 - Rich findings pipeline:
   - Output formats: JSON, CSV, optional SARIF.
   - Precise spans (`line/column/end_line/end_column`) plus `snippet`, `matched_code`, and `highlighted_snippet`.
+  - Rule-level `tags` in findings output to support grouping by sensitive-data and secret-related detections.
   - Framework/severity rollups via findings framework summary CSV.
   - Severity/confidence result gating via `-min-severity` and `-min-confidence`.
+  - Optional category-based CI fail gating via `-fail-on-categories`.
 - Dependency intelligence pipeline:
   - Package inventory extraction across manifests including `package.json`, `requirements.txt`, `go.mod`, and `Cargo.toml`.
   - npm lockfile-aware resolution from `package-lock.json` / `npm-shrinkwrap.json`.
@@ -121,6 +123,7 @@ Relevant flags:
 | `-oss-vulns-csv-out` | `./oss_vulnerabilities.csv` | CSV report for OSS dependency vulnerability matches. |
 | `-oss-vulns-summary-csv-out` | `./oss_vulnerabilities_summary.csv` | Summary CSV for OSS dependency vulnerability matches. |
 | `-fail-on-oss-vuln-severity` | (empty) | Exit non-zero when OSS dependency findings at or above the selected severity remain after policy filtering. |
+| `-fail-on-categories` | (empty) | Comma-separated finding categories that fail the scan when present (case-insensitive). |
 | `-findings-sarif-out` | (empty) | Optional SARIF output path for findings. |
 
 Notes and limitations:
