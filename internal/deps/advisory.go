@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -17,7 +18,38 @@ import (
 )
 
 const defaultAdvisoryFeedUserAgent = "JavaScript-Security-Scanner/1.0 advisory client"
-const githubNPMAdvisoryFeedAlias = "github://npm"
+const githubAdvisoryFeedAliasPrefix = "github://"
+
+type githubAdvisoryFeedTarget struct {
+	AliasEcosystem  string
+	APIEcosystem    string
+	OutputEcosystem string
+}
+
+var githubAdvisoryFeedTargets = map[string]githubAdvisoryFeedTarget{
+	"npm": {
+		AliasEcosystem:  "npm",
+		APIEcosystem:    "npm",
+		OutputEcosystem: "npm",
+	},
+	"pip": {
+		AliasEcosystem:  "pip",
+		APIEcosystem:    "pip",
+		OutputEcosystem: "pip",
+	},
+	"go": {
+		AliasEcosystem:  "go",
+		APIEcosystem:    "go",
+		OutputEcosystem: "go",
+	},
+	"cargo": {
+		AliasEcosystem:  "cargo",
+		APIEcosystem:    "rust",
+		OutputEcosystem: "cargo",
+	},
+}
+
+var githubAdvisoryFeedTargetOrder = []string{"npm", "pip", "go", "cargo"}
 
 type Advisory struct {
 	ID               string   `json:"id" yaml:"id"`
@@ -111,8 +143,19 @@ func FetchAdvisories(feedURL string, opts AdvisoryFeedOptions) ([]Advisory, erro
 	if opts.MaxBytes <= 0 {
 		opts.MaxBytes = 2 * 1024 * 1024
 	}
-	if strings.EqualFold(feedURL, githubNPMAdvisoryFeedAlias) {
-		return fetchGitHubNPMAdvisories(opts)
+	if targets, matched := parseGitHubAdvisoryFeedAlias(feedURL); matched {
+		if len(targets) == 0 {
+			return nil, fmt.Errorf("fetch advisories: invalid github advisory feed alias %q (supported: github://npm, github://pip, github://go, github://cargo, github://all)", feedURL)
+		}
+		merged := make([]Advisory, 0)
+		for _, target := range targets {
+			advisories, err := fetchGitHubAdvisoriesByEcosystem(opts, target.APIEcosystem, target.OutputEcosystem)
+			if err != nil {
+				return nil, err
+			}
+			merged = append(merged, advisories...)
+		}
+		return normalizeAdvisories(merged), nil
 	}
 
 	client := &http.Client{Timeout: opts.Timeout}
@@ -142,6 +185,25 @@ func FetchAdvisories(feedURL string, opts AdvisoryFeedOptions) ([]Advisory, erro
 	}
 
 	return parseAdvisoryBytes(feedURL, body)
+}
+
+func parseGitHubAdvisoryFeedAlias(feedURL string) ([]githubAdvisoryFeedTarget, bool) {
+	if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(feedURL)), githubAdvisoryFeedAliasPrefix) {
+		return nil, false
+	}
+	ecosystem := strings.TrimSpace(strings.TrimPrefix(strings.ToLower(strings.TrimSpace(feedURL)), githubAdvisoryFeedAliasPrefix))
+	if ecosystem == "all" {
+		targets := make([]githubAdvisoryFeedTarget, 0, len(githubAdvisoryFeedTargetOrder))
+		for _, key := range githubAdvisoryFeedTargetOrder {
+			targets = append(targets, githubAdvisoryFeedTargets[key])
+		}
+		return targets, true
+	}
+	target, ok := githubAdvisoryFeedTargets[ecosystem]
+	if !ok {
+		return nil, true
+	}
+	return []githubAdvisoryFeedTarget{target}, true
 }
 
 type githubAdvisoryIdentifier struct {
@@ -184,12 +246,17 @@ type githubSecurityAdvisory struct {
 	Vulnerabilities []githubAdvisoryVulnerability `json:"vulnerabilities"`
 }
 
-func fetchGitHubNPMAdvisories(opts AdvisoryFeedOptions) ([]Advisory, error) {
+func fetchGitHubAdvisoriesByEcosystem(opts AdvisoryFeedOptions, apiEcosystem, outputEcosystem string) ([]Advisory, error) {
+	apiEcosystem = strings.ToLower(strings.TrimSpace(apiEcosystem))
+	outputEcosystem = strings.ToLower(strings.TrimSpace(outputEcosystem))
+	if apiEcosystem == "" || outputEcosystem == "" {
+		return nil, fmt.Errorf("fetch advisories: ecosystem is required")
+	}
 	client := &http.Client{Timeout: opts.Timeout}
 	page := 1
 	out := make([]Advisory, 0)
 	for {
-		pageURL := fmt.Sprintf("https://api.github.com/advisories?ecosystem=npm&per_page=100&page=%d", page)
+		pageURL := fmt.Sprintf("https://api.github.com/advisories?ecosystem=%s&per_page=100&page=%d", url.QueryEscape(apiEcosystem), page)
 		req, err := http.NewRequest(http.MethodGet, pageURL, nil)
 		if err != nil {
 			return nil, fmt.Errorf("fetch advisories: %w", err)
@@ -218,7 +285,7 @@ func fetchGitHubNPMAdvisories(opts AdvisoryFeedOptions) ([]Advisory, error) {
 		if err := json.Unmarshal(body, &payload); err != nil {
 			return nil, fmt.Errorf("fetch advisories: %w", err)
 		}
-		out = append(out, convertGitHubNPMAdvisories(payload)...)
+		out = append(out, convertGitHubAdvisories(payload, apiEcosystem, outputEcosystem)...)
 		if !hasNextPageLink(resp.Header.Get("Link")) {
 			break
 		}
@@ -264,7 +331,13 @@ func splitGitHubVersionRange(raw string) []string {
 	return out
 }
 
-func convertGitHubNPMAdvisories(payload []githubSecurityAdvisory) []Advisory {
+func convertGitHubAdvisories(payload []githubSecurityAdvisory, matchEcosystem, outputEcosystem string) []Advisory {
+	matchEcosystem = strings.ToLower(strings.TrimSpace(matchEcosystem))
+	outputEcosystem = strings.ToLower(strings.TrimSpace(outputEcosystem))
+	if matchEcosystem == "" || outputEcosystem == "" {
+		return nil
+	}
+	ecosystemIDSegment := advisoryIDSegment(outputEcosystem)
 	out := make([]Advisory, 0)
 	for _, entry := range payload {
 		aliases := make([]string, 0, len(entry.Identifiers)+1)
@@ -296,7 +369,7 @@ func convertGitHubNPMAdvisories(payload []githubSecurityAdvisory) []Advisory {
 			cvss = fmt.Sprintf("%.1f", entry.CVSS.Score)
 		}
 		for _, vuln := range entry.Vulnerabilities {
-			if !strings.EqualFold(vuln.Package.Ecosystem, "npm") {
+			if !strings.EqualFold(vuln.Package.Ecosystem, matchEcosystem) {
 				continue
 			}
 			pkg := strings.TrimSpace(vuln.Package.Name)
@@ -313,8 +386,8 @@ func convertGitHubNPMAdvisories(payload []githubSecurityAdvisory) []Advisory {
 			}
 			ranges := splitGitHubVersionRange(vuln.VulnerableVersionRange)
 			out = append(out, Advisory{
-				ID:               "OSS-NPM-" + advisoryIDSegment(pkg) + "-" + advisoryIDSegment(entry.GHSAID),
-				Ecosystem:        "npm",
+				ID:               "OSS-" + ecosystemIDSegment + "-" + advisoryIDSegment(pkg) + "-" + advisoryIDSegment(entry.GHSAID),
+				Ecosystem:        outputEcosystem,
 				Package:          pkg,
 				Severity:         strings.ToUpper(strings.TrimSpace(entry.Severity)),
 				Title:            title,

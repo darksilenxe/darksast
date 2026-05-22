@@ -159,7 +159,7 @@ func TestConvertGitHubNPMAdvisories(t *testing.T) {
 		},
 	}
 
-	advisories := convertGitHubNPMAdvisories(payload)
+	advisories := convertGitHubAdvisories(payload, "npm", "npm")
 	require.Len(t, advisories, 1)
 	assert.Equal(t, "OSS-NPM-LODASH-GHSA-35JH-R3H4-6JHM", advisories[0].ID)
 	assert.Equal(t, "npm", advisories[0].Ecosystem)
@@ -171,6 +171,90 @@ func TestConvertGitHubNPMAdvisories(t *testing.T) {
 	assert.Equal(t, []string{"CWE-77"}, advisories[0].CWE)
 	assert.Equal(t, "7.2", advisories[0].CVSS)
 	assert.Equal(t, "github-advisory-database", advisories[0].Source)
+}
+
+func TestConvertGitHubAdvisoriesForOtherEcosystem(t *testing.T) {
+	payload := []githubSecurityAdvisory{
+		{
+			GHSAID:      "GHSA-x2rg-q646-7m2v",
+			Summary:     "jinja2 vulnerable to sandbox escape",
+			Description: "jinja2 advisory",
+			Severity:    "critical",
+			Vulnerabilities: []githubAdvisoryVulnerability{
+				{
+					Package: struct {
+						Ecosystem string `json:"ecosystem"`
+						Name      string `json:"name"`
+					}{Ecosystem: "pip", Name: "jinja2"},
+					VulnerableVersionRange: "< 3.1.6",
+					FirstPatchedVersion: struct {
+						Identifier string `json:"identifier"`
+					}{Identifier: "3.1.6"},
+				},
+				{
+					Package: struct {
+						Ecosystem string `json:"ecosystem"`
+						Name      string `json:"name"`
+					}{Ecosystem: "npm", Name: "jinja2"},
+					VulnerableVersionRange: "< 3.1.6",
+				},
+			},
+		},
+	}
+
+	advisories := convertGitHubAdvisories(payload, "pip", "pip")
+	require.Len(t, advisories, 1)
+	assert.Equal(t, "OSS-PIP-JINJA2-GHSA-X2RG-Q646-7M2V", advisories[0].ID)
+	assert.Equal(t, "pip", advisories[0].Ecosystem)
+	assert.Equal(t, "jinja2", advisories[0].Package)
+	assert.Equal(t, "CRITICAL", advisories[0].Severity)
+	assert.Equal(t, []string{"< 3.1.6"}, advisories[0].AffectedVersions)
+	assert.Equal(t, "3.1.6", advisories[0].FixedVersion)
+}
+
+func TestParseGitHubAdvisoryFeedAlias(t *testing.T) {
+	targets, matched := parseGitHubAdvisoryFeedAlias("github://npm")
+	require.True(t, matched)
+	require.Len(t, targets, 1)
+	assert.Equal(t, "npm", targets[0].AliasEcosystem)
+	assert.Equal(t, "npm", targets[0].APIEcosystem)
+	assert.Equal(t, "npm", targets[0].OutputEcosystem)
+
+	targets, matched = parseGitHubAdvisoryFeedAlias("github://PIP")
+	require.True(t, matched)
+	require.Len(t, targets, 1)
+	assert.Equal(t, "pip", targets[0].AliasEcosystem)
+	assert.Equal(t, "pip", targets[0].APIEcosystem)
+	assert.Equal(t, "pip", targets[0].OutputEcosystem)
+
+	targets, matched = parseGitHubAdvisoryFeedAlias("github://cargo")
+	require.True(t, matched)
+	require.Len(t, targets, 1)
+	assert.Equal(t, "cargo", targets[0].AliasEcosystem)
+	assert.Equal(t, "rust", targets[0].APIEcosystem)
+	assert.Equal(t, "cargo", targets[0].OutputEcosystem)
+
+	targets, matched = parseGitHubAdvisoryFeedAlias("github://all")
+	require.True(t, matched)
+	require.Len(t, targets, 4)
+	assert.Equal(t, []string{"npm", "pip", "go", "cargo"}, []string{
+		targets[0].AliasEcosystem,
+		targets[1].AliasEcosystem,
+		targets[2].AliasEcosystem,
+		targets[3].AliasEcosystem,
+	})
+
+	targets, matched = parseGitHubAdvisoryFeedAlias("https://example.com/feed")
+	require.False(t, matched)
+	assert.Nil(t, targets)
+
+	targets, matched = parseGitHubAdvisoryFeedAlias("github://")
+	require.True(t, matched)
+	assert.Nil(t, targets)
+
+	targets, matched = parseGitHubAdvisoryFeedAlias("github://unknown")
+	require.True(t, matched)
+	assert.Nil(t, targets)
 }
 
 func TestHasNextPageLink(t *testing.T) {
