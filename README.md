@@ -1,4 +1,4 @@
-# JavaScript-Security-Scanner
+# darksast SAST Scanner
 
 JavaScript-Security-Scanner is a lightweight Go-based static scanner for application and configuration code. It supports JavaScript/TypeScript, Python, Go, Rust, Java, PHP, Ruby, C#, Bash, and YAML scanning, reports findings in JSON/CSV, and exports package inventory, framework summaries, and compromised-package intel matches.
 
