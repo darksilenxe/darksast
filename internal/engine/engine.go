@@ -27,6 +27,7 @@ type Finding struct {
 	MatchedCode         string   `json:"matched_code,omitempty"`
 	HighlightedSnippet  string   `json:"highlighted_snippet,omitempty"`
 	Confidence          string   `json:"confidence,omitempty"`
+	Tags                []string `json:"tags,omitempty"`
 	Description         string   `json:"description,omitempty"`
 	Category            string   `json:"category,omitempty"`
 	Taxonomy            []string `json:"taxonomy,omitempty"`
@@ -489,6 +490,7 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, l
 				MatchedCode:         matchedCode,
 				HighlightedSnippet:  highlightedSnippet,
 				Confidence:          rule.EffectiveConfidence(),
+				Tags:                append([]string(nil), []string(rule.Tags)...),
 				Description:         rule.Description,
 				Category:            rule.Metadata.Category,
 				Taxonomy:            append([]string(nil), rule.Metadata.Taxonomy...),

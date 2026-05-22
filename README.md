@@ -4,15 +4,29 @@ JavaScript-Security-Scanner is a lightweight Go-based static scanner for applica
 
 ## Features
 
-- Scans JavaScript/TypeScript, Python, Go, Rust, Java, PHP, Ruby, C#, Bash, and YAML files (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.rs`, `.java`, `.php`, `.rb`, `.cs`, `.sh`, `.bash`, `.zsh`, `.yaml`, `.yml`).
-- Loads security signatures from YAML rule files in `rules/`.
-- Supports native rule files plus Semgrep/OpenGrep bundle files (`rules: [...]`) when each imported rule provides a Tree-sitter-compatible `query` (or `metadata.query`).
-- Produces findings in JSON, CSV, and optional SARIF formats.
-- Produces compromised-package intel outputs from local YAML plus an optional remote JSON feed with IoCs.
-- Produces package inventory outputs (table text + CSV + summary CSV) across supported dependency manifests including `package.json`, `requirements.txt`, `go.mod`, and `Cargo.toml`.
-- Produces OSS dependency vulnerability outputs from local/remote advisory feeds with fixed-version guidance, direct-vs-transitive labeling, optional policy ignores, and CI gating.
-- Resolves npm dependencies from `package-lock.json` / `npm-shrinkwrap.json` so direct and transitive package versions can be matched more accurately.
-- Supports Windows-first scripts and cross-platform shell scripts.
+- Multi-language SAST scanning for JavaScript/TypeScript, Python, Go, Rust, Java, PHP, Ruby, C#, Bash, and YAML (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.rs`, `.java`, `.php`, `.rb`, `.cs`, `.sh`, `.bash`, `.zsh`, `.yaml`, `.yml`).
+- Tree-sitter-based YAML rule engine with support for:
+  - Native repo rules in `rules/`.
+  - Semgrep/OpenGrep `rules: [...]` bundles when each imported rule provides a Tree-sitter-compatible `query` (or `metadata.query`).
+  - Optional rule language targeting, dependency-aware rule gating (`requires_dependency` + `-gate-by-dependency`), and confidence/severity reporting.
+  - Optional post-match false-positive controls (literal gates, regex require/ignore filters, argument-count gates) and taint-aware matching.
+- Rich findings pipeline:
+  - Output formats: JSON, CSV, optional SARIF.
+  - Precise spans (`line/column/end_line/end_column`) plus `snippet`, `matched_code`, and `highlighted_snippet`.
+  - Rule-level `tags` in findings output to support grouping by sensitive-data and secret-related detections.
+  - Framework/severity rollups via findings framework summary CSV.
+  - Severity/confidence result gating via `-min-severity` and `-min-confidence`.
+  - Optional category-based CI fail gating via `-fail-on-categories`.
+- Dependency intelligence pipeline:
+  - Package inventory extraction across manifests including `package.json`, `requirements.txt`, `go.mod`, and `Cargo.toml`.
+  - npm lockfile-aware resolution from `package-lock.json` / `npm-shrinkwrap.json`.
+  - Inventory outputs: text table + CSV + summary CSV.
+  - Compromised package detection from local seed rules plus optional remote feed (with generated merged rules output).
+  - OSS advisory matching from local bundles plus optional remote feed, including `github://npm` ingestion from GitHub Advisory Database.
+  - Advisory policy suppressions with optional expiry and CI fail gating via `-fail-on-oss-vuln-severity`.
+- Optional URL fetch mode (`-url`) that downloads inline and same-origin external scripts into `-fetch-out` and scans them with the same pipeline.
+- Scan scope controls for test/spec and vendored/build-output files via `-include-tests` and `-include-vendored`.
+- Windows-first PowerShell entry scripts plus cross-platform shell entrypoint and npm wrappers.
 
 ## Requirements
 
@@ -109,6 +123,7 @@ Relevant flags:
 | `-oss-vulns-csv-out` | `./oss_vulnerabilities.csv` | CSV report for OSS dependency vulnerability matches. |
 | `-oss-vulns-summary-csv-out` | `./oss_vulnerabilities_summary.csv` | Summary CSV for OSS dependency vulnerability matches. |
 | `-fail-on-oss-vuln-severity` | (empty) | Exit non-zero when OSS dependency findings at or above the selected severity remain after policy filtering. |
+| `-fail-on-categories` | (empty) | Comma-separated finding categories that fail the scan when present (case-insensitive). |
 | `-findings-sarif-out` | (empty) | Optional SARIF output path for findings. |
 
 Notes and limitations:

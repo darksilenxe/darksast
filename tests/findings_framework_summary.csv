@@ -9,13 +9,14 @@ code,Go,HIGH,1,MEDIUM
 code,Go,MEDIUM,2,MEDIUM
 code,Java,HIGH,2,MEDIUM
 code,Java,MEDIUM,1,MEDIUM
+code,JavaScript,CRITICAL,1,HIGH
 code,JavaScript,HIGH,6,HIGH
-code,JavaScript,HIGH,3,MEDIUM
+code,JavaScript,HIGH,4,MEDIUM
 code,JavaScript,MEDIUM,7,MEDIUM
 code,Next.js,MEDIUM,2,MEDIUM
 code,Node.js,CRITICAL,3,HIGH
 code,Node.js,CRITICAL,6,MEDIUM
-code,Node.js,HIGH,4,HIGH
+code,Node.js,HIGH,5,HIGH
 code,Node.js,HIGH,13,MEDIUM
 code,Node.js,MEDIUM,1,HIGH
 code,Node.js,MEDIUM,7,MEDIUM

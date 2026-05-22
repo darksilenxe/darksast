@@ -1,0 +1,24 @@
+id: "HARDCODED-BEARER-AUTH"
+severity: "HIGH"
+confidence: "HIGH"
+framework: "Node.js"
+description: "Detects hardcoded Authorization headers that embed Bearer tokens in source code."
+tags:
+  - "secrets"
+  - "sensitive-data"
+metadata:
+  category: "Secrets Exposure"
+  taxonomy:
+    - "data/sensitive"
+  cwe:
+    - "CWE-798"
+  owasp:
+    - "A07:2021"
+  references:
+    - "https://cwe.mitre.org/data/definitions/798.html"
+  remediation: "Read bearer tokens from secure secret management instead of embedding them in code."
+query: |
+  (pair
+    key: [(property_identifier) (string)] @header_key (#match? @header_key "^[\"']?[Aa]uthorization[\"']?$")
+    value: (string) @header_value (#match? @header_value "^[\"']Bearer\\s+[^\"']+[\"']$")
+  ) @hardcoded_bearer_auth
