@@ -135,3 +135,12 @@ func languageSpecForPath(path string) (languageSpec, bool) {
 	}
 	return languageSpec{}, false
 }
+
+// IsSupportedSourcePath returns true when the file extension matches
+// one of the source languages the scanner can parse. Exported so
+// adjacent packages (e.g. the data inventory pass) can reuse the same
+// file-filtering policy without duplicating the extension list.
+func IsSupportedSourcePath(path string) bool {
+	_, ok := languageSpecForPath(path)
+	return ok
+}

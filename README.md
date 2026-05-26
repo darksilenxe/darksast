@@ -24,6 +24,12 @@ JavaScript-Security-Scanner is a lightweight Go-based static scanner for applica
   - Compromised package detection from local seed rules plus optional remote feed (with generated merged rules output).
   - OSS advisory matching from local bundles plus optional remote feed, including `github://<ecosystem>` ingestion from GitHub Advisory Database.
   - Advisory policy suppressions with optional expiry and CI fail gating via `-fail-on-oss-vuln-severity`.
+- Sensitive-data inventory ("data map"):
+  - Independent pass that classifies occurrences of common sensitive data types (Personal, Financial, Health, Authentication, Technical) across source and config files, regardless of whether a vulnerability rule fires.
+  - Detector-based: pattern matches on identifier names (e.g. `email`, `ssn`, `creditCardNumber`) and literal value shapes (RFC-5322-ish email, US SSN, IPv4, IBAN, JWT, MAC, card PAN ranges, etc.).
+  - Outputs: JSON (`-data-inventory-json-out`), per-occurrence CSV (`-data-inventory-csv-out`), aggregated summary CSV grouped by `(category, data_type, severity)` (`-data-inventory-summary-csv-out`).
+  - Honors `-include-tests`, `-include-vendored`, and `-changed-files` so the inventory pass tracks the SAST pipeline's file selection.
+  - Toggle with `-enable-data-inventory` (default `true`).
 - Optional URL fetch mode (`-url`) that downloads inline and same-origin external scripts into `-fetch-out` and scans them with the same pipeline.
 - Scan scope controls for test/spec and vendored/build-output files via `-include-tests` and `-include-vendored`.
 - Windows-first PowerShell entry scripts plus cross-platform shell entrypoint and npm wrappers.
@@ -129,6 +135,10 @@ Relevant flags:
 | `-baseline-out` | (empty) | Optional JSON path to write the current run's fingerprints as a baseline; run once to bless legacy findings, then commit the file. |
 | `-fail-on-new-findings` | `false` | Exit non-zero when at least one finding remains after baseline filtering. Combine with `-baseline` to gate CI only on net-new findings. |
 | `-changed-files` | (empty) | Newline-delimited file (typically `git diff --name-only`) restricting the scan to listed paths while still loading full project dependency context. |
+| `-enable-data-inventory` | `true` | Run the sensitive-data inventory pass and emit a Bearer-style data map. Set to `false` to skip. |
+| `-data-inventory-json-out` | `./data_inventory.json` | JSON report listing every detected sensitive-data occurrence plus category/data-type/file rollups. Empty string disables. |
+| `-data-inventory-csv-out` | `./data_inventory.csv` | Per-occurrence CSV for the sensitive-data inventory pass. Empty string disables. |
+| `-data-inventory-summary-csv-out` | `./data_inventory_summary.csv` | Aggregated CSV grouped by `(category, data_type, severity)` for the sensitive-data inventory pass. Empty string disables. |
 
 Notes and limitations:
 

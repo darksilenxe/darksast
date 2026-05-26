@@ -13,6 +13,7 @@ import (
 
 	// Adjust this import path based on your actual go.mod module name
 	"javascript-security-scanner/internal/baseline"
+	"javascript-security-scanner/internal/dataclass"
 	"javascript-security-scanner/internal/deps"
 	"javascript-security-scanner/internal/engine"
 	"javascript-security-scanner/internal/fetcher"
@@ -76,6 +77,15 @@ func main() {
 	baselineOut := flag.String("baseline-out", "", "Optional JSON path to write the current fingerprint set as a baseline (run once to bless legacy findings, then commit the file).")
 	failOnNewFindings := flag.Bool("fail-on-new-findings", false, "Exit non-zero when, after baseline filtering, at least one finding remains. Combine with -baseline to gate CI only on net-new findings.")
 	changedFilesPath := flag.String("changed-files", "", "Optional newline-delimited file (typically `git diff --name-only`) restricting the scan to listed files while still loading full project dependency context.")
+
+	// Sensitive-data inventory ("data map") pass. Independent of the
+	// vulnerability findings pipeline so users can audit what
+	// categories of sensitive data appear in the codebase even when
+	// no rule fires.
+	enableDataInventory := flag.Bool("enable-data-inventory", true, "Run the sensitive-data inventory pass and write the JSON/CSV inventory reports.")
+	dataInventoryJSONOut := flag.String("data-inventory-json-out", "./data_inventory.json", "Output JSON file for the sensitive-data inventory pass.")
+	dataInventoryCSVOut := flag.String("data-inventory-csv-out", "./data_inventory.csv", "Output CSV file with one row per sensitive-data detection.")
+	dataInventorySummaryCSVOut := flag.String("data-inventory-summary-csv-out", "./data_inventory_summary.csv", "Output summary CSV grouped by (category, data_type, severity).")
 
 	// Optional "fetch from URL" front end. When -url is empty the
 	// scanner behaves exactly as before, so existing CLI/script
@@ -373,6 +383,44 @@ func main() {
 	}
 	if findingsCSVErr := reporter.WriteFindingsCSV(findings, *findingsCSVOut); findingsCSVErr != nil {
 		log.Printf("[!] Failed to write findings CSV: %v\n", findingsCSVErr)
+	}
+
+	// Phase 2: sensitive-data inventory pass. Runs independently of the
+	// rule-based vulnerability scan so users can audit the categories
+	// of sensitive data the codebase touches even when no rule fires.
+	if *enableDataInventory {
+		fmt.Println("[*] Running sensitive-data inventory pass...")
+		inventoryOpts := dataclass.Options{
+			IncludeTests:    *includeTests,
+			IncludeVendored: *includeVendored,
+		}
+		if scannerEngine.ChangedFiles != nil {
+			inventoryOpts.ChangedFiles = make(map[string]struct{}, len(scannerEngine.ChangedFiles))
+			for p := range scannerEngine.ChangedFiles {
+				inventoryOpts.ChangedFiles[p] = struct{}{}
+			}
+		}
+		detections, invErr := dataclass.Scan(*targetDir, dataclass.BuiltinDetectors(), inventoryOpts)
+		if invErr != nil {
+			log.Printf("[!] Data inventory pass failed: %v\n", invErr)
+		} else {
+			reporter.PrintDataInventorySummary(detections, *targetDir)
+			if out := strings.TrimSpace(*dataInventoryJSONOut); out != "" {
+				if err := reporter.WriteDataInventoryJSON(detections, *targetDir, out); err != nil {
+					log.Printf("[!] Failed to write data inventory JSON: %v\n", err)
+				}
+			}
+			if out := strings.TrimSpace(*dataInventoryCSVOut); out != "" {
+				if err := reporter.WriteDataInventoryCSV(detections, out); err != nil {
+					log.Printf("[!] Failed to write data inventory CSV: %v\n", err)
+				}
+			}
+			if out := strings.TrimSpace(*dataInventorySummaryCSVOut); out != "" {
+				if err := reporter.WriteDataInventorySummaryCSV(detections, out); err != nil {
+					log.Printf("[!] Failed to write data inventory summary CSV: %v\n", err)
+				}
+			}
+		}
 	}
 
 	fmt.Println("[*] Scan complete.")
