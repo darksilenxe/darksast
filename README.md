@@ -125,6 +125,10 @@ Relevant flags:
 | `-fail-on-oss-vuln-severity` | (empty) | Exit non-zero when OSS dependency findings at or above the selected severity remain after policy filtering. |
 | `-fail-on-categories` | (empty) | Comma-separated finding categories that fail the scan when present (case-insensitive). |
 | `-findings-sarif-out` | (empty) | Optional SARIF output path for findings. |
+| `-baseline` | (empty) | Optional JSON baseline file; findings whose fingerprint is listed are suppressed from the report so legacy debt stays hidden while you focus on new issues. |
+| `-baseline-out` | (empty) | Optional JSON path to write the current run's fingerprints as a baseline; run once to bless legacy findings, then commit the file. |
+| `-fail-on-new-findings` | `false` | Exit non-zero when at least one finding remains after baseline filtering. Combine with `-baseline` to gate CI only on net-new findings. |
+| `-changed-files` | (empty) | Newline-delimited file (typically `git diff --name-only`) restricting the scan to listed paths while still loading full project dependency context. |
 
 Notes and limitations:
 
@@ -195,6 +199,25 @@ Every finding now includes precise source location information:
 ```
 
 **CSV findings** (`findings.csv`) include `snippet`, `matched_code`, and `highlighted_snippet` columns for faster triage.
+
+### Fingerprints, baselines, and diff mode
+
+Each finding now carries a deterministic `fingerprint` (rule ID + relative file + matched code + neighbor-line context) that is line-number independent so trivial refactors do not invalidate suppressions. The fingerprint is emitted in `findings_report.json`, in the trailing `fingerprint` column of `findings.csv`, and as `partialFingerprints["darksast/v1"]` in SARIF output.
+
+- `-baseline-out baseline.json` writes the current run's fingerprints; commit the file to "bless" existing debt.
+- `-baseline baseline.json` filters out any finding whose fingerprint is listed before reports and exit-gating run.
+- `-fail-on-new-findings` exits non-zero when at least one finding remains after baseline filtering — ideal for PR CI.
+- `-changed-files diff.txt` scopes the code scan to a newline-delimited list of paths (e.g. `git diff --name-only origin/main...HEAD`). Dependency / SCA analysis still loads the full project so taint and advisory matching remain accurate.
+
+### Inline suppression directives
+
+Annotate a finding inline with either of two equivalent comment prefixes:
+
+- `// scanner-disable-line [RULE-ID[,RULE-ID...]]` — suppress matching rules on the same line.
+- `// scanner-disable-next-line [RULE-ID[,RULE-ID...]]` — suppress matching rules on the following line.
+- `// scanner-expected [RULE-ID[,RULE-ID...]]` and `// scanner-expected-next-line [RULE-ID[,RULE-ID...]]` — semantic synonyms for the two above, meant for findings you have reviewed and chosen to accept (for example in deliberately vulnerable fixtures).
+
+Omitting the rule ID list suppresses any finding on that line.
 
 ## Disclaimer
 
