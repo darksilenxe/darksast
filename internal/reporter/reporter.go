@@ -69,11 +69,12 @@ type sarifRuleProperty struct {
 }
 
 type sarifResult struct {
-	RuleID     string           `json:"ruleId"`
-	Level      string           `json:"level,omitempty"`
-	Message    sarifMessage     `json:"message"`
-	Locations  []sarifLocation  `json:"locations,omitempty"`
-	Properties *sarifResultProp `json:"properties,omitempty"`
+	RuleID              string            `json:"ruleId"`
+	Level               string            `json:"level,omitempty"`
+	Message             sarifMessage      `json:"message"`
+	Locations           []sarifLocation   `json:"locations,omitempty"`
+	Properties          *sarifResultProp  `json:"properties,omitempty"`
+	PartialFingerprints map[string]string `json:"partialFingerprints,omitempty"`
 }
 
 type sarifResultProp struct {
@@ -218,11 +219,12 @@ func WriteSARIF(findings []engine.Finding, rules []engine.Rule, targetDir string
 		}
 
 		results = append(results, sarifResult{
-			RuleID:     finding.RuleID,
-			Level:      sarifLevel(finding.Severity),
-			Message:    sarifMessage{Text: messageText},
-			Locations:  []sarifLocation{location},
-			Properties: props,
+			RuleID:              finding.RuleID,
+			Level:               sarifLevel(finding.Severity),
+			Message:             sarifMessage{Text: messageText},
+			Locations:           []sarifLocation{location},
+			Properties:          props,
+			PartialFingerprints: sarifPartialFingerprints(finding),
 		})
 	}
 
@@ -352,7 +354,7 @@ func WriteFindingsCSV(findings []engine.Finding, outputPath string) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	if err := writer.Write([]string{"kind", "file", "line", "column", "end_line", "end_column", "rule_id", "severity", "framework", "snippet", "matched_code", "highlighted_snippet", "confidence", "tags", "description", "category", "taxonomy", "cwe", "owasp", "package_name", "declared_version", "resolved_version", "version_source", "fixed_versions", "references", "remediation", "confidence_rationale", "project_path"}); err != nil {
+	if err := writer.Write([]string{"kind", "file", "line", "column", "end_line", "end_column", "rule_id", "severity", "framework", "snippet", "matched_code", "highlighted_snippet", "confidence", "tags", "description", "category", "taxonomy", "cwe", "owasp", "package_name", "declared_version", "resolved_version", "version_source", "fixed_versions", "references", "remediation", "confidence_rationale", "project_path", "fingerprint"}); err != nil {
 		return fmt.Errorf("failed to write findings CSV header: %w", err)
 	}
 
@@ -396,6 +398,7 @@ func WriteFindingsCSV(findings []engine.Finding, outputPath string) error {
 			finding.Remediation,
 			finding.ConfidenceRationale,
 			finding.ProjectPath,
+			finding.Fingerprint,
 		}
 
 		if err := writer.Write(row); err != nil {
@@ -450,6 +453,15 @@ func sarifSecuritySeverity(severity string) string {
 		return "5.0"
 	default:
 		return "3.0"
+	}
+}
+
+func sarifPartialFingerprints(finding engine.Finding) map[string]string {
+	if strings.TrimSpace(finding.Fingerprint) == "" {
+		return nil
+	}
+	return map[string]string{
+		"darksast/v1": finding.Fingerprint,
 	}
 }
 

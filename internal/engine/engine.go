@@ -42,6 +42,11 @@ type Finding struct {
 	VersionSource       string   `json:"version_source,omitempty"`
 	FixedVersions       []string `json:"fixed_versions,omitempty"`
 	ProjectPath         string   `json:"project_path,omitempty"`
+	// Fingerprint is a deterministic, location-independent identifier
+	// used to compare findings across runs (baselines, diffs). It is
+	// derived from rule ID, the relative file path, the matched code,
+	// and normalized neighbor-line context — never raw line numbers.
+	Fingerprint string `json:"fingerprint,omitempty"`
 }
 
 const maxSnippetLen = 120
@@ -154,6 +159,18 @@ type Engine struct {
 	// ExcludedPaths are absolute paths that should not be scanned. Entries
 	// may be files or directories.
 	ExcludedPaths []string
+
+	// TargetDir is the directory passed to ScanDirectory; it is used to
+	// derive relative paths for fingerprint computation so the same
+	// finding produces the same identifier across different CI
+	// environments.
+	TargetDir string
+
+	// ChangedFiles, when non-nil, restricts scanning to the listed
+	// absolute file paths. This implements the diff-mode workflow where
+	// callers pass `git diff --name-only` to scope a scan to changed
+	// files while still loading the full project dependency context.
+	ChangedFiles map[string]struct{}
 }
 
 // New constructs an Engine with default (false-positive-conservative)
@@ -191,7 +208,51 @@ func (e *Engine) shouldScanFile(path string) bool {
 	if !e.IncludeTests && IsTestPath(path) {
 		return false
 	}
+	if !e.isChangedFile(path) {
+		return false
+	}
 	return true
+}
+
+// SetChangedFiles records the set of files that diff-mode scans should
+// be restricted to. Entries are normalized to absolute, cleaned paths.
+// A nil or empty argument disables diff mode (scan everything).
+func (e *Engine) SetChangedFiles(paths []string) {
+	if len(paths) == 0 {
+		e.ChangedFiles = nil
+		return
+	}
+	set := make(map[string]struct{}, len(paths))
+	for _, p := range paths {
+		trimmed := strings.TrimSpace(p)
+		if trimmed == "" {
+			continue
+		}
+		abs, err := filepath.Abs(trimmed)
+		if err != nil {
+			continue
+		}
+		set[filepath.Clean(abs)] = struct{}{}
+	}
+	if len(set) == 0 {
+		e.ChangedFiles = nil
+		return
+	}
+	e.ChangedFiles = set
+}
+
+// isChangedFile returns true when diff mode is disabled or the given
+// file is part of the configured changed-files set.
+func (e *Engine) isChangedFile(path string) bool {
+	if len(e.ChangedFiles) == 0 {
+		return true
+	}
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	_, ok := e.ChangedFiles[filepath.Clean(abs)]
+	return ok
 }
 
 // SetExcludedPaths records files/directories that should not be scanned.
@@ -476,6 +537,8 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, l
 			}
 			snippet, matchedCode, highlightedSnippet := extractFindingContext(sourceCode, uint32(row), findingNode)
 
+			fingerprint := ComputeFingerprint(rule.ID, path, e.TargetDir, fingerprintMatchedCode(matchedCode, snippet), neighborLines(sourceCode, uint32(row)))
+
 			findings <- Finding{
 				Kind:                "code",
 				File:                path,
@@ -499,6 +562,7 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, l
 				References:          append([]string(nil), rule.Metadata.References...),
 				Remediation:         rule.Metadata.Remediation,
 				ConfidenceRationale: rule.Metadata.ConfidenceRationale,
+				Fingerprint:         fingerprint,
 			}
 		}
 
@@ -508,6 +572,7 @@ func (e *Engine) matchRules(tree *sitter.Tree, sourceCode []byte, path string, l
 
 func (e *Engine) ScanDirectory(targetDir string, findings chan<- Finding) error {
 	var wg sync.WaitGroup
+	e.TargetDir = targetDir
 
 	err := filepath.WalkDir(targetDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -658,6 +723,7 @@ func (e *Engine) walkNode(node *sitter.Node, sourceCode []byte, symTable *Symbol
 						line := uint32(row + 1)
 						if !suppress.isSuppressed(line, "proto-assignment") {
 							snippet, matchedCode, highlightedSnippet := extractFindingContext(sourceCode, uint32(row), node)
+							fingerprint := ComputeFingerprint("proto-assignment", path, e.TargetDir, fingerprintMatchedCode(matchedCode, snippet), neighborLines(sourceCode, uint32(row)))
 							findings <- Finding{
 								Kind:               "code",
 								File:               path,
@@ -677,6 +743,7 @@ func (e *Engine) walkNode(node *sitter.Node, sourceCode []byte, symTable *Symbol
 								CWE:                []string{"CWE-1321"},
 								OWASP:              []string{"A03:2021"},
 								Remediation:        "Reject special keys like __proto__, constructor, and prototype before merging attacker-controlled input.",
+								Fingerprint:        fingerprint,
 							}
 						}
 					}
@@ -689,6 +756,17 @@ func (e *Engine) walkNode(node *sitter.Node, sourceCode []byte, symTable *Symbol
 	for i := 0; i < int(node.ChildCount()); i++ {
 		e.walkNode(node.Child(i), sourceCode, symTable, path, findings, suppress)
 	}
+}
+
+// fingerprintMatchedCode picks the most stable text fragment available
+// for fingerprint computation. The AST-matched code is preferred; the
+// snippet line is used only as a fallback (for findings emitted from
+// hand-rolled walkers that lack a Tree-sitter node).
+func fingerprintMatchedCode(matched, snippet string) string {
+	if strings.TrimSpace(matched) != "" {
+		return matched
+	}
+	return snippet
 }
 
 func normalizeFramework(framework string) string {

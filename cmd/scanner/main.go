@@ -1,15 +1,19 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 
 	// Adjust this import path based on your actual go.mod module name
+	"javascript-security-scanner/internal/baseline"
+	"javascript-security-scanner/internal/dataclass"
 	"javascript-security-scanner/internal/deps"
 	"javascript-security-scanner/internal/engine"
 	"javascript-security-scanner/internal/fetcher"
@@ -69,6 +73,19 @@ func main() {
 	gateByDependency := flag.Bool("gate-by-dependency", false, "Suppress framework-specific rules whose `requires_dependency` list does not match the scanned project's package.json (e.g. skip Angular rules when @angular/core is absent)")
 	minSeverity := flag.String("min-severity", "LOW", "Minimum finding severity to report: LOW, MEDIUM, HIGH, CRITICAL")
 	minConfidence := flag.String("min-confidence", "LOW", "Minimum finding confidence to report: LOW, MEDIUM, HIGH")
+	baselinePath := flag.String("baseline", "", "Optional JSON baseline file: findings whose fingerprint is listed are suppressed from the report (legacy debt remains hidden).")
+	baselineOut := flag.String("baseline-out", "", "Optional JSON path to write the current fingerprint set as a baseline (run once to bless legacy findings, then commit the file).")
+	failOnNewFindings := flag.Bool("fail-on-new-findings", false, "Exit non-zero when, after baseline filtering, at least one finding remains. Combine with -baseline to gate CI only on net-new findings.")
+	changedFilesPath := flag.String("changed-files", "", "Optional newline-delimited file (typically `git diff --name-only`) restricting the scan to listed files while still loading full project dependency context.")
+
+	// Sensitive-data inventory ("data map") pass. Independent of the
+	// vulnerability findings pipeline so users can audit what
+	// categories of sensitive data appear in the codebase even when
+	// no rule fires.
+	enableDataInventory := flag.Bool("enable-data-inventory", true, "Run the sensitive-data inventory pass and write the JSON/CSV inventory reports.")
+	dataInventoryJSONOut := flag.String("data-inventory-json-out", "./data_inventory.json", "Output JSON file for the sensitive-data inventory pass.")
+	dataInventoryCSVOut := flag.String("data-inventory-csv-out", "./data_inventory.csv", "Output CSV file with one row per sensitive-data detection.")
+	dataInventorySummaryCSVOut := flag.String("data-inventory-summary-csv-out", "./data_inventory_summary.csv", "Output summary CSV grouped by (category, data_type, severity).")
 
 	// Optional "fetch from URL" front end. When -url is empty the
 	// scanner behaves exactly as before, so existing CLI/script
@@ -283,6 +300,13 @@ func main() {
 	}
 	scannerEngine.SetExcludedPaths([]string{*rulesDir, *compromisedRules})
 
+	if changedPaths, err := readChangedFiles(*changedFilesPath, *targetDir); err != nil {
+		log.Printf("[!] Failed to read changed-files list: %v\n", err)
+	} else if len(changedPaths) > 0 {
+		scannerEngine.SetChangedFiles(changedPaths)
+		fmt.Printf("[*] Diff mode: scan restricted to %d changed file(s) from %s.\n", len(changedPaths), *changedFilesPath)
+	}
+
 	findingsChan := make(chan engine.Finding, 100)
 	findings := make([]engine.Finding, 0)
 	failCategorySet := parseCategoryGate(*failOnCategories)
@@ -314,7 +338,7 @@ func main() {
 	}
 
 	for _, match := range advisoryMatches {
-		f := advisoryMatchToFinding(match)
+		f := advisoryMatchToFinding(match, *targetDir)
 		if minSevRank > 0 && severityRank[strings.ToUpper(f.Severity)] < minSevRank {
 			continue
 		}
@@ -323,6 +347,27 @@ func main() {
 		}
 		findings = append(findings, f)
 		printFinding(f)
+	}
+
+	// Apply baseline filtering before report writers so all reports
+	// agree on the set of "new" findings that the current run surfaces.
+	if out := strings.TrimSpace(*baselineOut); out != "" {
+		if err := baseline.Write(out, findings); err != nil {
+			log.Printf("[!] Failed to write baseline: %v\n", err)
+		} else {
+			fmt.Printf("[+] Baseline written to %s (%d unique fingerprints).\n", out, countFingerprints(findings))
+		}
+	}
+	baselineSet, err := baseline.Load(*baselinePath)
+	if err != nil {
+		log.Printf("[!] Failed to load baseline: %v\n", err)
+	}
+	suppressedByBaseline := 0
+	if len(baselineSet) > 0 {
+		kept, matched := baseline.Filter(findings, baselineSet)
+		suppressedByBaseline = len(matched)
+		findings = kept
+		fmt.Printf("[*] Baseline filtered out %d known finding(s); %d remain.\n", suppressedByBaseline, len(findings))
 	}
 
 	if jsonErr := reporter.WriteJSON(findings, *targetDir, *findingsJSONOut); jsonErr != nil {
@@ -340,6 +385,44 @@ func main() {
 		log.Printf("[!] Failed to write findings CSV: %v\n", findingsCSVErr)
 	}
 
+	// Phase 2: sensitive-data inventory pass. Runs independently of the
+	// rule-based vulnerability scan so users can audit the categories
+	// of sensitive data the codebase touches even when no rule fires.
+	if *enableDataInventory {
+		fmt.Println("[*] Running sensitive-data inventory pass...")
+		inventoryOpts := dataclass.Options{
+			IncludeTests:    *includeTests,
+			IncludeVendored: *includeVendored,
+		}
+		if scannerEngine.ChangedFiles != nil {
+			inventoryOpts.ChangedFiles = make(map[string]struct{}, len(scannerEngine.ChangedFiles))
+			for p := range scannerEngine.ChangedFiles {
+				inventoryOpts.ChangedFiles[p] = struct{}{}
+			}
+		}
+		detections, invErr := dataclass.Scan(*targetDir, dataclass.BuiltinDetectors(), inventoryOpts)
+		if invErr != nil {
+			log.Printf("[!] Data inventory pass failed: %v\n", invErr)
+		} else {
+			reporter.PrintDataInventorySummary(detections, *targetDir)
+			if out := strings.TrimSpace(*dataInventoryJSONOut); out != "" {
+				if err := reporter.WriteDataInventoryJSON(detections, *targetDir, out); err != nil {
+					log.Printf("[!] Failed to write data inventory JSON: %v\n", err)
+				}
+			}
+			if out := strings.TrimSpace(*dataInventoryCSVOut); out != "" {
+				if err := reporter.WriteDataInventoryCSV(detections, out); err != nil {
+					log.Printf("[!] Failed to write data inventory CSV: %v\n", err)
+				}
+			}
+			if out := strings.TrimSpace(*dataInventorySummaryCSVOut); out != "" {
+				if err := reporter.WriteDataInventorySummaryCSV(detections, out); err != nil {
+					log.Printf("[!] Failed to write data inventory summary CSV: %v\n", err)
+				}
+			}
+		}
+	}
+
 	fmt.Println("[*] Scan complete.")
 	if shouldFailForCategories(findings, failCategorySet) {
 		log.Printf("[!] Failing because findings matched -fail-on-categories: %s.\n", strings.Join(sortedKeys(failCategorySet), ", "))
@@ -347,6 +430,10 @@ func main() {
 	}
 	if shouldFailForOSSVulns {
 		log.Printf("[!] Failing because OSS dependency vulnerabilities met the -fail-on-oss-vuln-severity threshold.\n")
+		os.Exit(1)
+	}
+	if *failOnNewFindings && len(findings) > 0 {
+		log.Printf("[!] Failing because -fail-on-new-findings is set and %d finding(s) remain after baseline filtering.\n", len(findings))
 		os.Exit(1)
 	}
 }
@@ -366,12 +453,12 @@ func printFinding(f engine.Finding) {
 		f.Severity, f.Framework, f.RuleID, f.File, f.Line, f.Column, dangerousCode, f.Description)
 }
 
-func advisoryMatchToFinding(match deps.AdvisoryFinding) engine.Finding {
+func advisoryMatchToFinding(match deps.AdvisoryFinding, targetDir string) engine.Finding {
 	fixedVersions := make([]string, 0)
 	if match.FixedVersion != "" {
 		fixedVersions = append(fixedVersions, match.FixedVersion)
 	}
-	return engine.Finding{
+	finding := engine.Finding{
 		Kind:            "dependency",
 		File:            match.ManifestPath,
 		RuleID:          match.AdvisoryID,
@@ -387,6 +474,13 @@ func advisoryMatchToFinding(match deps.AdvisoryFinding) engine.Finding {
 		Remediation:     match.Remediation,
 		ProjectPath:     match.ProjectPath,
 	}
+	// Dependency findings use package@version as the stable identity
+	// instead of source code, so a version bump produces a fresh
+	// fingerprint and a re-introduced advisory will not be silently
+	// hidden by a baseline.
+	advisoryIdentity := match.Package + "@" + match.Version
+	finding.Fingerprint = engine.ComputeFingerprint(match.AdvisoryID, match.ManifestPath, targetDir, advisoryIdentity, nil)
+	return finding
 }
 
 func parseCategoryGate(raw string) map[string]struct{} {
@@ -430,4 +524,86 @@ func sortedKeys(values map[string]struct{}) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// readChangedFiles parses a newline-delimited file (the typical output
+// of `git diff --name-only`) and returns an absolute, deduplicated list
+// of file paths. Entries that look like comments (`# ...`) and blank
+// lines are ignored. Relative entries are resolved against targetDir
+// first; if that file does not exist, they fall back to the working
+// directory so callers can supply paths in either form.
+func readChangedFiles(path, targetDir string) ([]string, error) {
+	clean := strings.TrimSpace(path)
+	if clean == "" {
+		return nil, nil
+	}
+
+	f, err := os.Open(clean)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open %s: %w", clean, err)
+	}
+	defer f.Close()
+
+	seen := make(map[string]struct{})
+	out := make([]string, 0)
+
+	scanner := bufio.NewScanner(f)
+	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
+	for scanner.Scan() {
+		entry := strings.TrimSpace(scanner.Text())
+		if entry == "" || strings.HasPrefix(entry, "#") {
+			continue
+		}
+		resolved := resolveChangedFile(entry, targetDir)
+		if resolved == "" {
+			continue
+		}
+		if _, ok := seen[resolved]; ok {
+			continue
+		}
+		seen[resolved] = struct{}{}
+		out = append(out, resolved)
+	}
+	if scanErr := scanner.Err(); scanErr != nil {
+		return nil, fmt.Errorf("failed to read %s: %w", clean, scanErr)
+	}
+	return out, nil
+}
+
+func resolveChangedFile(entry, targetDir string) string {
+	if filepath.IsAbs(entry) {
+		abs, err := filepath.Abs(entry)
+		if err != nil {
+			return ""
+		}
+		return filepath.Clean(abs)
+	}
+	if td := strings.TrimSpace(targetDir); td != "" {
+		candidate := filepath.Join(td, entry)
+		if abs, err := filepath.Abs(candidate); err == nil {
+			if _, statErr := os.Stat(abs); statErr == nil {
+				return filepath.Clean(abs)
+			}
+		}
+	}
+	abs, err := filepath.Abs(entry)
+	if err != nil {
+		return ""
+	}
+	return filepath.Clean(abs)
+}
+
+// countFingerprints returns the number of unique non-empty fingerprints
+// across the supplied findings, used purely for human-readable log
+// messages.
+func countFingerprints(findings []engine.Finding) int {
+	seen := make(map[string]struct{}, len(findings))
+	for _, finding := range findings {
+		fp := strings.TrimSpace(finding.Fingerprint)
+		if fp == "" {
+			continue
+		}
+		seen[fp] = struct{}{}
+	}
+	return len(seen)
 }

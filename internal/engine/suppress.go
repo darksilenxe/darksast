@@ -79,15 +79,21 @@ func IsVendoredPath(path string) bool {
 // space-separated list of rule IDs that should be suppressed. When no
 // rule IDs are listed, the directive suppresses all rules on that line.
 //
+// The directive name `scanner-expected` is treated as a semantic
+// synonym of `scanner-disable-line`: it suppresses the same finding
+// while documenting the intent that a finding here is expected (for
+// example, in a fixture file or a known-vulnerable demo snippet).
+//
 // Examples:
 //
 //	// scanner-disable-line
 //	// scanner-disable-next-line
 //	// scanner-disable-line JS-EVAL-EXEC
 //	// scanner-disable-next-line JS-EVAL-EXEC, DOM-XSS-INNERHTML-ASSIGN
+//	// scanner-expected JS-EVAL-EXEC
 //
 // Block comments (/* ... */) carrying the same directive are also honored.
-var suppressionRegex = regexp.MustCompile(`(?i)scanner-disable-(line|next-line)\b([^*\n\r]*)`)
+var suppressionRegex = regexp.MustCompile(`(?i)scanner-(disable-(line|next-line)|expected(?:-next-line)?)\b([^*\n\r]*)`)
 
 // suppressionMap captures the set of rule IDs disabled for a given 1-based
 // line number. An empty set means "all rules disabled on this line".
@@ -112,16 +118,17 @@ func buildSuppressionMap(sourceCode []byte) suppressionMap {
 		// Only honor the directive when it appears inside a comment. A
 		// cheap heuristic: the directive must be preceded on the same
 		// line by `//`, `/*`, or `*` (continuation of a block comment).
-		if !lineHasCommentBefore(line, "scanner-disable-") {
+		if !lineHasCommentBefore(line, "scanner-") {
 			continue
 		}
 
 		for _, m := range matches {
-			kind := strings.ToLower(m[1])
-			ids := parseRuleIDList(m[2])
+			directive := strings.ToLower(m[1])
+			ids := parseRuleIDList(m[3])
 
+			isNextLine := strings.Contains(directive, "next-line")
 			targetLine := uint32(idx + 1)
-			if kind == "next-line" {
+			if isNextLine {
 				targetLine = uint32(idx + 2)
 			}
 
