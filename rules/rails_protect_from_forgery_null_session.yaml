@@ -1,0 +1,22 @@
+id: "RAILS-PROTECT-FROM-FORGERY-NULL-SESSION"
+severity: "MEDIUM"
+framework: "Rails"
+language: "Ruby"
+description: "Detects Rails protect_from_forgery configured with :null_session, which silently drops the session on CSRF failure instead of rejecting the request."
+tags:
+  - csrf
+cwe:
+  - CWE-352
+owasp:
+  - "A01:2021"
+remediation: "Use protect_from_forgery with: :exception (the Rails default) so failed CSRF checks raise instead of resetting the session."
+query: |
+  (call
+    method: (identifier) @fn (#eq? @fn "protect_from_forgery")
+    arguments: (argument_list
+      (pair
+        key: (hash_key_symbol) @key (#eq? @key "with")
+        value: (simple_symbol) @value (#eq? @value ":null_session")
+      )
+    )
+  ) @finding

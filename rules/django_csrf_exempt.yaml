@@ -1,0 +1,16 @@
+id: "DJANGO-CSRF-EXEMPT"
+severity: "HIGH"
+framework: "Django"
+language: "Python"
+description: "Detects Django views decorated with @csrf_exempt which disables CSRF token validation for that view."
+tags:
+  - csrf
+cwe:
+  - CWE-352
+owasp:
+  - "A01:2021"
+remediation: "Remove the @csrf_exempt decorator and ensure the view enforces CSRF token validation, or use a scoped @method_decorator with proper protections."
+query: |
+  (decorator
+    (identifier) @name (#eq? @name "csrf_exempt")
+  ) @finding

@@ -1,0 +1,26 @@
+id: "EXPRESS-CSURF-IGNORE-STATE-CHANGING"
+severity: "HIGH"
+framework: "Express"
+language: "JavaScript"
+description: "Detects csurf middleware configured to ignoreMethods that include state-changing verbs (POST/PUT/PATCH/DELETE), defeating CSRF protection."
+tags:
+  - csrf
+cwe:
+  - CWE-352
+owasp:
+  - "A01:2021"
+remediation: "Remove POST/PUT/PATCH/DELETE from csurf ignoreMethods; only GET/HEAD/OPTIONS should be exempt."
+ignore_if_matches:
+  methods: "^\\[\\s*(?:[\"'](GET|HEAD|OPTIONS)[\"'](?:\\s*,\\s*)?){0,3}\\]$"
+query: |
+  (call_expression
+    function: (identifier) @fn (#eq? @fn "csurf")
+    arguments: (arguments
+      (object
+        (pair
+          key: (property_identifier) @key (#eq? @key "ignoreMethods")
+          value: (array) @methods (#match? @methods "[\"'](POST|PUT|PATCH|DELETE)[\"']")
+        )
+      )
+    )
+  ) @finding

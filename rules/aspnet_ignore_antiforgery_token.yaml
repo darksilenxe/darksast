@@ -1,0 +1,16 @@
+id: "ASPNET-IGNORE-ANTIFORGERY-TOKEN"
+severity: "HIGH"
+framework: "ASP.NET"
+language: "C#"
+description: "Detects ASP.NET MVC/Core action methods or controllers annotated with [IgnoreAntiforgeryToken], disabling CSRF protection."
+tags:
+  - csrf
+cwe:
+  - CWE-352
+owasp:
+  - "A01:2021"
+remediation: "Remove [IgnoreAntiforgeryToken] and validate the antiforgery token (e.g. [ValidateAntiForgeryToken] or global AutoValidateAntiforgeryTokenAttribute)."
+query: |
+  (attribute
+    name: (identifier) @name (#match? @name "^IgnoreAntiforgeryToken(Attribute)?$")
+  ) @finding

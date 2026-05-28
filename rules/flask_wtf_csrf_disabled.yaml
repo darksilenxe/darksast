@@ -1,0 +1,17 @@
+id: "FLASK-WTF-CSRF-DISABLED"
+severity: "HIGH"
+framework: "Flask"
+language: "Python"
+description: "Detects Flask-WTF configuration assigning WTF_CSRF_ENABLED = False, disabling CSRF protection globally."
+tags:
+  - csrf
+cwe:
+  - CWE-352
+owasp:
+  - "A01:2021"
+remediation: "Leave WTF_CSRF_ENABLED at its default (True) so Flask-WTF validates CSRF tokens on form submissions."
+query: |
+  (assignment
+    left: (identifier) @name (#eq? @name "WTF_CSRF_ENABLED")
+    right: (false)
+  ) @finding
