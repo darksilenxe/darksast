@@ -1,0 +1,19 @@
+id: "RAILS-SKIP-VERIFY-AUTHENTICITY-TOKEN"
+severity: "HIGH"
+framework: "Rails"
+language: "Ruby"
+description: "Detects Rails controllers that skip :verify_authenticity_token via skip_before_action / skip_before_filter, disabling CSRF protection."
+tags:
+  - csrf
+cwe:
+  - CWE-352
+owasp:
+  - "A01:2021"
+remediation: "Do not skip :verify_authenticity_token on state-changing actions; scope skips narrowly or require API tokens instead."
+query: |
+  (call
+    method: (identifier) @fn (#match? @fn "^skip_(before_action|before_filter|forgery_protection)$")
+    arguments: (argument_list
+      (simple_symbol) @sym (#eq? @sym ":verify_authenticity_token")
+    )
+  ) @finding

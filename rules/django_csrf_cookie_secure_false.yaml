@@ -1,0 +1,17 @@
+id: "DJANGO-CSRF-COOKIE-SECURE-FALSE"
+severity: "MEDIUM"
+framework: "Django"
+language: "Python"
+description: "Detects Django settings assigning CSRF_COOKIE_SECURE = False, allowing the CSRF token cookie over plain HTTP."
+tags:
+  - csrf
+cwe:
+  - CWE-352
+owasp:
+  - "A05:2021"
+remediation: "Set CSRF_COOKIE_SECURE = True so the CSRF cookie is only sent over HTTPS."
+query: |
+  (assignment
+    left: (identifier) @name (#eq? @name "CSRF_COOKIE_SECURE")
+    right: (false)
+  ) @finding

@@ -1,0 +1,29 @@
+id: "EXPRESS-SESSION-SAMESITE-NONE"
+severity: "MEDIUM"
+framework: "Express"
+language: "JavaScript"
+description: "Detects express-session cookie configs with sameSite:'none', which disables the SameSite CSRF defense."
+tags:
+  - csrf
+cwe:
+  - CWE-352
+owasp:
+  - "A01:2021"
+remediation: "Set sameSite to 'lax' or 'strict' on session cookies, or pair sameSite:'none' with anti-CSRF tokens and secure:true."
+query: |
+  (call_expression
+    function: (identifier) @fn (#eq? @fn "session")
+    arguments: (arguments
+      (object
+        (pair
+          key: (property_identifier) @cookie_key (#eq? @cookie_key "cookie")
+          value: (object
+            (pair
+              key: (property_identifier) @key (#eq? @key "sameSite")
+              value: (string) @value (#match? @value "^[\"']none[\"']$")
+            )
+          )
+        )
+      )
+    )
+  ) @finding

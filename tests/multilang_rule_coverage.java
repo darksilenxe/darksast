@@ -8,4 +8,14 @@ class MultiLangJavaCoverage {
         HttpsURLConnection conn = null;
         conn.setHostnameVerifier((host, session) -> true);
     }
+
+    // CSRF: Spring Security configuration disabling CSRF protection.
+    void configure(Object http) throws Exception {
+        ((SecurityChain) http).csrf().disable();
+    }
+}
+
+interface SecurityChain {
+    SecurityChain csrf();
+    SecurityChain disable();
 }

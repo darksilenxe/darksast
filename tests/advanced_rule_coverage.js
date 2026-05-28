@@ -98,8 +98,12 @@ session({
   secret,
   resave: true,
   saveUninitialized: true,
-  cookie: { secure: false, httpOnly: false }
+  cookie: { secure: false, httpOnly: false, sameSite: 'none' }
 });
+
+// CSRF: csurf middleware exempting state-changing verbs disables protection.
+const csurf = require('csurf');
+csurf({ ignoreMethods: ['GET', 'HEAD', 'OPTIONS', 'POST'] });
 
 jwt.verify(token, secret, { ignoreExpiration: true });
 window.open(userInput, '_blank');

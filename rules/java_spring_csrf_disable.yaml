@@ -1,0 +1,19 @@
+id: "JAVA-SPRING-CSRF-DISABLE"
+severity: "HIGH"
+framework: "Spring"
+language: "Java"
+description: "Detects Spring Security configurations that call .csrf().disable(), disabling CSRF protection."
+tags:
+  - csrf
+cwe:
+  - CWE-352
+owasp:
+  - "A01:2021"
+remediation: "Remove .csrf().disable(); rely on Spring Security's default CSRF protection or configure a CsrfTokenRepository instead."
+query: |
+  (method_invocation
+    object: (method_invocation
+      name: (identifier) @csrf (#eq? @csrf "csrf")
+    )
+    name: (identifier) @disable (#eq? @disable "disable")
+  ) @finding
