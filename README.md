@@ -47,6 +47,10 @@ JavaScript-Security-Scanner is a lightweight Go-based static scanner for applica
   - Runs after the rule-based scan, once per invocation, and builds a lightweight project-wide model of JavaScript/TypeScript, Go, and Python function declarations, HTTP/CLI entry points (route registrations, `main`, `if __name__ == "__main__":`), and a name-based call graph.
   - Annotates each finding with additive `triage_verdict` (`REACHABLE`, `LIKELY_UNREACHABLE`, or `UNKNOWN`) and `triage_rationale` fields — findings are never dropped, reordered, or otherwise altered, and existing JSON/CSV output is unchanged when the flag is left disabled.
   - Intended as a first, deterministic step towards judging exploitability; other languages and an optional model-assisted second pass are not yet implemented.
+- Optional attacker-oriented heuristic reasoning (`-enable-attacker-heuristics`, default `false`):
+  - Runs after scanning (and after holistic review when enabled) and annotates findings with additive `exploitability`, `exploitability_score` (0-100), and `attacker_reasoning` fields.
+  - Uses deterministic signals such as severity/confidence, source/sink markers, and `triage_verdict` reachability context to prioritize findings the way an attacker would.
+  - This pass is additive and does not suppress findings.
 - Optional URL fetch mode (`-url`) that downloads inline and same-origin external scripts into `-fetch-out` and scans them with the same pipeline.
 - Scan scope controls for test/spec and vendored/build-output files via `-include-tests` and `-include-vendored`.
 - Windows-first PowerShell entry scripts plus cross-platform shell entrypoint and npm wrappers.
@@ -150,6 +154,8 @@ Relevant flags:
 | `-exclude` | (empty) | Comma-separated glob patterns: skip files matching any pattern. Applied after `-include`. Semgrep-compatible. |
 | `-fail-on-findings` | `false` | Exit non-zero when any findings are present. Mirrors Semgrep's default exit-code behavior. |
 | `-findings-semgrep-json-out` | (empty) | Optional path to write findings in Semgrep's `--json` output schema for CI/CD tool compatibility. |
+| `-enable-holistic-review` | `false` | Run whole-codebase reachability analysis and annotate findings with `triage_verdict`/`triage_rationale`. |
+| `-enable-attacker-heuristics` | `false` | Run attacker-style heuristic reasoning and annotate findings with `exploitability`, `exploitability_score`, and `attacker_reasoning`. |
 | `-compromised-rules` | `./intel/compromised_packages.yaml` | Local YAML seed rules for compromised package intelligence. |
 | `-compromised-feed-url` | (empty) | Optional remote JSON feed for compromised package rules and IoCs. |
 | `-compromised-generated-rules-out` | (empty) | Optional YAML path to write the merged compromised package ruleset. |

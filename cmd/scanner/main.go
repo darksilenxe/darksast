@@ -20,6 +20,7 @@ import (
 	"javascript-security-scanner/internal/deps"
 	"javascript-security-scanner/internal/engine"
 	"javascript-security-scanner/internal/fetcher"
+	"javascript-security-scanner/internal/heuristics"
 	"javascript-security-scanner/internal/reporter"
 	"javascript-security-scanner/internal/triage"
 )
@@ -111,6 +112,7 @@ func main() {
 	fetchMaxBytes := flag.Int64("fetch-max-bytes", 5*1024*1024, "Maximum bytes accepted per HTTP response when fetching JavaScript")
 	fetchSameOrigin := flag.Bool("fetch-same-origin", true, "Only download external scripts whose host matches the page URL")
 	enableHolisticReview := flag.Bool("enable-holistic-review", false, "Run an opt-in, whole-codebase reachability review after scanning that annotates findings with triage_verdict/triage_rationale (REACHABLE, LIKELY_UNREACHABLE, UNKNOWN). Findings are never dropped by this review; disabled by default so existing output is unchanged.")
+	enableAttackerHeuristics := flag.Bool("enable-attacker-heuristics", false, "Run an opt-in attacker-oriented heuristic pass that annotates findings with exploitability/exploitability_score/attacker_reasoning.")
 	httpProxy := flag.String("http-proxy", "", "Optional interception proxy URL used for all outbound HTTP(S) requests (for example, http://127.0.0.1:8080)")
 	proxyInsecureSkipVerify := flag.Bool("proxy-insecure-skip-verify", false, "Disable TLS certificate verification for outbound HTTP(S) requests (use only with trusted interception proxies)")
 	flag.Parse()
@@ -420,6 +422,10 @@ func main() {
 			project.Review(findings)
 			fmt.Printf("[*] Whole-codebase reachability review complete for %d finding(s).\n", len(findings))
 		}
+	}
+	if *enableAttackerHeuristics {
+		enriched := heuristics.Enrich(findings)
+		fmt.Printf("[*] Attacker-oriented heuristics enriched %d finding(s).\n", enriched)
 	}
 
 	if jsonErr := reporter.WriteJSON(findings, *targetDir, *findingsJSONOut); jsonErr != nil {

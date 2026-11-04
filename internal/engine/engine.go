@@ -54,6 +54,12 @@ type Finding struct {
 	// existing output is unchanged by default.
 	TriageVerdict   string `json:"triage_verdict,omitempty"`
 	TriageRationale string `json:"triage_rationale,omitempty"`
+	// Exploitability and attacker reasoning are populated by the optional,
+	// opt-in attacker-heuristics pass (internal/heuristics). The pass is
+	// additive: fields remain empty unless enabled.
+	Exploitability      string   `json:"exploitability,omitempty"`
+	ExploitabilityScore int      `json:"exploitability_score,omitempty"`
+	AttackerReasoning   []string `json:"attacker_reasoning,omitempty"`
 }
 
 const maxSnippetLen = 120
